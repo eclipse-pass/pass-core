@@ -45,6 +45,8 @@ Environment variables:
 * PASS_CORE_DATABASE_PASSWORD=moo
 * PASS_CORE_PORT=8080
 * PASS_CORE_JAVA_OPTS="-Djavax.persistence.schema-generation.database.action=create"
+* PASS_CORE_BASE_URL=http://localhost
+  * Used when building relationship links
 
 
 # Using JSON API
