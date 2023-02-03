@@ -55,7 +55,7 @@ jobs:
 
       - name: Publish release
         run: |
-          mvn release:prepare -DreleaseVersion=$RELEASE -Dtag=$RELEASE -DdevelopmentVersion=$NEXT -DautoVersionSubmodules=true
+          mvn --batch-mode release:prepare -DreleaseVersion=$RELEASE -Dtag=$RELEASE -DdevelopmentVersion=$NEXT -DautoVersionSubmodules=true
           mvn release:perform -Dgoals=deploy 
         env:
           # Add OSSRH_USERNAME and OSSRH_TOKEN as GH secrets
