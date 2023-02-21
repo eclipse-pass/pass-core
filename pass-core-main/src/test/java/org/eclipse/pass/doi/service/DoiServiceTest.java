@@ -107,7 +107,7 @@ public class DoiServiceTest extends IntegrationTest {
     }
 
     /**
-     * test that a valid dois for a book gives the appropriate error - since it has no issns, it does not have
+     * test that a valid doi for a book gives the appropriate error - since it has no issns, it does not have
      * sufficient
      * info to specify a journal
      *

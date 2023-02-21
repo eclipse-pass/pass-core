@@ -8,7 +8,7 @@ somebody from JHU invokes the policies endpoint, a general "policy for JHU emplo
 
 ### Policies Request
 
-`GET /policy-service/policies?submission=${SUBMISSION_URI}`
+`GET /policy-service/policies?submission=${SUBMISSION_ID}`
 
 or (with encoded submission=${SUBMISSION_URI}))
 
@@ -19,16 +19,16 @@ Content-Type application/x-www-form-urlencoded
 
 ### Policies Response
 
-The response is a list of URIs to Policy resources, decorated with a `type` property:
+The response is a list of IDs to Policy resources, decorated with a `type` property:
 
 ```json
 [
  {
-   "id": "http://pass.local:8080/fcrepo/rest/policies/2d/...",
+   "id": "3",
    "type": "funder"
  },
  {
-   "id": "http://pass.local:8080/fcrepo/rest/policies/63/...",
+   "id": "22",
    "type": "institution"
  }
 ]
@@ -41,8 +41,8 @@ deposited into in order to satisfy any applicable policies for that submission.
 
 ### Repositories Request
 
-GET `/policy-service/repositories?submission=${SUBMISSION_URI}`
-or, with urlencoded (with encoded submission=${SUBMISSION_URI}) as the body:
+GET `/policy-service/repositories?submission=${SUBMISSION_ID}`
+or, with urlencoded (with encoded submission=${SUBMISSION_ID}) as the body:
 
 ```HTTP
 POST /policy-service/repositories
