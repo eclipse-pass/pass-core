@@ -20,20 +20,21 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-      # - name: "Log into GHCR"
-      #   run: echo ${{ secrets.pass_docker_pat }} | docker login ghcr.io --username grant-mcs --password-stdin
-      # - name: "Build and upload new package"
-      #   run: mvn clean verify
-      - name: Login to GHCR
-        uses: docker/login-action@v2.1
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      # Maybe switch to this, instead of Lines #34-37
+      # - name: Login to GHCR
+      #   uses: docker/login-action@v2.1
+      #   with:
+      #     registry: ghcr.io
+      #     username: ${{ github.actor }}
+      #     password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: "Build new package"
-        run: mvn -U -B -V -ntp clean verify
+      # - name: "Build new package"
+      #   run: mvn -U -B -V -ntp clean verify
 
+      - name: "Log into GHCR"
+        run: echo ${{ secrets.PASS_DOCKER_TOKEN }} | docker login ghcr.io --username ${{ secrets.PASS_DOCKER_USER }} --password-stdin
+      - name: "Build and upload new package"
+        run: mvn clean verify
       - name: "Get image tag"
         id: image_tag
         run: echo "IMAGE_TAG=`docker images ghcr.io/eclipse-pass/pass-core-main --no-trunc --format {{.Tag}}`" >> $GITHUB_OUTPUT
@@ -53,10 +54,10 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: eclipse-pass/pass-docker
-          token: ${{ secrets.pass_docker_pat }}
+          token: ${{ secrets.PASS_DOCKER_TOKEN }}
       - uses: oleksiyrudenko/gha-git-credentials@v2-latest
         with:
-          token: ${{ secrets.pass_docker_pat }}
+          token: ${{ secrets.PASS_DOCKER_TOKEN }}
       - name: Update nightly server config
         run: python tools/update-image.py eclipse-pass.nightly.yml pass-core "ghcr.io/eclipse-pass/pass-core-main:${{ steps.image_tag.outputs.IMAGE_TAG }}@${{ steps.image_hash.outputs.IMAGE_HASH }}"
       - name: Commit change (if any)
