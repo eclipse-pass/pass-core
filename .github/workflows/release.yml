@@ -50,13 +50,9 @@ jobs:
       # =============================================================================
       # Setup
       # =============================================================================
+      # Automatically checks out the repo and branch where the workflow was triggered
       - name: Checkout code
         uses: actions/checkout@v3
-
-      - name: Configure git
-        run: |
-          git config user.name "GH Action | Release"
-          git config user.email "<>"
 
       - name: Setup Java & Maven
         uses: actions/setup-java@v3
@@ -78,10 +74,10 @@ jobs:
         run: mvn -B -U -V -ntp versions:update-parent -DparentVersion=$RELEASE
 
       - name: Commit release version bump
-        run: |
-          git add **/pom.xml pom.xml
-          git status
-          git commit -m "Update parent version to $RELEASE"
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: pom.xml **/pom.xml
+          message: "Update parent version to $RELEASE"
 
       # Will publish and create new Docker image for release version
       - name: Publish release
@@ -98,12 +94,13 @@ jobs:
       # Project and submodule versions _should_ already be updated in the release step above
       - name: Update parent POM to new dev version
         run: mvn -B -U -V -ntp versions:update-parent -DallowSnapshots=true -DparentVersion=$NEXT
-      
+
       - name: Commit snapshot version bump
-        run: |
-          git add **/pom.xml pom.xml
-          git status
-          git commit -m "Update parent version to $NEXT"
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: pom.xml **/pom.xml
+          message: "Update parent version to $NEXT"
+          push: true
 
       # Will produce a new Docker image for the new dev version
       - name: Build and publish new dev version
@@ -113,10 +110,8 @@ jobs:
           MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
 
-      - name: Push to updated main and new release tag GH
-        run: |
-          git push origin main
-          git push origin --tags
+      - name: Push new release tag GH
+        run: git push origin --tags
 
       # Handle Docker images
       - name: Login to GHCR
