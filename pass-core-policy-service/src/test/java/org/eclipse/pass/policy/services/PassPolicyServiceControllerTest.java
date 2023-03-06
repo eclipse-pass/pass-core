@@ -34,7 +34,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.yahoo.elide.RefreshableElide;
 import org.eclipse.pass.object.model.Policy;
-import org.eclipse.pass.policy.interfaces.PolicyService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +56,7 @@ public class PassPolicyServiceControllerTest {
         // mock HttpServletRequest & HttpServletResponse & PolicyService
         HttpServletRequest mockRequest = mock(HttpServletRequest.class);
         HttpServletResponse mockResponse = mock(HttpServletResponse.class);
-        PolicyService mockPolicyService = mock(PolicyServiceImpl.class);
+        PolicyService mockPolicyService = mock(PolicyService.class);
 
         // mock the returned values of
         Map<String, String> headers = new HashMap();
@@ -71,7 +70,7 @@ public class PassPolicyServiceControllerTest {
         when(mockRequest.getHeader("Query-String")).thenReturn("test.query");
 
         // mock the returned value of policyService.findPolicies()
-        String submission = "http://policies/valid submission";
+        String submission = System.getenv("PASS_CORE_BASE_URL") + "/policies/valid submission";
         List<Policy> policies = new ArrayList<Policy>();
         policies.add(new Policy());
         when(mockPolicyService.findPolicies(submission, headers)).thenReturn(policies);
@@ -94,7 +93,7 @@ public class PassPolicyServiceControllerTest {
     @DisplayName("Test: Test of doPost() method. Should return a response to a given request")
     void TestDoPostPolicy() throws Exception {
         // mock HttpServletRequest & HttpServletResponse
-        PolicyService mockPolicyService = mock(PolicyServiceImpl.class);
+        PolicyService mockPolicyService = mock(PolicyService.class);
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
 

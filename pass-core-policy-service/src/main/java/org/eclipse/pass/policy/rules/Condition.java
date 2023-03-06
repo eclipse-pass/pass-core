@@ -40,7 +40,7 @@ import org.json.JSONObject;
  */
 public class Condition {
 
-    private JSONObject conditions;
+    private final JSONObject conditions;
 
     public Condition() {
         this.conditions = new JSONObject();
@@ -64,11 +64,10 @@ public class Condition {
 
         // If there are no conditions present, then the policy is applicable
         if (conditions.isEmpty()) {
-            return passes = true;
+            return true;
         }
 
         for (String cond : conditions.keySet()) {
-            passes = false;
             try {
                 switch (cond) {
                     case "endsWith":
@@ -109,7 +108,7 @@ public class Condition {
      * @throws IOException - failed to resolve condition
      */
     public Boolean endsWith(Object fromCondition, VariableResolver variables) throws IOException {
-        Evaluation test = (a, b) -> a.toString().endsWith(b.toString());
+        Evaluation test = (a, b) -> a.endsWith(b);
         return eachPair(fromCondition, variables, test);
     }
 
@@ -120,7 +119,7 @@ public class Condition {
      * @throws IOException - failed to resolve condition
      */
     public Boolean equals(Object fromCondition, VariableResolver variables) throws IOException {
-        Evaluation test = (a, b) -> a.toString().equals(b.toString());
+        Evaluation test = (a, b) -> a.equals(b);
         return eachPair(fromCondition, variables, test);
     }
 
@@ -131,7 +130,7 @@ public class Condition {
      * @throws IOException - failed to resolve condition
      */
     public Boolean contains(Object fromCondition, VariableResolver variables) throws IOException {
-        Evaluation test = (a, b) -> a.toString().contains(b.toString());
+        Evaluation test = (a, b) -> a.contains(b);
         return eachPair(fromCondition, variables, test);
     }
 
@@ -152,7 +151,6 @@ public class Condition {
             Boolean passes;
 
             for (String evaluation : args.keySet()) {
-                passes = false;
                 if (!(args.get(evaluation) instanceof JSONArray)) {
                     throw new IOException(
                             "Expecting a JSONArray as an evaluator item, but got " + args.get(evaluation).getClass());
@@ -249,6 +247,6 @@ public class Condition {
             throw new IOException("Expecting single valued string, instead got " + list);
         }
 
-        return list.get(0).toString();
+        return list.get(0);
     }
 }

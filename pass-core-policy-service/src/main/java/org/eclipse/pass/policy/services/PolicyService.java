@@ -22,7 +22,6 @@ import java.util.Map;
 import com.yahoo.elide.RefreshableElide;
 import org.eclipse.pass.object.model.Policy;
 import org.eclipse.pass.object.model.Repository;
-import org.eclipse.pass.policy.interfaces.PolicyService;
 import org.eclipse.pass.policy.rules.Context;
 import org.eclipse.pass.policy.rules.DSL;
 
@@ -33,11 +32,11 @@ import org.eclipse.pass.policy.rules.DSL;
  *
  * @author David McIntyre
  */
-public class PolicyServiceImpl implements PolicyService {
+public class PolicyService {
 
     RefreshableElide refreshableElide;
 
-    public PolicyServiceImpl(RefreshableElide refreshableElide) {
+    public PolicyService(RefreshableElide refreshableElide) {
         this.refreshableElide = refreshableElide;
     }
 
@@ -45,7 +44,6 @@ public class PolicyServiceImpl implements PolicyService {
    //     this.passClient = client;
     //}
 
-    @Override
     public List<Policy> findPolicies(String submission, Map<String, String> headers) throws RuntimeException {
         Context context = new Context(submission, headers, refreshableElide);
         DSL dsl = new DSL();
@@ -60,7 +58,6 @@ public class PolicyServiceImpl implements PolicyService {
 
     // }
 
-    @Override
     public List<Repository> findRepositories(URI submissionURI, Map<String, Object> headers) throws RuntimeException {
         return null;
     }

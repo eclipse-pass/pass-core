@@ -28,7 +28,6 @@ import javax.servlet.http.HttpServletResponse;
 import com.yahoo.elide.RefreshableElide;
 import org.eclipse.pass.object.model.Policy;
 import org.eclipse.pass.object.model.Repository;
-import org.eclipse.pass.policy.interfaces.PolicyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,12 +47,14 @@ public class PassPolicyServiceController {
     private final PolicyService policyService;
 
     public PassPolicyServiceController(RefreshableElide refreshableElide) {
-        this.policyService = new PolicyServiceImpl(refreshableElide);
+        this.policyService = new PolicyService(refreshableElide);
     }
 
     public PassPolicyServiceController(PolicyService policyService) {
         this.policyService = policyService;
     }
+
+    public String baseUrl = System.getenv("PASS_CORE_BASE_URL");
 
     /**
      * Handles incoming GET requests to the /policies endpoint
@@ -72,8 +73,7 @@ public class PassPolicyServiceController {
         LOG.debug("Context path: " + request.getContextPath() + "; query string " + request.getQueryString());
 
         // retrieve submission URI from request
-
-        String submission = "http://policies/" + request.getParameter("submission");
+        String submission = baseUrl + "/policies/" + request.getParameter("submission");
 
         // handle empty request submission error
         if (submission == null) {
@@ -84,10 +84,10 @@ public class PassPolicyServiceController {
 
         // retrieve map of headers and values from request
         Enumeration<String> headerNames = request.getHeaderNames();
-        Map<String, String> headers = new HashMap<String, String>();
+        Map<String, String> headers = new HashMap<>();
         if (headerNames != null) {
             while (headerNames.hasMoreElements()) {
-                String key = (String) headerNames.nextElement();
+                String key = headerNames.nextElement();
                 String value = request.getHeader(key);
                 headers.put(key, value);
             }
@@ -143,14 +143,14 @@ public class PassPolicyServiceController {
         LOG.debug("Context path: " + request.getContextPath() + "; query string " + request.getQueryString());
 
         // retrieve submission URI from request
-        URI submission = URI.create("http://repositories" + request.getParameter("submission"));
+        URI submission = URI.create( baseUrl + "/repositories/" + request.getParameter("submission"));
 
         // handle empty request submission error
         if (submission == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No submission query param provided");
         }
 
-        // retieve map of headers and values from request
+        // retrieve map of headers and values from request
         Enumeration<String> headerNames = request.getHeaderNames();
         Map<String, Object> headers = new HashMap<String, Object>();
         if (headerNames != null) {

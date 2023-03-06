@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
  * @author David McIntyre
  */
 @DisplayName("PolicyService Tests")
-public class PassPolicyServiceImplTest {
+public class PassPolicyServiceTest {
 
     @Test
     public void demoTest() {
