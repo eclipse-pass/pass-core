@@ -25,6 +25,7 @@ import org.eclipse.pass.policy.rules.Variable;
 import org.eclipse.pass.policy.rules.model.Condition;
 import org.eclipse.pass.policy.rules.model.PolicyRules;
 import org.eclipse.pass.policy.rules.model.RepositoryRules;
+import org.json.JSONObject;
 
 /**
  * Represents the PolicyRules object
@@ -52,7 +53,7 @@ public class PolicyRulesUtil {
         throws RuntimeException {
         List<PolicyRules> resolvedPolicies = new ArrayList<>();
         List<RepositoryRules> resolvedRepos = new ArrayList<>();
-        List<Condition> conditions= new ArrayList<>();
+        List<Condition> conditions = policyRules.getConditions();
 
         // If the policy ID is a variable, we need to resolve/expand it. If the result
         // is a list of IDs, we return a list of policies, each one with an ID from the
@@ -100,13 +101,11 @@ public class PolicyRulesUtil {
                 policyRules.setRepositories(resolvedRepos);
 
                 try {
-                    for (Condition condition : conditions) {
-                        Boolean valid = condition.apply(variables);
+                    Boolean valid = ConditionUtil.apply(new JSONObject(conditions), variables);
 
                     if (valid) {
                         resolvedPolicies.add(policyRules);
                     }
-                }
                 } catch (RuntimeException e) {
                     throw new RuntimeException("Failed to apply conditions to policy " + policyRules.getId(), e);
                 }

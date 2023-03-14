@@ -33,10 +33,10 @@ import org.eclipse.pass.policy.rules.util.PolicyRulesUtil;
 public class DSL implements PolicyResolver {
 
     @JsonProperty("$schema")
-    private String schema; // json:"$schema"
+    private String schema;
 
     @JsonProperty("policy-rules")
-    private List<PolicyRules> policyRulesList; // json:"policy-rules"
+    private List<PolicyRules> policyRulesList;
 
     /**
      * DSL.resolve()

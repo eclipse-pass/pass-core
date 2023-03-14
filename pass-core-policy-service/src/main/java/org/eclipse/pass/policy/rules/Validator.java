@@ -28,6 +28,12 @@ import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
 import org.eclipse.pass.policy.interfaces.PolicyResolver;
 
+/**
+ * Validator validates a serialized PolicyRules document aainst the implementation's expected JSON schema,
+ * and then populates the DSL with the PolicyRules
+ *
+ * @author jrm
+ */
 public class Validator {
 
     public PolicyResolver validate(String filePath) throws IOException {
@@ -51,6 +57,8 @@ public class Validator {
             }
 
             dsl = objectMapper.convertValue(jsonNode, DSL.class);
+            //for testing and verification
+            //System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode));
 
         } catch (IOException e) {
             throw e;

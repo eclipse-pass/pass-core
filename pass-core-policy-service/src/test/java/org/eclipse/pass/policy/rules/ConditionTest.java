@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.pass.policy.rules.model.Condition;
+import org.eclipse.pass.policy.rules.util.ConditionUtil;
 import org.json.JSONObject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,12 +23,12 @@ public class ConditionTest {
     @DisplayName("Test apply() function with valid endsWith Condition")
     public void testTrueApplyEndsWith() throws Exception {
         JSONObject conditions = new JSONObject();
-        List<String> values = new ArrayList<String>();
+        List<String> values = new ArrayList<>();
         values.add("ing");
         values.add("testString");
         conditions.put("endsWith", values);
 
-        Boolean result = new Condition(conditions).apply(null);
+        Boolean result = ConditionUtil.apply(conditions, null);
         assertTrue(result);
     }
 
@@ -36,12 +36,12 @@ public class ConditionTest {
     @DisplayName("Test apply() function with valid contains Condition")
     public void testTrueApplyContains() throws Exception {
         JSONObject conditions = new JSONObject();
-        List<String> values = new ArrayList<String>();
+        List<String> values = new ArrayList<>();
         values.add("estS");
         values.add("testString");
         conditions.put("contains", values);
 
-        Boolean result = new Condition(conditions).apply(null);
+        Boolean result = ConditionUtil.apply(conditions,null);
         assertTrue(result);
     }
 
@@ -49,12 +49,12 @@ public class ConditionTest {
     @DisplayName("Test apply() function with valid equals Condition")
     public void testTrueApplyEquals() throws Exception {
         JSONObject conditions = new JSONObject();
-        List<String> values = new ArrayList<String>();
+        List<String> values = new ArrayList<>();
         values.add("testString");
         values.add("testString");
         conditions.put("equals", values);
 
-        Boolean result = new Condition(conditions).apply(null);
+        Boolean result = ConditionUtil.apply(conditions,null);
         assertTrue(result);
     }
 
@@ -63,17 +63,17 @@ public class ConditionTest {
     public void testTrueApplyAnyOf() throws Exception {
         JSONObject conditions = new JSONObject();
         JSONObject evaluators = new JSONObject();
-        List<String> equalsValues = new ArrayList<String>();
+        List<String> equalsValues = new ArrayList<>();
         equalsValues.add("testString");
         equalsValues.add("testString");
-        List<String> containsValues = new ArrayList<String>();
+        List<String> containsValues = new ArrayList<>();
         containsValues.add("invalid");
         containsValues.add("testString");
         evaluators.put("equals", equalsValues);
         evaluators.put("contains", containsValues);
         conditions.put("anyOf", evaluators);
 
-        Boolean result = new Condition(conditions).apply(null);
+        Boolean result = ConditionUtil.apply(conditions,null);
         assertTrue(result);
     }
 
@@ -82,17 +82,18 @@ public class ConditionTest {
     public void testTrueApplyNoneOf() throws Exception {
         JSONObject conditions = new JSONObject();
         JSONObject evaluators = new JSONObject();
-        List<String> equalsValues = new ArrayList<String>();
+        List<String> equalsValues = new ArrayList<>();
         equalsValues.add("invalid");
         equalsValues.add("testString");
-        List<String> containsValues = new ArrayList<String>();
+        List<String> containsValues = new ArrayList<>();
         containsValues.add("invalid");
         containsValues.add("testString");
         evaluators.put("equals", equalsValues);
         evaluators.put("contains", containsValues);
         conditions.put("noneOf", evaluators);
 
-        Boolean result = new Condition(conditions).apply(null);
+       // Boolean result = new Condition(conditions).apply(null);
+        Boolean result = ConditionUtil.apply(conditions, null);
         assertTrue(result);
     }
 
@@ -105,7 +106,7 @@ public class ConditionTest {
         values.add("testString");
         conditions.put("endsWith", values);
 
-        Boolean result = new Condition(conditions).apply(null);
+        Boolean result = ConditionUtil.apply(conditions,null);
         assertFalse(result);
     }
 
@@ -118,7 +119,7 @@ public class ConditionTest {
         values.add("testString");
         conditions.put("contains", values);
 
-        Boolean result = new Condition(conditions).apply(null);
+        Boolean result = ConditionUtil.apply(conditions,null);
         assertFalse(result);
     }
 
@@ -131,7 +132,7 @@ public class ConditionTest {
         values.add("testString");
         conditions.put("equals", values);
 
-        Boolean result = new Condition(conditions).apply(null);
+        Boolean result = ConditionUtil.apply(conditions,null);
         assertFalse(result);
     }
 
@@ -150,7 +151,7 @@ public class ConditionTest {
         evaluators.put("contains", containsValues);
         conditions.put("anyOf", evaluators);
 
-        Boolean result = new Condition(conditions).apply(null);
+        Boolean result = ConditionUtil.apply(conditions,null);
         assertFalse(result);
     }
 
@@ -162,14 +163,14 @@ public class ConditionTest {
         List<String> equalsValues = new ArrayList<String>();
         equalsValues.add("invalid");
         equalsValues.add("invalid");
-        List<String> containsValues = new ArrayList<String>();
+        List<String> containsValues = new ArrayList<>();
         containsValues.add("invalid");
         containsValues.add("testString");
         evaluators.put("equals", equalsValues);
         evaluators.put("contains", containsValues);
         conditions.put("noneOf", evaluators);
 
-        Boolean result = new Condition(conditions).apply(null);
+        Boolean result = ConditionUtil.apply(conditions,null);
         assertFalse(result);
     }
 }
