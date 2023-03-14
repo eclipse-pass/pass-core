@@ -26,8 +26,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.yahoo.elide.RefreshableElide;
-import org.eclipse.pass.object.model.Policy;
-import org.eclipse.pass.object.model.Repository;
+import org.eclipse.pass.policy.rules.model.PolicyRules;
+import org.eclipse.pass.policy.rules.model.RepositoryRules;
+import org.json.simple.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,7 +47,7 @@ public class PassPolicyServiceController {
     private static final Logger LOG = LoggerFactory.getLogger(PassPolicyServiceController.class);
     private final PolicyService policyService;
 
-    public PassPolicyServiceController(RefreshableElide refreshableElide) {
+    public PassPolicyServiceController(RefreshableElide refreshableElide) throws IOException {
         this.policyService = new PolicyService(refreshableElide);
     }
 
@@ -94,8 +95,12 @@ public class PassPolicyServiceController {
         }
 
         // findPolicies() relevant to request
-        try {
-            List<Policy> policies = policyService.findPolicies(submission, headers);
+        try  {
+            List<PolicyRules> policyRulesList = policyService.findPolicies(submission, headers);
+            JSONArray policyResourceArray = policyService.createPolicyResponseJSONArray(policyRulesList);
+            response.getWriter().append(policyResourceArray.toString());
+            LOG.info("Returning policies result for submission " + submission);
+            response.setStatus(200);
         } catch (RuntimeException e) {
             LOG.error("Unable to find relevant policies", e);
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
@@ -163,7 +168,7 @@ public class PassPolicyServiceController {
 
         // call to policy service
         try {
-            List<Repository> repositories = policyService.findRepositories(submission, headers);
+            List<RepositoryRules> repositories = policyService.findRepositories(submission, headers);
         } catch (RuntimeException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         }

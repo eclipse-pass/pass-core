@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eclipse.pass.policy.rules;
+package org.eclipse.pass.policy.rules.util;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.pass.object.model.Repository;
 import org.eclipse.pass.policy.interfaces.VariableResolver;
+import org.eclipse.pass.policy.rules.Variable;
+import org.eclipse.pass.policy.rules.model.RepositoryRules;
 
 /**
  * Represents the RepositoryRules object
@@ -29,41 +30,47 @@ import org.eclipse.pass.policy.interfaces.VariableResolver;
  *
  * @author David McIntyre
  */
-public class RepositoryRules {
+public class RepositoryRulesUtil {
+
+    private RepositoryRulesUtil() {
+        //empty constructor
+    }
 
     /**
      * Resolve interpolates any variables in a repository and resolves against a
      * ruleset
      * to a list of applicable Repositories.
      *
+     *
+     * @param repoData
      * @param variables - the ruleset to be resolved against
      * @return List&lt;Repository&gt; - the List of resolved Repositories
      * @throws RuntimeException - Repository could not be resolved
      */
-    public List<Repository> resolve(Repository repo, VariableResolver variables) throws RuntimeException {
-        List<Repository> resolvedRepos = new ArrayList<Repository>();
-        Repository repository = repo;
+    static public List<RepositoryRules> resolve(RepositoryRules repoData, VariableResolver variables)
+        throws RuntimeException {
+        List<RepositoryRules> resolvedRepos = new ArrayList<>();
+        RepositoryRules repositoryRules = repoData;
 
-        if (Variable.isVariable(repository.getId().toString())) {
+        if (Variable.isVariable(repositoryRules.getId())) {
 
-            // resolve repository ID/s
-            List<String> resolvedIDs = new ArrayList<String>();
+            // resolve repositoryData ID/s
+            List<String> resolvedIDs = new ArrayList<>();
 
             try {
-                resolvedIDs.addAll(variables.resolve(repository.getId().toString()));
+                resolvedIDs.addAll(variables.resolve(repositoryRules.getId()));
 
                 for (String id : resolvedIDs) {
-                    Repository resolved = new Repository();
-                    //URI uriID = new URI(id);
-                    resolved.setId(Long.parseLong(id));
-
+                    RepositoryRules resolved = new RepositoryRules();
+                    resolved.setId(id);
+                   // resolved.setSelected(true);
                     resolvedRepos.add(resolved);
                 }
             } catch (RuntimeException e) {
-                throw new RuntimeException("Could not resolve property ID " + repository.getId().toString(), e);
+                throw new RuntimeException("Could not resolve property ID " + repositoryRules.getId().toString(), e);
             }
         } else {
-            resolvedRepos.add(repository);
+            resolvedRepos.add(repositoryRules);
         }
 
         return resolvedRepos;

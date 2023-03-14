@@ -33,7 +33,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.yahoo.elide.RefreshableElide;
-import org.eclipse.pass.object.model.Policy;
+import org.eclipse.pass.policy.rules.model.PolicyRules;
+import org.json.simple.JSONArray;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,10 +72,10 @@ public class PassPolicyServiceControllerTest {
 
         // mock the returned value of policyService.findPolicies()
         String submission = System.getenv("PASS_CORE_BASE_URL") + "/policies/valid submission";
-        List<Policy> policies = new ArrayList<Policy>();
-        policies.add(new Policy());
+        List<PolicyRules> policies = new ArrayList<>();
+        policies.add(new PolicyRules());
         when(mockPolicyService.findPolicies(submission, headers)).thenReturn(policies);
-
+        when(mockPolicyService.createPolicyResponseJSONArray(policies)).thenReturn(new JSONArray());
         StringWriter stringWriter = new StringWriter();
         PrintWriter writer = new PrintWriter(stringWriter);
         when(mockResponse.getWriter()).thenReturn(writer);

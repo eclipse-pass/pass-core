@@ -170,7 +170,7 @@ public class Variable extends VariablePinner {
     /**
      * setSegmentName()
      *
-     * @param segmentName
+     * @param segmentName the segment name to set
      */
     public void setSegmentName(String segmentName) {
         this.segmentName = segmentName;
@@ -188,7 +188,7 @@ public class Variable extends VariablePinner {
     /**
      * setFullName()
      *
-     * @param fullName
+     * @param fullName the full name to set
      */
     public void setFullName(String fullName) {
         this.fullName = fullName;
@@ -207,7 +207,7 @@ public class Variable extends VariablePinner {
     /**
      * setShifted()
      *
-     * @param shifted
+     * @param shifted whether this is shifted
      */
     public void setShifted(Boolean shifted) {
         this.shifted = shifted;

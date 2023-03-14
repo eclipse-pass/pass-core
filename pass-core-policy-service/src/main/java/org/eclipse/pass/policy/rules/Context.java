@@ -51,8 +51,8 @@ public class Context extends VariablePinner {
 
     public Context(RefreshableElide refreshableElide) {
         this.refreshableElide = refreshableElide;
-        this.headers = new HashMap<String, String>();
-        this.values = new HashMap<String, Object>();
+        this.headers = new HashMap<>();
+        this.values = new HashMap<>();
     }
 
     protected PassClient getNewClient() {
@@ -70,7 +70,7 @@ public class Context extends VariablePinner {
         this.submission = submission;
         this.headers = headers;
         this.refreshableElide = refreshableElide;
-        this.values = new HashMap<String, Object>();
+        this.values = new HashMap<>();
     }
 
     public Context(String submission, Map<String, String> headers, RefreshableElide refreshableElide,
@@ -116,7 +116,7 @@ public class Context extends VariablePinner {
         } catch (IOException e) {
             throw new RuntimeException("Unable to initialise context : " + this, e);
         }
-        List<String> resolved = new ArrayList<String>();
+        List<String> resolved = new ArrayList<>();
 
         // Check for proper variable conversion. If the conversion is null, return the
         // source as the resolved variable.

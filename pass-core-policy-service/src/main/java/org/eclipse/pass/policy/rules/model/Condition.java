@@ -1,25 +1,17 @@
-/*
- * Copyright 2022 Johns Hopkins University
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package org.eclipse.pass.policy.rules;
+package org.eclipse.pass.policy.rules.model;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.pass.policy.interfaces.Evaluation;
 import org.eclipse.pass.policy.interfaces.VariableResolver;
+import org.eclipse.pass.policy.rules.Variable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,16 +30,83 @@ import org.json.JSONObject;
  *
  * @author David McIntyre
  */
+
 public class Condition {
 
-    private final JSONObject conditions;
-
     public Condition() {
-        this.conditions = new JSONObject();
+
     }
+  
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    @JsonProperty("conditions")
+    private JSONObject conditions = new JSONObject();
+
+    @JsonProperty("anyOf")
+    List<Map<String, Map<String,String>>> anyOf = new ArrayList<>();
+
+    @JsonProperty("contains")
+    HashMap<String, String> contains = new HashMap<>();
+
+    @JsonProperty("endsWith")
+    HashMap<String, String> endsWith = new HashMap<>();
+
+    @JsonProperty("equals")
+    HashMap<String, JSONObject> equals = new HashMap<>();
+
+    @JsonProperty("noneOf")
+    List<Map<String, Map<String,String>>> noneOf = new ArrayList<>();
 
     public Condition(JSONObject conditions) {
         this.conditions = conditions;
+    }
+
+    public JSONObject getConditions() {
+        return conditions;
+    }
+
+    public void setConditions(JSONObject conditions) {
+        this.conditions = conditions;
+    }
+
+    public List<Map<String, Map<String, String>>> getAnyOf() {
+        return anyOf;
+    }
+
+    public void setAllOf(List<Map<String, Map<String, String>>> anyOf) {
+        this.anyOf = anyOf;
+    }
+
+    public HashMap<String, String> getContains() {
+        return contains;
+    }
+
+    public void setContains(HashMap<String, String> contains) {
+        this.contains = contains;
+    }
+
+    public HashMap<String, String> getEndsWith() {
+        return endsWith;
+    }
+
+    public void setEndsWith(HashMap<String, String> endsWith) {
+        this.endsWith = endsWith;
+    }
+
+    public HashMap<String, JSONObject> getEquals() {
+        return equals;
+    }
+
+    public void setEquals(HashMap<String, JSONObject> equals) {
+        this.equals = equals;
+    }
+
+    public List<Map<String, Map<String, String>>> getNoneOf() {
+        return noneOf;
+    }
+
+    public void setNoneOf(List<Map<String, Map<String, String>>> noneOf) {
+        this.noneOf = noneOf;
     }
 
     /**
@@ -64,10 +123,13 @@ public class Condition {
 
         // If there are no conditions present, then the policy is applicable
         if (conditions.isEmpty()) {
-            return true;
+            return passes = true;
         }
 
+      //  JSONObject conditions = stringify(conditions);
+
         for (String cond : conditions.keySet()) {
+            passes = false;
             try {
                 switch (cond) {
                     case "endsWith":
@@ -108,7 +170,7 @@ public class Condition {
      * @throws IOException - failed to resolve condition
      */
     public Boolean endsWith(Object fromCondition, VariableResolver variables) throws IOException {
-        Evaluation test = (a, b) -> a.endsWith(b);
+        Evaluation test = (a, b) -> a.toString().endsWith(b.toString());
         return eachPair(fromCondition, variables, test);
     }
 
@@ -119,7 +181,7 @@ public class Condition {
      * @throws IOException - failed to resolve condition
      */
     public Boolean equals(Object fromCondition, VariableResolver variables) throws IOException {
-        Evaluation test = (a, b) -> a.equals(b);
+        Evaluation test = (a, b) -> a.toString().equals(b.toString());
         return eachPair(fromCondition, variables, test);
     }
 
@@ -130,7 +192,7 @@ public class Condition {
      * @throws IOException - failed to resolve condition
      */
     public Boolean contains(Object fromCondition, VariableResolver variables) throws IOException {
-        Evaluation test = (a, b) -> a.contains(b);
+        Evaluation test = (a, b) -> a.toString().contains(b.toString());
         return eachPair(fromCondition, variables, test);
     }
 
@@ -151,9 +213,10 @@ public class Condition {
             Boolean passes;
 
             for (String evaluation : args.keySet()) {
+                passes = false;
                 if (!(args.get(evaluation) instanceof JSONArray)) {
                     throw new IOException(
-                            "Expecting a JSONArray as an evaluator item, but got " + args.get(evaluation).getClass());
+                        "Expecting a JSONArray as an evaluator item, but got " + args.get(evaluation).getClass());
                 }
 
                 JSONArray values = (JSONArray) args.get(evaluation);
@@ -247,6 +310,17 @@ public class Condition {
             throw new IOException("Expecting single valued string, instead got " + list);
         }
 
-        return list.get(0);
+        return list.get(0).toString();
+    }
+
+    public JSONObject stringify(List<Condition> conditions) {
+        String condString = "";
+        try {
+           condString = objectMapper.writeValueAsString(conditions);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return new JSONObject(condString);
     }
 }
+

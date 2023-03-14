@@ -15,15 +15,20 @@
  */
 package org.eclipse.pass.policy.services;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import javax.json.JsonArray;
 
 import com.yahoo.elide.RefreshableElide;
-import org.eclipse.pass.object.model.Policy;
-import org.eclipse.pass.object.model.Repository;
+import org.eclipse.pass.policy.interfaces.PolicyResolver;
 import org.eclipse.pass.policy.rules.Context;
-import org.eclipse.pass.policy.rules.DSL;
+import org.eclipse.pass.policy.rules.Validator;
+import org.eclipse.pass.policy.rules.model.PolicyRules;
+import org.eclipse.pass.policy.rules.model.RepositoryRules;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 /**
  * Represents PolicyService object.
@@ -35,31 +40,43 @@ import org.eclipse.pass.policy.rules.DSL;
 public class PolicyService {
 
     RefreshableElide refreshableElide;
+    PolicyResolver policyResolver;
 
-    public PolicyService(RefreshableElide refreshableElide) {
+    public PolicyService(RefreshableElide refreshableElide) throws IOException {
         this.refreshableElide = refreshableElide;
+        String rulesDoc = System.getenv("POLICY_RULES_FILE") != null ?
+                          System.getenv("POLICY_RULES_FILE") :
+                          "src/main/resources/policies/aws.json";
+        this.policyResolver = new Validator().validate(rulesDoc);
     }
 
-    //public PolicyServiceImpl(PassClient client) {
-   //     this.passClient = client;
-    //}
-
-    public List<Policy> findPolicies(String submission, Map<String, String> headers) throws RuntimeException {
+    public List<PolicyRules> findPolicies(String submission, Map<String, String> headers) throws RuntimeException,
+        IOException {
         Context context = new Context(submission, headers, refreshableElide);
-        DSL dsl = new DSL();
-        try {
-            return dsl.resolve(context);
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Could not resolve policy rule", e);
-        }
+
+        return policyResolver.resolve(context);
     }
 
-    // public void sendPolicies() {
-
-    // }
-
-    public List<Repository> findRepositories(URI submissionURI, Map<String, Object> headers) throws RuntimeException {
+    public List<RepositoryRules> findRepositories(URI submissionURI, Map<String, Object> headers)
+        throws RuntimeException {
         return null;
+    }
+
+    public JSONArray createPolicyResponseJSONArray(List<PolicyRules> policyRulesList) {
+        JSONArray jasonArray = new JSONArray();
+        for ( PolicyRules policyRules : policyRulesList) {
+            JSONObject policyObject = new JSONObject();
+            policyObject.put("policy-id", policyRules.getId());
+            policyObject.put("type", policyRules.getType());
+            jasonArray.add(policyObject);
+        }
+
+        return jasonArray;
+    }
+
+    public JsonArray createRepositoryResponseJsonArray() {
+        return null;
+
     }
     // public void reconcileRepositories() {
 

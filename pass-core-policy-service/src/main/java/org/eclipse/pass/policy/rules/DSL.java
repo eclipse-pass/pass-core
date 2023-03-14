@@ -18,9 +18,11 @@ package org.eclipse.pass.policy.rules;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.pass.object.model.Policy;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.eclipse.pass.policy.components.VariablePinner;
 import org.eclipse.pass.policy.interfaces.PolicyResolver;
+import org.eclipse.pass.policy.rules.model.PolicyRules;
+import org.eclipse.pass.policy.rules.util.PolicyRulesUtil;
 
 /**
  * Represents the DSL object
@@ -30,10 +32,11 @@ import org.eclipse.pass.policy.interfaces.PolicyResolver;
  */
 public class DSL implements PolicyResolver {
 
-    private PolicyRules policyRules;
-
+    @JsonProperty("$schema")
     private String schema; // json:"$schema"
-    private List<Policy> policies; // json:"policy-rules"
+
+    @JsonProperty("policy-rules")
+    private List<PolicyRules> policyRulesList; // json:"policy-rules"
 
     /**
      * DSL.resolve()
@@ -45,12 +48,12 @@ public class DSL implements PolicyResolver {
      * @throws RuntimeException - Policy rule could not be resolved
      */
     @Override
-    public List<Policy> resolve(VariablePinner variables) throws RuntimeException {
-        List<Policy> resolvedPolicies = new ArrayList<Policy>();
+    public List<PolicyRules> resolve(VariablePinner variables) throws RuntimeException {
+        List<PolicyRules> resolvedPolicies = new ArrayList<>();
 
-        for (Policy policy : policies) {
+        for (PolicyRules policyRules : policyRulesList) {
             try {
-                List<Policy> resolved = policyRules.resolve(policy, variables);
+                List<PolicyRules> resolved = PolicyRulesUtil.resolve(policyRules, variables);
 
                 // If a resolved policy or policies exist, append to final list
                 if (resolved.size() > 0) {
@@ -62,6 +65,14 @@ public class DSL implements PolicyResolver {
             }
         }
 
-        return policyRules.uniquePolicies(resolvedPolicies);
+        return PolicyRulesUtil.uniquePolicies(resolvedPolicies);
     }
+
+    public String getSchema(){ return this.schema;}
+
+    public void setSchema(String schema) { this.schema = schema;}
+
+    public List<PolicyRules> getPolicyRuleList() { return this.policyRulesList; }
+
+    public void setPolicyRuleList(List<PolicyRules> policyRulesList) {this.policyRulesList = policyRulesList;}
 }

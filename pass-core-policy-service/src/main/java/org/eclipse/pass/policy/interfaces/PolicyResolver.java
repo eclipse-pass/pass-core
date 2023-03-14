@@ -17,8 +17,8 @@ package org.eclipse.pass.policy.interfaces;
 
 import java.util.List;
 
-import org.eclipse.pass.object.model.Policy;
 import org.eclipse.pass.policy.components.VariablePinner;
+import org.eclipse.pass.policy.rules.model.PolicyRules;
 
 /**
  * Represents PolicyResolver interface
@@ -29,5 +29,5 @@ import org.eclipse.pass.policy.components.VariablePinner;
  */
 public interface PolicyResolver {
 
-    public List<Policy> resolve(VariablePinner variables) throws RuntimeException;
+    public List<PolicyRules> resolve(VariablePinner variables) throws RuntimeException;
 }
