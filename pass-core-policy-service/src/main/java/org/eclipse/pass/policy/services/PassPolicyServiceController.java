@@ -74,13 +74,16 @@ public class PassPolicyServiceController {
         LOG.debug("Context path: " + request.getContextPath() + "; query string " + request.getQueryString());
 
         // retrieve submission URI from request
-        String submission = baseUrl + "/policies/" + request.getParameter("submission");
+        String submissionParameter = request.getParameter("submission");
+        String submission;
 
         // handle empty request submission error
-        if (submission == null) {
+        if (submissionParameter == null) {
             LOG.error("No submission query param provided");
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No submission query param provided");
             return;
+        } else {
+            submission = baseUrl + "/policies/" + submissionParameter;
         }
 
         // retrieve map of headers and values from request
