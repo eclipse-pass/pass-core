@@ -42,7 +42,7 @@ public class Validator {
 
         try (
             InputStream jsonStream = new FileInputStream(filePath);
-            InputStream schemaStream = new FileInputStream("src/main/resources/schemas/policy_config_1.0.json");
+            InputStream schemaStream = new FileInputStream("../pass-core-policy-service/src/main/resources/schemas/policy_config_1.0.json");
         ) {
 
             ObjectMapper objectMapper = new ObjectMapper();

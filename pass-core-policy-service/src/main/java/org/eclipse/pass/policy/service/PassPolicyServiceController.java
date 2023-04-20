@@ -31,6 +31,7 @@ import org.eclipse.pass.policy.rules.model.RepositoryRules;
 import org.json.simple.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,6 +48,7 @@ public class  PassPolicyServiceController {
     private static final Logger LOG = LoggerFactory.getLogger(PassPolicyServiceController.class);
     private final PolicyService policyService;
 
+    @Autowired
     public PassPolicyServiceController(RefreshableElide refreshableElide) throws IOException {
         this.policyService = new PolicyService(refreshableElide);
     }
@@ -55,7 +57,8 @@ public class  PassPolicyServiceController {
         this.policyService = policyService;
     }
 
-    public String baseUrl = System.getenv("PASS_CORE_BASE_URL");
+    public String baseUrl = System.getenv("PASS_CORE_BASE_URL") != null?
+                            System.getenv("PASS_CORE_BASE_URL") : "http://localhost:8080";
 
     /**
      * Handles incoming GET requests to the /policies endpoint
@@ -67,7 +70,6 @@ public class  PassPolicyServiceController {
     @GetMapping("/policy/policies")
     public void doGetPolicy(HttpServletRequest request, HttpServletResponse response)
         throws IOException {
-        System.out.println("MOOOOO - service called");
         response.setContentType("application/json");
         response.setCharacterEncoding("utf-8");
 
@@ -84,7 +86,7 @@ public class  PassPolicyServiceController {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No submission query param provided");
             return;
         } else {
-            submission = baseUrl + "/policies/" + submissionParameter;
+            submission = baseUrl + "/submissions/" + submissionParameter;
         }
 
         // retrieve map of headers and values from request

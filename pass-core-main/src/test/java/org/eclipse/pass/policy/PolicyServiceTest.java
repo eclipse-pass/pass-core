@@ -21,6 +21,7 @@ import org.eclipse.pass.object.model.Repository;
 import org.eclipse.pass.object.model.Source;
 import org.eclipse.pass.object.model.Submission;
 import org.eclipse.pass.object.model.SubmissionStatus;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -92,6 +93,7 @@ public class PolicyServiceTest extends IntegrationTest {
             .build();
 
         System.out.println(okHttpRequest.url().toString());
+        System.out.println(okHttpRequest.headers().toString());
         Call call = httpClient.newCall(okHttpRequest);
 
         try (Response okHttpResponse = call.execute()) {

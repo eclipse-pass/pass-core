@@ -162,7 +162,7 @@ public class PolicyRules {
 
     @Override
     public String toString() {
-        return "Policy [id=" + id + ", description=" + description + ", type=" + type
+        return "PolicyRule [id=" + id + ", description=" + description + ", type=" + type
                + ", repositories=" + repositories + ", conditions=" + conditions + ", id=" + getId() + "]";
     }
 

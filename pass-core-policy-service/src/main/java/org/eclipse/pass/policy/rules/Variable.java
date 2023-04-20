@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.pass.policy.components.VariablePinner;
 
 /**
@@ -65,13 +66,15 @@ public class Variable extends VariablePinner {
             return null;
         }
         // need to trim string based on ${} chars
-        Variable variable = new Variable(source.toString());
+        String trimmed = StringUtils.removeStart(source, "${");
+        trimmed = StringUtils.removeEnd(trimmed, "}");
+        Variable variable = new Variable(trimmed);
         return variable;
     }
 
     @Override
     public List<String> resolve(String varString) throws RuntimeException {
-        List<String> resolvedVar = new ArrayList<String>();
+        List<String> resolvedVar = new ArrayList<>();
         resolvedVar.add(varString);
         return resolvedVar;
     }

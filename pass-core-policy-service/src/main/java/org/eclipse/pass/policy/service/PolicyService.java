@@ -46,14 +46,14 @@ public class PolicyService {
         this.refreshableElide = refreshableElide;
         String rulesDoc = System.getenv("POLICY_RULES_FILE") != null ?
                           System.getenv("POLICY_RULES_FILE") :
-                          "src/main/resources/policies/aws.json";
+                          "../pass-core-policy-service/src/main/resources/policies/aws.json";
         this.policyResolver = new Validator().validate(rulesDoc);
     }
 
     public List<PolicyRules> findPolicies(String submission, Map<String, String> headers) throws RuntimeException,
         IOException {
         Context context = new Context(submission, headers, refreshableElide);
-        System.out.println(submission);
+        System.out.println("Submission: " + submission);
         System.out.println(headers.toString());
         return policyResolver.resolve(context);
     }

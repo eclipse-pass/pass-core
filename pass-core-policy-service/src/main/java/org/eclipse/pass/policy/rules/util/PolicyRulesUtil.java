@@ -59,7 +59,7 @@ public class PolicyRulesUtil {
         // is a list of IDs, we return a list of policies, each one with an ID from the
         // list.
         if (Variable.isVariable(policyRules.getId())) {
-
+            System.out.println(policyRules.toString());
             // resolve policy IDs
             List<String> resolvedIDs = new ArrayList<>();
             try {
