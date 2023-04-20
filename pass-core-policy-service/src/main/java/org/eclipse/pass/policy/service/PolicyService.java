@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eclipse.pass.policy.services;
+package org.eclipse.pass.policy.service;
 
 import java.io.IOException;
 import java.net.URI;
@@ -53,7 +53,8 @@ public class PolicyService {
     public List<PolicyRules> findPolicies(String submission, Map<String, String> headers) throws RuntimeException,
         IOException {
         Context context = new Context(submission, headers, refreshableElide);
-
+        System.out.println(submission);
+        System.out.println(headers.toString());
         return policyResolver.resolve(context);
     }
 

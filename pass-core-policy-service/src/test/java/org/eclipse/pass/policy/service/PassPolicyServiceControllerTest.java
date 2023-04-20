@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.eclipse.pass.policy.services;
+package org.eclipse.pass.policy.service;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -86,7 +85,6 @@ public class PassPolicyServiceControllerTest {
         verify(mockRequest, atLeast(1)).getHeaderNames();
         verify(mockPolicyService, atLeast(1)).findPolicies(submission, headers);
         writer.flush();
-        assertTrue(stringWriter.toString().contains("Served at:"));
     }
 
     // test doPostPolicy ()
@@ -107,7 +105,6 @@ public class PassPolicyServiceControllerTest {
 
         new PassPolicyServiceController(refreshableElide).doPostPolicy(request, response);
         verify(request, atLeast(1)).getHeader("Content-Type");
-        assertTrue(stringWriter.toString().contains("Served at:"));
     }
 
 }

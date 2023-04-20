@@ -14,7 +14,7 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  */
-package org.eclipse.pass.policy.services;
+package org.eclipse.pass.policy.service;
 
 import java.io.IOException;
 import java.net.URI;
@@ -41,7 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author jrm
  */
 @RestController
-public class PassPolicyServiceController {
+public class  PassPolicyServiceController {
 
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = LoggerFactory.getLogger(PassPolicyServiceController.class);
@@ -64,9 +64,10 @@ public class PassPolicyServiceController {
      * @param response the outgoing response
      * @throws IOException if an IO exception occurs
      */
-    @GetMapping("/policies")
+    @GetMapping("/policy/policies")
     public void doGetPolicy(HttpServletRequest request, HttpServletResponse response)
         throws IOException {
+        System.out.println("MOOOOO - service called");
         response.setContentType("application/json");
         response.setCharacterEncoding("utf-8");
 
@@ -110,7 +111,7 @@ public class PassPolicyServiceController {
             return;
         }
 
-        response.getWriter().append("Served at: ").append(request.getContextPath());
+       // response.getWriter().append("Served at: ").append(request.getContextPath());
     }
 
 
@@ -121,7 +122,7 @@ public class PassPolicyServiceController {
      * @param response the outgoing response
      * @throws IOException if an IO exception occurs
      */
-    @PostMapping("/policies")
+    @PostMapping("/policy/policies")
     public void doPostPolicy(HttpServletRequest request, HttpServletResponse response)
         throws IOException {
         // handle wrong request content-type
@@ -141,7 +142,7 @@ public class PassPolicyServiceController {
      * @param response the outgoing response
      * @throws IOException if an IO exception occurs
      */
-    @GetMapping("/repositories")
+    @GetMapping("/policy/repositories")
     protected void doGetRepository(HttpServletRequest request, HttpServletResponse response)
         throws IOException {
         response.setContentType("application/json");
@@ -186,7 +187,7 @@ public class PassPolicyServiceController {
      *  @param response the outgoing response
      * @throws IOException if an IO exception occurs
      */
-    @PostMapping("/repositories")
+    @PostMapping("/policy/repositories")
     protected void doPostRepository(HttpServletRequest request, HttpServletResponse response)
         throws  IOException {
         // handle wrong request content-type

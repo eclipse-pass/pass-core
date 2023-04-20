@@ -29,7 +29,7 @@ import com.networknt.schema.ValidationMessage;
 import org.eclipse.pass.policy.interfaces.PolicyResolver;
 
 /**
- * Validator validates a serialized PolicyRules document aainst the implementation's expected JSON schema,
+ * Validator validates a serialized PolicyRules document against the implementation's expected JSON schema,
  * and then populates the DSL with the PolicyRules
  *
  * @author jrm
