@@ -19,8 +19,6 @@ package org.eclipse.pass.policy.service;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.Set;
-
-
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
@@ -39,6 +37,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * This class defines Policy and Repository service endpoints and orchestrates responses
+ *
+ * @author jrm
+ */
 @RestController
 public class PassPolicyServiceController {
 
@@ -60,6 +63,13 @@ public class PassPolicyServiceController {
         this.policyService = policyService;
     }
 
+    /**
+     * Handles incoming GET requests to the /policy/policies endpoint
+     *
+     * @param request the incoming request
+     * @param response the outgoing response
+     * @throws IOException if an IO exception occurs
+     */
     @GetMapping("/policy/policies")
     public void doGetPolicies(HttpServletRequest request, HttpServletResponse response)
         throws IOException {
@@ -77,10 +87,8 @@ public class PassPolicyServiceController {
         // handle empty or invalid request submission error
         if (submissionId == null) {
             LOG.error("Submission query parameter missing or invalid");
-            response.setStatus(400);
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing or invalid submission parameter: " +
-                                                                   "must be a String representation of a Long");
-
+            set_error_response(response, "Missing or invalid submission parameter: " +
+                                         "must be a String representation of a Long", HttpStatus.BAD_REQUEST);
             return;
         }
 
@@ -100,6 +108,13 @@ public class PassPolicyServiceController {
         set_response(response, (JsonObject) jab.build(), HttpStatus.OK);
     }
 
+    /**
+     * Handles incoming GET requests to the /policy/repositories endpoint
+     *
+     * @param request the incoming request
+     * @param response the outgoing response
+     * @throws IOException if an IO exception occurs
+     */
     @GetMapping("/policy/repositories")
     public void doGetRepositories(HttpServletRequest request, HttpServletResponse response)
         throws IOException {
@@ -134,7 +149,6 @@ public class PassPolicyServiceController {
         }
         set_response(response, (JsonObject) jab.build(), HttpStatus.OK);
     }
-
 
     private void set_response(HttpServletResponse response, JsonObject obj, HttpStatus status) throws IOException {
         response.getWriter().print(obj.toString());

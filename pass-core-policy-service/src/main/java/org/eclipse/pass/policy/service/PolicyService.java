@@ -22,10 +22,27 @@ import java.util.Set;
 import org.eclipse.pass.object.model.Policy;
 import org.eclipse.pass.object.model.Repository;
 
+/**
+ * Interface for Policy Sevice implementations.
+ *
+ * @author jrm
+ */
 public interface PolicyService {
 
+    /**
+     *
+     * @param submissionId - the string value of the Submission ID
+     * @param userPrincipal - the Principal from the Http Request in the Controller
+     * @return a Set of found Policies
+     */
     Set<Policy> findPoliciesForSubmission(Long submissionId, Principal userPrincipal);
 
+    /**
+     *
+     * @param submissionId - the string value of the Submission ID
+     * @param userPrincipal - - the Principal from the Http Request in the Controller
+     * @return a Set of found Repositoriess
+     */
     Set<Repository> findRepositoriesForSubmission(Long submissionId, Principal userPrincipal);
 
 }

@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 
@@ -35,31 +34,39 @@ import org.eclipse.pass.object.model.Policy;
 import org.eclipse.pass.object.model.Repository;
 import org.eclipse.pass.object.model.Submission;
 import org.eclipse.pass.object.model.User;
+
+/**
+ * Simple implementation of the Policy Service interface. Provides Sets of policies or repositories
+ *
+ * @author jrm
+ */
 public class PolicyServiceSimpleImpl implements PolicyService {
 
     private RefreshableElide refreshableElide;
     private String institutionalPolicyId = System.getenv("INSTITUTIONAL_POLICY_ID");
     private String institutionalRepositoryId = System.getenv("INSTITUTIONAL_REPOSITORY_ID");
 
-    public PolicyServiceSimpleImpl (RefreshableElide refreshableElide) {
+    public PolicyServiceSimpleImpl(RefreshableElide refreshableElide) {
         this.refreshableElide = refreshableElide;
     }
 
     @Override
     public Set<Policy> findPoliciesForSubmission(Long submissionId, Principal userPrincipal) {
-        Set<Policy> policies = new HashSet<>();
+        Set<Policy> policies = new HashSet<>(); //use Set to avoid duplicates
         JsonArrayBuilder jab = Json.createArrayBuilder();
         try (PassClient passClient = PassClient.newInstance(refreshableElide)) {
             Submission submission = passClient.getObject(Submission.class, submissionId);
             for (Grant grant : submission.getGrants()) {
                 for (Funder funder : getFunders(grant)) {
-                    policies.add(funder.getPolicy());
+                    if (funder.getPolicy() != null) {
+                        policies.add(funder.getPolicy());
+                    }
                 }
             }
 
             //If the user is an affiliate of the institution, add the institutional repository
             Long policyId = Long.parseLong(institutionalPolicyId);
-            if(isInstitutionalUser(userPrincipal) && policyId != null) {
+            if (isInstitutionalUser(userPrincipal) && policyId != null) {
                 Policy policy = passClient.getObject(Policy.class, policyId);
                 if (policy != null) {
                     policies.add(policy);
@@ -72,17 +79,17 @@ public class PolicyServiceSimpleImpl implements PolicyService {
     }
 
     @Override
-    public Set<Repository> findRepositoriesForSubmission(Long submissionId, Principal userPrincipal ) {
-        Set<Repository> repositories = new HashSet<>();
-        for ( Policy policy : findPoliciesForSubmission(submissionId, userPrincipal)) {
+    public Set<Repository> findRepositoriesForSubmission(Long submissionId, Principal userPrincipal) {
+        Set<Repository> repositories = new HashSet<>(); //use Set to avoid duplicates
+        for (Policy policy : findPoliciesForSubmission(submissionId, userPrincipal)) {
             repositories.addAll(policy.getRepositories());
         }
 
         //If the user is an affiliate of the institution, add the institutional repository
         if (isInstitutionalUser(userPrincipal)) {
-            try(PassClient passClient = PassClient.newInstance(refreshableElide)) {
+            try (PassClient passClient = PassClient.newInstance(refreshableElide)) {
                 Long repositoryId = Long.parseLong(institutionalRepositoryId);
-                if(repositoryId != null) {
+                if (repositoryId != null) {
                     Repository repository = passClient.getObject(Repository.class, repositoryId);
                     if (repository != null) {
                         repositories.add(repository);
@@ -97,12 +104,18 @@ public class PolicyServiceSimpleImpl implements PolicyService {
         return repositories;
     }
 
+    /**
+     * A convenience method
+     *
+     * @param grant - the Grant to find Funders for
+     * @return - the Set of Funders for the provided Grant
+     */
     private Set<Funder> getFunders(Grant grant) {
-        Set<Funder> funders = new HashSet<>();
+        Set<Funder> funders = new HashSet<>(); // use Set to avoid duplicates
         Funder primaryFunder = grant.getPrimaryFunder();
         Funder directFunder = grant.getDirectFunder();
 
-        if ( primaryFunder != null) {
+        if (primaryFunder != null) {
             funders.add(primaryFunder);
         }
         if (directFunder != null) {
@@ -112,7 +125,14 @@ public class PolicyServiceSimpleImpl implements PolicyService {
         return funders;
     }
 
-    private boolean isInstitutionalUser (Principal userPrincipal) {
+    /**
+     * A method to decide whether the Principal is an affiliate. If the user is found unambiguously
+     * in the data store, then the user is assumed to be an affiliate.
+     *
+     * @param userPrincipal - the Principal on the HttpRequest in the controller
+     * @return a boolean indicating whether the user is an affiliate
+     */
+    private boolean isInstitutionalUser(Principal userPrincipal) {
         if (userPrincipal == null || userPrincipal.getName() == null) {
 
             String user_name = userPrincipal.getName();
@@ -122,6 +142,7 @@ public class PolicyServiceSimpleImpl implements PolicyService {
                 selector.setFilter(RSQL.equals("username", user_name));
                 PassClientResult<User> result = client.selectObjects(selector);
 
+                //if we find an unambiguous match, we interpret this as the user being an affiliate
                 if (result.getObjects().size() == 1) {
                     return true;
                 }
