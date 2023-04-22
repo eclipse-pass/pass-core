@@ -49,8 +49,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class PassPolicyServiceController {
 
     private static final long serialVersionUID = 1L;
-    private final String institutionalPolicyTitle = System.getenv("INSTITUTIONAL_POLICY_TITLE");
-    private final String institutionalRepositoryName = System.getenv("INSTITUTIONAL_REPOSITORY_NAME");
+    private final String institutionalPolicyTitle = System.getProperty("INSTITUTIONAL_POLICY_TITLE") != null ?
+                                                    System.getProperty("INSTITUTIONAL_POLICY_TITLE") :
+                                                    "JHU Open Access Policy";
+    private final String institutionalRepositoryName = System.getProperty("INSTITUTIONAL_REPOSITORY_NAME") != null ?
+                                                       System.getProperty("INSTITUTIONAL_REPOSITORY_NAME") :
+                                                       "JScholarship";
     private static final Logger LOG = LoggerFactory.getLogger(PassPolicyServiceController.class);
     private final PolicyService policyService;
 
@@ -100,6 +104,7 @@ public class PassPolicyServiceController {
         } catch (IOException ioe) {
             set_error_response(response, "IO error encountered connecting to data store",
                                HttpStatus.INTERNAL_SERVER_ERROR);
+            LOG.debug(ioe.getMessage(), ioe);
             return;
         }
 
@@ -107,7 +112,8 @@ public class PassPolicyServiceController {
         for (Policy policy : policies) {
             JsonObjectBuilder job = Json.createObjectBuilder();
             job.add("id", policy.getId().toString());
-            if (institutionalPolicyTitle != null && policy.getTitle().equals(institutionalPolicyTitle)) {
+            if (institutionalPolicyTitle != null && policy.getTitle() != null
+                && policy.getTitle().equals(institutionalPolicyTitle)) {
                 job.add("type", "institution");
             } else {
                 job.add("type", "funder");
@@ -128,8 +134,8 @@ public class PassPolicyServiceController {
     @GetMapping("/policy/repositories")
     public void doGetRepositories(HttpServletRequest request, HttpServletResponse response)
         throws IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("utf-8");
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
         LOG.info("Servicing new request......");
         LOG.debug("Context path: " + request.getContextPath() + "; query string " + request.getQueryString());
@@ -152,6 +158,7 @@ public class PassPolicyServiceController {
         } catch (IOException ioe) {
             set_error_response(response, "IO error encountered connecting to data store",
                                HttpStatus.INTERNAL_SERVER_ERROR);
+            LOG.debug(ioe.getMessage(), ioe);
             return;
         }
 
@@ -159,7 +166,8 @@ public class PassPolicyServiceController {
         for (Repository repository : repositories) {
             JsonObjectBuilder job = Json.createObjectBuilder();
             job.add("url", PassClient.getUrl(refreshableElide, repository));
-            if ( institutionalRepositoryName != null && repository.getName().equals(institutionalRepositoryName)) {
+            if ( institutionalRepositoryName != null && repository.getName() != null
+                 && repository.getName().equals(institutionalRepositoryName)) {
                 job.add("selected", "true");
             } else {
                 job.add("selected", "false");

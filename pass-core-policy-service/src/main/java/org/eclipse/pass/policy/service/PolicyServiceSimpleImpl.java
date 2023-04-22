@@ -41,8 +41,15 @@ import org.eclipse.pass.object.model.User;
 public class PolicyServiceSimpleImpl implements PolicyService {
 
     private RefreshableElide refreshableElide;
-    private String institutionalPolicyTitle = System.getenv("INSTITUTIONAL_POLICY_TITLE");
-    private String institutionalRepositoryName = System.getenv("INSTITUTIONAL_REPOSITORY_NAME");
+    private final String institutionalPolicyTitle = System.getProperty("INSTITUTIONAL_POLICY_TITLE") != null ?
+                                                    System.getProperty("INSTITUTIONAL_POLICY_TITLE") :
+                                                    "JHU Open Access Policy";
+    private final String institutionalRepositoryName = System.getProperty("INSTITUTIONAL_REPOSITORY_NAME") != null ?
+                                                       System.getProperty("INSTITUTIONAL_REPOSITORY_NAME") :
+                                                       "JScholarship";
+    private String institution = System.getProperty("INSTITUTION") != null ?
+                                 System.getProperty("INSTITUTION") :
+                                 "johnshopkins.edu";
 
     public PolicyServiceSimpleImpl(RefreshableElide refreshableElide) {
         this.refreshableElide = refreshableElide;
@@ -67,8 +74,9 @@ public class PolicyServiceSimpleImpl implements PolicyService {
             userSelector.setFilter(RSQL.equals("username", user_name));
             PassClientResult<User> userResult = passClient.selectObjects(userSelector);
 
-            if (userResult.getObjects()
-                          .size() == 1 && institutionalPolicyTitle != null) { //have a unique user in the system
+            if (userResult.getObjects().size() == 1
+                && userResult.getObjects().get(0).getAffiliation().contains(institution)
+                && institutionalPolicyTitle != null) { //have a unique user in the system
                 PassClientSelector<Policy> policySelector = new PassClientSelector<>(Policy.class);
                 policySelector.setFilter(RSQL.equals("title", institutionalPolicyTitle));
                 PassClientResult<Policy> policyResult = passClient.selectObjects(policySelector);
@@ -95,8 +103,9 @@ public class PolicyServiceSimpleImpl implements PolicyService {
             userSelector.setFilter(RSQL.equals("username", user_name));
             PassClientResult<User> userResult = passClient.selectObjects(userSelector);
 
-            if (userResult.getObjects()
-                          .size() == 1 && institutionalRepositoryName != null) { //have a unique user in the system
+            if (userResult.getObjects().size() == 1
+                && userResult.getObjects().get(0).getAffiliation().contains(institution)
+                && institutionalRepositoryName != null) { //have a unique user in the system
                 PassClientSelector<Repository> repositorySelector = new PassClientSelector<>(Repository.class);
                 repositorySelector.setFilter(RSQL.equals("name", institutionalRepositoryName));
                 PassClientResult<Repository> repositoryResult = passClient.selectObjects(repositorySelector);
