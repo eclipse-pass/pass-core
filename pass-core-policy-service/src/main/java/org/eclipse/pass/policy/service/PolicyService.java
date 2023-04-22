@@ -16,6 +16,7 @@
  */
 package org.eclipse.pass.policy.service;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.util.Set;
 
@@ -35,7 +36,7 @@ public interface PolicyService {
      * @param userPrincipal - the Principal from the Http Request in the Controller
      * @return a Set of found Policies
      */
-    Set<Policy> findPoliciesForSubmission(Long submissionId, Principal userPrincipal);
+    Set<Policy> findPoliciesForSubmission(Long submissionId, Principal userPrincipal) throws IOException;
 
     /**
      *
@@ -43,6 +44,6 @@ public interface PolicyService {
      * @param userPrincipal - - the Principal from the Http Request in the Controller
      * @return a Set of found Repositoriess
      */
-    Set<Repository> findRepositoriesForSubmission(Long submissionId, Principal userPrincipal);
+    Set<Repository> findRepositoriesForSubmission(Long submissionId, Principal userPrincipal) throws IOException;
 
 }

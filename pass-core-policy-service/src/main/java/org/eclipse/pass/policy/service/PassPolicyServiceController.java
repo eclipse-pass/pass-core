@@ -17,6 +17,7 @@
 package org.eclipse.pass.policy.service;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.Set;
 import javax.json.Json;
@@ -35,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -47,8 +49,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class PassPolicyServiceController {
 
     private static final long serialVersionUID = 1L;
-    private String institutionalPolicyId = System.getenv("INSTITUTIONAL_POLICY_ID");
-    private String institutionalRepositoryId = System.getenv("INSTITUTIONAL_REPOSITORY_ID");
+    private final String institutionalPolicyTitle = System.getenv("INSTITUTIONAL_POLICY_TITLE");
+    private final String institutionalRepositoryName = System.getenv("INSTITUTIONAL_REPOSITORY_NAME");
     private static final Logger LOG = LoggerFactory.getLogger(PassPolicyServiceController.class);
     private final PolicyService policyService;
 
@@ -74,8 +76,8 @@ public class PassPolicyServiceController {
     @GetMapping("/policy/policies")
     public void doGetPolicies(HttpServletRequest request, HttpServletResponse response)
         throws IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("utf-8");
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
         LOG.info("Servicing new request......");
         LOG.debug("Context path: " + request.getContextPath() + "; query string " + request.getQueryString());
@@ -92,13 +94,20 @@ public class PassPolicyServiceController {
             return;
         }
 
-        Set<Policy> policies = policyService.findPoliciesForSubmission(submissionId, userPrincipal);
+        Set<Policy> policies;
+        try {
+            policies = policyService.findPoliciesForSubmission(submissionId, userPrincipal);
+        } catch (IOException ioe) {
+            set_error_response(response, "IO error encountered connecting to data store",
+                               HttpStatus.INTERNAL_SERVER_ERROR);
+            return;
+        }
 
         JsonArrayBuilder jab = Json.createArrayBuilder();
         for (Policy policy : policies) {
             JsonObjectBuilder job = Json.createObjectBuilder();
             job.add("id", policy.getId().toString());
-            if ( policy.getId().toString().equals(institutionalPolicyId)) {
+            if (institutionalPolicyTitle != null && policy.getTitle().equals(institutionalPolicyTitle)) {
                 job.add("type", "institution");
             } else {
                 job.add("type", "funder");
@@ -136,12 +145,21 @@ public class PassPolicyServiceController {
                                          "must be a String representation of a Long", HttpStatus.BAD_REQUEST);
             return;
         }
-        Set<Repository> repositories = policyService.findRepositoriesForSubmission(submissionId, userPrincipal);
+
+        Set<Repository> repositories;
+        try {
+            repositories = policyService.findRepositoriesForSubmission(submissionId, userPrincipal);
+        } catch (IOException ioe) {
+            set_error_response(response, "IO error encountered connecting to data store",
+                               HttpStatus.INTERNAL_SERVER_ERROR);
+            return;
+        }
+
         JsonArrayBuilder jab = Json.createArrayBuilder();
         for (Repository repository : repositories) {
             JsonObjectBuilder job = Json.createObjectBuilder();
             job.add("url", PassClient.getUrl(refreshableElide, repository));
-            if ( repository.getId().toString().equals(institutionalRepositoryId)) {
+            if ( institutionalRepositoryName != null && repository.getName().equals(institutionalRepositoryName)) {
                 job.add("selected", "true");
             } else {
                 job.add("selected", "false");
