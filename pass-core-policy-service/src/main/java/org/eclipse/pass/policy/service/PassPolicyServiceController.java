@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.Set;
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -86,7 +87,6 @@ public class PassPolicyServiceController {
 
         // handle empty or invalid request submission error
         if (submissionId == null) {
-            LOG.error("Submission query parameter missing or invalid");
             set_error_response(response, "Missing or invalid submission parameter: " +
                                          "must be a String representation of a Long", HttpStatus.BAD_REQUEST);
             return;
@@ -105,7 +105,8 @@ public class PassPolicyServiceController {
             }
             jab.add(job.build());
         }
-        set_response(response, (JsonObject) jab.build(), HttpStatus.OK);
+        JsonArray array = jab.build();
+        set_response(response,  array, HttpStatus.OK);
     }
 
     /**
@@ -147,10 +148,10 @@ public class PassPolicyServiceController {
             }
             jab.add(job.build());
         }
-        set_response(response, (JsonObject) jab.build(), HttpStatus.OK);
+        set_response(response,  jab.build(), HttpStatus.OK);
     }
 
-    private void set_response(HttpServletResponse response, JsonObject obj, HttpStatus status) throws IOException {
+    private void set_response(HttpServletResponse response, JsonArray obj, HttpStatus status) throws IOException {
         response.getWriter().print(obj.toString());
         response.setStatus(status.value());
     }
@@ -158,8 +159,8 @@ public class PassPolicyServiceController {
     private void set_error_response(HttpServletResponse response, String message,
                                     HttpStatus status) throws IOException {
         JsonObject obj = Json.createObjectBuilder().add("message", message).build();
-
-        set_response(response, obj, status);
+        response.getWriter().print(obj.toString());
+        response.setStatus(status.value());
         LOG.error(message);
     }
 

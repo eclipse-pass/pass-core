@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.HashSet;
 import java.util.Set;
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
 
 import com.yahoo.elide.RefreshableElide;
 import org.eclipse.pass.object.PassClient;
@@ -53,7 +51,6 @@ public class PolicyServiceSimpleImpl implements PolicyService {
     @Override
     public Set<Policy> findPoliciesForSubmission(Long submissionId, Principal userPrincipal) {
         Set<Policy> policies = new HashSet<>(); //use Set to avoid duplicates
-        JsonArrayBuilder jab = Json.createArrayBuilder();
         try (PassClient passClient = PassClient.newInstance(refreshableElide)) {
             Submission submission = passClient.getObject(Submission.class, submissionId);
             for (Grant grant : submission.getGrants()) {
