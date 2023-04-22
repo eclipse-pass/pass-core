@@ -41,14 +41,14 @@ import org.eclipse.pass.object.model.User;
 public class PolicyServiceSimpleImpl implements PolicyService {
 
     private RefreshableElide refreshableElide;
-    private final String institutionalPolicyTitle = System.getProperty("INSTITUTIONAL_POLICY_TITLE") != null ?
-                                                    System.getProperty("INSTITUTIONAL_POLICY_TITLE") :
+    private final String institutionalPolicyTitle = System.getenv("INSTITUTIONAL_POLICY_TITLE") != null ?
+                                                    System.getenv("INSTITUTIONAL_POLICY_TITLE") :
                                                     "JHU Open Access Policy";
-    private final String institutionalRepositoryName = System.getProperty("INSTITUTIONAL_REPOSITORY_NAME") != null ?
-                                                       System.getProperty("INSTITUTIONAL_REPOSITORY_NAME") :
+    private final String institutionalRepositoryName = System.getenv("INSTITUTIONAL_REPOSITORY_NAME") != null ?
+                                                       System.getenv("INSTITUTIONAL_REPOSITORY_NAME") :
                                                        "JScholarship";
-    private String institution = System.getProperty("INSTITUTION") != null ?
-                                 System.getProperty("INSTITUTION") :
+    private String institution = System.getenv("INSTITUTION") != null ?
+                                 System.getenv("INSTITUTION") :
                                  "johnshopkins.edu";
 
     public PolicyServiceSimpleImpl(RefreshableElide refreshableElide) {
