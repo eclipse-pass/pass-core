@@ -67,7 +67,8 @@ public class PolicyServiceSimpleImpl implements PolicyService {
             userSelector.setFilter(RSQL.equals("username", user_name));
             PassClientResult<User> userResult = passClient.selectObjects(userSelector);
 
-            if (userResult.getObjects().size() == 1 && institutionalPolicyTitle != null) { //have a unique user in the system
+            if (userResult.getObjects()
+                          .size() == 1 && institutionalPolicyTitle != null) { //have a unique user in the system
                 PassClientSelector<Policy> policySelector = new PassClientSelector<>(Policy.class);
                 policySelector.setFilter(RSQL.equals("title", institutionalPolicyTitle));
                 PassClientResult<Policy> policyResult = passClient.selectObjects(policySelector);
@@ -79,32 +80,32 @@ public class PolicyServiceSimpleImpl implements PolicyService {
         return policies;
     }
 
-        @Override
+    @Override
     public Set<Repository> findRepositoriesForSubmission(Long submissionId, Principal userPrincipal)
-            throws IOException {
+        throws IOException {
         Set<Repository> repositories = new HashSet<>(); //use Set to avoid duplicates
-             try (PassClient passClient = PassClient.newInstance(refreshableElide)) {
-                 for (Policy policy : findPoliciesForSubmission(submissionId, userPrincipal)) {
-                     repositories.addAll(policy.getRepositories());
-                 }
+        try (PassClient passClient = PassClient.newInstance(refreshableElide)) {
+            for (Policy policy : findPoliciesForSubmission(submissionId, userPrincipal)) {
+                repositories.addAll(policy.getRepositories());
+            }
 
-                 //If the user is an affiliate of the institution, add the institutional repository
-                 String user_name = userPrincipal.getName();
-                 PassClientSelector<User> userSelector = new PassClientSelector<>(User.class);
-                 userSelector.setFilter(RSQL.equals("username", user_name));
-                 PassClientResult<User> userResult = passClient.selectObjects(userSelector);
+            //If the user is an affiliate of the institution, add the institutional repository
+            String user_name = userPrincipal.getName();
+            PassClientSelector<User> userSelector = new PassClientSelector<>(User.class);
+            userSelector.setFilter(RSQL.equals("username", user_name));
+            PassClientResult<User> userResult = passClient.selectObjects(userSelector);
 
-                 if (userResult.getObjects()
-                               .size() == 1 && institutionalRepositoryName != null) { //have a unique user in the system
-                     PassClientSelector<Repository> repositorySelector = new PassClientSelector<>(Repository.class);
-                     repositorySelector.setFilter(RSQL.equals("name", institutionalRepositoryName));
-                     PassClientResult<Repository> repositoryResult = passClient.selectObjects(repositorySelector);
-                     if (repositoryResult.getObjects().size() == 1) {
-                         repositories.add(repositoryResult.getObjects().get(0));
-                     }
-                 }
-             }
-            return repositories;
+            if (userResult.getObjects()
+                          .size() == 1 && institutionalRepositoryName != null) { //have a unique user in the system
+                PassClientSelector<Repository> repositorySelector = new PassClientSelector<>(Repository.class);
+                repositorySelector.setFilter(RSQL.equals("name", institutionalRepositoryName));
+                PassClientResult<Repository> repositoryResult = passClient.selectObjects(repositorySelector);
+                if (repositoryResult.getObjects().size() == 1) {
+                    repositories.add(repositoryResult.getObjects().get(0));
+                }
+            }
+        }
+        return repositories;
     }
 
     /**
