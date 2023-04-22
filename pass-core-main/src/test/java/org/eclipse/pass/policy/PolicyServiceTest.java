@@ -38,7 +38,7 @@ import org.eclipse.pass.object.model.Submission;
 import org.eclipse.pass.object.model.SubmissionStatus;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.junit.jupiter.api.AfterAll;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,23 +49,18 @@ public class PolicyServiceTest extends ShibIntegrationTest {
     protected RefreshableElide refreshableElide;
 
     private Submission submission;
-
-    Repository repository1 = new Repository();
-    Repository repository2 = new Repository();
-    Repository repository3 = new Repository();
-    Policy policy1 = new Policy();
-    Funder funder1 = new Funder();
-    Policy policy2 = new Policy();
-    Policy policy3 = new Policy();
-    Funder funder2 = new Funder();
-    Grant grant = new Grant();
+    private Repository repository1 = new Repository();
+    private Repository repository2 = new Repository();
+    private Repository repository3 = new Repository();
+    private Policy policy1 = new Policy();
+    private Funder funder1 = new Funder();
+    private Policy policy2 = new Policy();
+    private Policy policy3 = new Policy();
+    private Funder funder2 = new Funder();
+    private Grant grant = new Grant();
 
     @BeforeAll
     public void setupObjects() throws IOException {
-
-        System.setProperty("INSTITUTION", "johnshopkins.edu");
-        System.setProperty("INSTITUTIONAL_REPOSITORY_NAME", "JScholarship");
-        System.setProperty("INSTITUTIONAL_POLICY_TITLE", "JHU Open Access Policy");
 
         repository1.setName("Repository 1");
         repository1.setDescription("Repository for policy1");
@@ -131,6 +126,18 @@ public class PolicyServiceTest extends ShibIntegrationTest {
             assertEquals(200, okHttpResponse.code());
             JSONArray result = new JSONArray(okHttpResponse.body().string());
             assertEquals(3, result.length());
+
+            for (int i = 0; i < result.length(); i++) {
+                JSONObject obj = result.getJSONObject(i);
+                String id =  obj.getString("id");
+
+                if ( id.equals(policy3.getId().toString())) {
+                    assertEquals("institution", obj.getString("type"));
+                } else {
+                    assertEquals("funder", obj.getString("type"));
+                }
+            }
+
         }
     }
 
@@ -150,6 +157,17 @@ public class PolicyServiceTest extends ShibIntegrationTest {
             assertEquals(200, okHttpResponse.code());
             JSONArray result = new JSONArray(okHttpResponse.body().string());
             assertEquals(3, result.length());
+
+            for (int i = 0; i < result.length(); i++) {
+                JSONObject obj = result.getJSONObject(i);
+                String uri =  obj.getString("url");
+
+                if ( uri != null && uri.equals(PassClient.getUrl(refreshableElide, repository3))) {
+                    assertEquals("true", obj.getString("selected"));
+                } else {
+                    assertEquals("false", obj.getString("selected"));
+                }
+            }
         }
 
     }
@@ -163,21 +181,5 @@ public class PolicyServiceTest extends ShibIntegrationTest {
             .addPathSegment(endpoint)
             .addQueryParameter("submission", parameterValue)
             .build();
-    }
-
-    @AfterAll
-    public void tearDown() throws IOException {
-        try (PassClient client = PassClient.newInstance(refreshableElide)) {
-            client.deleteObject(repository1);
-            client.deleteObject(repository2);
-            client.deleteObject(repository3);
-            client.deleteObject(policy1);
-            client.deleteObject(funder1);
-            client.deleteObject(policy2);
-            client.deleteObject(funder2);
-            client.deleteObject(policy3);
-            client.deleteObject(grant);
-            client.deleteObject(submission);
-        }
     }
 }
