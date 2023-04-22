@@ -62,7 +62,13 @@ public class PolicyServiceSimpleImpl implements PolicyService {
             }
 
             //If the user is an affiliate of the institution, add the institutional repository
-            Long policyId = Long.parseLong(institutionalPolicyId);
+            Long policyId = null;
+            try {
+                policyId = Long.parseLong(institutionalPolicyId);
+            } catch (NumberFormatException e) {
+                System.out.println("MOO");
+            }
+
             if (isInstitutionalUser(userPrincipal) && policyId != null) {
                 Policy policy = passClient.getObject(Policy.class, policyId);
                 if (policy != null) {
@@ -85,7 +91,12 @@ public class PolicyServiceSimpleImpl implements PolicyService {
         //If the user is an affiliate of the institution, add the institutional repository
         if (isInstitutionalUser(userPrincipal)) {
             try (PassClient passClient = PassClient.newInstance(refreshableElide)) {
-                Long repositoryId = Long.parseLong(institutionalRepositoryId);
+                Long repositoryId = null;
+                try {
+                   repositoryId = Long.parseLong(institutionalRepositoryId);
+                } catch (NumberFormatException e) {
+                    System.out.println("MOO");
+                }
                 if (repositoryId != null) {
                     Repository repository = passClient.getObject(Repository.class, repositoryId);
                     if (repository != null) {
