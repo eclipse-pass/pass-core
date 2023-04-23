@@ -42,7 +42,7 @@ public interface PolicyService {
      *
      * @param submissionId - the string value of the Submission ID
      * @param userPrincipal - - the Principal from the Http Request in the Controller
-     * @return a Set of found Repositoriess
+     * @return a Set of found Repositories
      */
     Set<Repository> findRepositoriesForSubmission(Long submissionId, Principal userPrincipal) throws IOException;
 
