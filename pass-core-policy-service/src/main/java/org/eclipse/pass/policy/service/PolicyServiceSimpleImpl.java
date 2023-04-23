@@ -41,6 +41,8 @@ import org.eclipse.pass.object.model.User;
 public class PolicyServiceSimpleImpl implements PolicyService {
 
     private RefreshableElide refreshableElide;
+
+    //defaults for environment variables are for the IT
     private final String institutionalPolicyTitle = System.getenv("INSTITUTIONAL_POLICY_TITLE") != null ?
                                                     System.getenv("INSTITUTIONAL_POLICY_TITLE") :
                                                     "JHU Open Access Policy";

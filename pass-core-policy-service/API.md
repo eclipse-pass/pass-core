@@ -51,11 +51,11 @@ Response an application/json document that lists repositories sorted into bucket
 [
    {
      "url": "http://pass.local/fcrepo/rest/repositories/1",
-     "selected": true
+     "selected": false
    },
    {
      "url": "http://pass.local/fcrepo/rest/repositories/2",
-     "selected": true
+     "selected": false
    },
    {
      "url": "http://pass.local/fcrepo/rest/repositories/3",
@@ -63,7 +63,7 @@ Response an application/json document that lists repositories sorted into bucket
    },
    {
      "url": "http://pass.local/fcrepo/rest/repositories/4",
-     "selected": true
+     "selected":false
    },
    {
      "url": "http://pass.local/fcrepo/rest/repositories/5",

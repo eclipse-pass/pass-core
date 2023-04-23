@@ -59,6 +59,13 @@ public class PolicyServiceTest extends ShibIntegrationTest {
     private Funder funder2 = new Funder();
     private Grant grant = new Grant();
 
+    /**
+     * We set up objects - a grant with two funders, each of which has a policy pointing to a
+     * repository. The submission has the grant.
+     *
+     * A third repository unrelated to a funder is the institutional repository.
+     * @throws IOException
+     */
     @BeforeAll
     public void setupObjects() throws IOException {
 
@@ -131,7 +138,7 @@ public class PolicyServiceTest extends ShibIntegrationTest {
                 JSONObject obj = result.getJSONObject(i);
                 String id =  obj.getString("id");
 
-                if ( id.equals(policy3.getId().toString())) {
+                if ( id.equals(policy3.getId().toString())) { //the institution's policy
                     assertEquals("institution", obj.getString("type"));
                 } else {
                     assertEquals("funder", obj.getString("type"));
@@ -162,7 +169,7 @@ public class PolicyServiceTest extends ShibIntegrationTest {
                 JSONObject obj = result.getJSONObject(i);
                 String uri =  obj.getString("url");
 
-                if ( uri != null && uri.equals(PassClient.getUrl(refreshableElide, repository3))) {
+                if ( uri != null && uri.equals(PassClient.getUrl(refreshableElide, repository3))) { //the IR
                     assertEquals("true", obj.getString("selected"));
                 } else {
                     assertEquals("false", obj.getString("selected"));

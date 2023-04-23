@@ -49,25 +49,23 @@ import org.springframework.web.bind.annotation.RestController;
 public class PassPolicyServiceController {
 
     private static final long serialVersionUID = 1L;
+
+    //defaults for environment variables are for the IT
     private final String institutionalPolicyTitle = System.getenv("INSTITUTIONAL_POLICY_TITLE") != null ?
                                                     System.getenv("INSTITUTIONAL_POLICY_TITLE") :
                                                     "JHU Open Access Policy";
     private final String institutionalRepositoryName = System.getenv("INSTITUTIONAL_REPOSITORY_NAME") != null ?
                                                        System.getenv("INSTITUTIONAL_REPOSITORY_NAME") :
                                                        "JScholarship";
+
     private static final Logger LOG = LoggerFactory.getLogger(PassPolicyServiceController.class);
     private final PolicyService policyService;
 
     @Autowired
     private RefreshableElide refreshableElide;
 
-    @Autowired
     public PassPolicyServiceController(RefreshableElide refreshableElide) throws IOException {
         this.policyService = new PolicyServiceSimpleImpl(refreshableElide);
-    }
-
-    public PassPolicyServiceController(PolicyService policyService) {
-        this.policyService = policyService;
     }
 
     /**
