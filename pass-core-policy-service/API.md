@@ -45,7 +45,7 @@ Content-Type: application/x-www-form-urlencoded
 
 ### Repositories Response
 
-Response an application/json document that lists repositories sorted into buckets, as follows:
+Response an application/json document that lists repositories as follows:
 
 ```json
 [

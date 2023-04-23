@@ -8,5 +8,5 @@ See the [Documentation for the API](API.md)
 Configuration is achieved via the following environment variables:
 
 * `INSTITUTION`: This is the institution as it is appears on User.affiliations for every user in the institution: e.g. "johnshopkins.edu"
-* `INSTITUTIONAL_POLICY_TITLE`: The value of Policy.title on the institution's IR object
-* `INSTITUTIONAL_REPOSITORY_NAME`: The value of Policy.title on the intitution's policy object
+* `INSTITUTIONAL_POLICY_TITLE`: The value of Policy.title on the institution's Policy object
+* `INSTITUTIONAL_REPOSITORY_NAME`: The value of Repository.name on the intstitution's IR Repository object
