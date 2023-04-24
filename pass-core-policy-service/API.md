@@ -78,7 +78,7 @@ Response an application/json document that lists repositories as follows:
 ```
 
 
-Repositories contained within each of the above lists are JSON objects containing the following fields:
+Repositories contained in the above list are JSON objects containing the following fields:
 
 * `url`: the URL to the repository resource in Fedora
 * `selected`: optional field.  Specifies if the repository should be selected by default in the UI or not.
