@@ -95,13 +95,14 @@ public class PolicyServiceSimpleImpl implements PolicyService {
         throws IOException {
         Set<Repository> repositories = new HashSet<>(); //use Set to avoid duplicates
 
-        /* would really like to do just this, but get hibernate lazy initialization exception
+        /* would really like to do just this, but get hibernate lazy initialization exception:
+
         for (Policy policy : findPoliciesForSubmission(submissionId, userPrincipal)) {
                 repositories.addAll(policy.getRepositories());
         }
 
         Instead we copy the code for the findPoliciesForSubmission
-        method here so it stays in the same session
+        method here, so it stays in the same session
          */
         Set<Policy> policies = new HashSet<>(); //use Set to avoid duplicates
         try (PassClient passClient = PassClient.newInstance(refreshableElide)) {

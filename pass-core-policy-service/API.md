@@ -2,7 +2,7 @@
 
 ## Policies
 
-The policy service has a `/policies` endpoint that determines the set of policies that are applicable to
+The policy service has a `/policy/policies` endpoint that determines the set of policies that are applicable to
 a given submission.  Note:  The results may be dependent on _who_ submits the request.  For example, if
 somebody from JHU invokes the policies endpoint, a general "policy for JHU employees" may be included in the results.
 
@@ -30,7 +30,7 @@ The response is a list of IDs to Policy resources, decorated with a `type` prope
 
 ## Repositories
 
-The policy service has a `/repositories` endpoint that, for a given submission, calculates the repositories that may be
+The policy service has a `/policy/repositories` endpoint that, for a given submission, calculates the repositories that may be
 deposited into in order to satisfy any applicable policies for that submission.
 
 ### Repositories Request

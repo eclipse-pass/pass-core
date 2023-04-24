@@ -44,7 +44,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * An integration test for th Policy Service. We populate the data store with objects related to a submission
+ * An integration test for the Policy Service. We populate the data store with objects related to a submission
  * and check that the results for retrieving Policies and Repositories related to the submission are correct.
  *
  * @author jrm
