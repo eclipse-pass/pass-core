@@ -176,14 +176,12 @@ public class PolicyServiceTest extends ShibIntegrationTest {
             JSONArray optional = (JSONArray) result.get("optional");
             for (int i = 0; i < optional.length(); i++) {
                 JSONObject obj = optional.getJSONObject(i);
-                String uri = obj.getString("url");
                 assertEquals("true", obj.getString("selected"));
             }
 
             JSONArray required = (JSONArray) result.get("required");
             for (int i = 0; i < required.length(); i++) {
                 JSONObject obj = required.getJSONObject(i);
-                String uri = obj.getString("url");
                 assertEquals("true", obj.getString("selected"));
             }
         }
