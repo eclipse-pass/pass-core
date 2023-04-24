@@ -146,7 +146,13 @@ public class PassPolicyServiceController {
 
         // retrieve submission parameter value from request
         String submissionParameterValue = request.getParameter("submission");
-        Long submissionId = Long.parseLong(submissionParameterValue);
+        Long submissionId;
+        try {
+            submissionId = Long.parseLong(submissionParameterValue);
+        } catch (NumberFormatException nfe) {
+            submissionId = null;
+        }
+
         Principal userPrincipal = request.getUserPrincipal();
 
         // handle empty or invalid request submission error
