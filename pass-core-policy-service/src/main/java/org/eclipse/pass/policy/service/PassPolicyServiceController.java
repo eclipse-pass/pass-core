@@ -53,7 +53,7 @@ public class PassPolicyServiceController {
     @Value("${pass.policy-service.institution}")
     private String institution;
 
-    @Value("${pass.policy-service.policy.institutional_policy_title}")
+    @Value("${pass.policy-service.institutional_policy_title}")
     private String institutionalPolicyTitle;
 
     @Value("${pass.policy-service.institutional_repository_name}")
