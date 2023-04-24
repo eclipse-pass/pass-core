@@ -42,6 +42,7 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 
 /**
  * An integration test for the Policy Service. We populate the data store with objects related to a submission
@@ -92,7 +93,7 @@ public class PolicyServiceTest extends ShibIntegrationTest {
 
         policy2.getRepositories().add(repository2);
 
-        policy3.setTitle("JHU Open Access Policy");
+        policy3.setTitle("Johns Hopkins University (JHU) Open Access Policy");
         policy3.getRepositories().add(repository3);
 
         funder2.setPolicy(policy2);
@@ -191,7 +192,7 @@ public class PolicyServiceTest extends ShibIntegrationTest {
     }
 
     @Test
-    public void InvalidSubmissionTest() {
+    public void InvalidSubmissionTest() throws IOException {
         HttpUrl url = formServiceUrl("repositories", "MOO");
         Request.Builder builder = new Request.Builder();
         setShibHeaders(builder);
@@ -201,12 +202,9 @@ public class PolicyServiceTest extends ShibIntegrationTest {
             .build();
 
         Call call = client.newCall(okHttpRequest);
-        try {
-            call.execute();
-        } catch (IOException e) {
-            e.printStackTrace();
+        try (Response okHttpResponse = call.execute()) {
+            assertEquals(400, okHttpResponse.code());
         }
-
     }
 
     private HttpUrl formServiceUrl(String endpoint, String parameterValue) {

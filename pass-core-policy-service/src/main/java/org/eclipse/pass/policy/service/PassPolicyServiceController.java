@@ -50,13 +50,13 @@ public class PassPolicyServiceController {
 
     private static final long serialVersionUID = 1L;
 
-    @Value("${pass.policy-service.institution}")
+    @Value("${pass.policy.institution}")
     private String institution;
 
-    @Value("${pass.policy-service.institutional_policy_title}")
+    @Value("${pass.policy.institutional_policy_title}")
     private String institutionalPolicyTitle;
 
-    @Value("${pass.policy-service.institutional_repository_name}")
+    @Value("${pass.policy.institutional_repository_name}")
     private String institutionalRepositoryName;
 
     private static final Logger LOG = LoggerFactory.getLogger(PassPolicyServiceController.class);
@@ -66,7 +66,7 @@ public class PassPolicyServiceController {
     private RefreshableElide refreshableElide;
 
     public PassPolicyServiceController(RefreshableElide refreshableElide) throws IOException {
-        this.policyService = new SimplePolicyService(refreshableElide, institution, institutionalPolicyTitle);
+        this.policyService = new SimplePolicyService(refreshableElide);
     }
 
     /**
@@ -77,8 +77,7 @@ public class PassPolicyServiceController {
      * @throws IOException if an IO exception occurs
      */
     @GetMapping("/policy/policies")
-    public void doGetPolicies(HttpServletRequest request, HttpServletResponse response)
-        throws IOException {
+    public void doGetPolicies(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
@@ -104,7 +103,8 @@ public class PassPolicyServiceController {
 
         Set<Policy> policies;
         try {
-            policies = policyService.findPoliciesForSubmission(submissionId, userPrincipal);
+            policies = policyService.findPoliciesForSubmission(submissionId, userPrincipal,
+                                                               institution, institutionalPolicyTitle);
         } catch (IOException ioe) {
             set_error_response(response, "IO error encountered connecting to data store",
                                HttpStatus.INTERNAL_SERVER_ERROR);
@@ -164,7 +164,8 @@ public class PassPolicyServiceController {
 
         Set<Repository> repositories;
         try {
-            repositories = policyService.findRepositoriesForSubmission(submissionId, userPrincipal);
+            repositories = policyService.findRepositoriesForSubmission(submissionId, userPrincipal,
+                                                                       institution, institutionalPolicyTitle);
         } catch (IOException ioe) {
             set_error_response(response, "IO error encountered connecting to data store",
                                HttpStatus.INTERNAL_SERVER_ERROR);
@@ -195,7 +196,8 @@ public class PassPolicyServiceController {
         set_object_response(response,  outerObject.build(), HttpStatus.OK);
     }
 
-    private void set_object_response(HttpServletResponse response, JsonObject obj, HttpStatus status) throws IOException {
+    private void set_object_response(HttpServletResponse response, JsonObject obj,
+                                     HttpStatus status) throws IOException {
         response.getWriter().print(obj.toString());
         response.setStatus(status.value());
     }
@@ -204,7 +206,6 @@ public class PassPolicyServiceController {
         response.getWriter().print(obj.toString());
         response.setStatus(status.value());
     }
-
 
     private void set_error_response(HttpServletResponse response, String message,
                                     HttpStatus status) throws IOException {

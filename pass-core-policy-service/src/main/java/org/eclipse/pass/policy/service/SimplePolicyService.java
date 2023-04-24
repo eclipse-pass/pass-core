@@ -42,18 +42,12 @@ public class SimplePolicyService implements PolicyService {
 
     private RefreshableElide refreshableElide;
 
-    private String institution;
-
-    private String institutionalPolicyTitle;
-
-    public SimplePolicyService(RefreshableElide refreshableElide, String institution, String institutionalPolicyTitle) {
+    public SimplePolicyService(RefreshableElide refreshableElide) {
         this.refreshableElide = refreshableElide;
-        this.institution = institution;
-        this.institutionalPolicyTitle = institutionalPolicyTitle;
     }
 
-    @Override
-    public Set<Policy> findPoliciesForSubmission(Long submissionId, Principal userPrincipal) throws IOException {
+    public Set<Policy> findPoliciesForSubmission(Long submissionId, Principal userPrincipal, String institution,
+                                                 String institutionalPolicyTitle) throws IOException {
         Set<Policy> policies = new HashSet<>(); //use Set to avoid duplicates
         try (PassClient passClient = PassClient.newInstance(refreshableElide)) {
             Submission submission = passClient.getObject(Submission.class, submissionId);
@@ -86,7 +80,8 @@ public class SimplePolicyService implements PolicyService {
     }
 
     @Override
-    public Set<Repository> findRepositoriesForSubmission(Long submissionId, Principal userPrincipal)
+    public Set<Repository> findRepositoriesForSubmission(Long submissionId, Principal userPrincipal,
+                                                         String institution, String institutionalPolicyTitle)
         throws IOException {
         Set<Repository> repositories = new HashSet<>(); //use Set to avoid duplicates
 

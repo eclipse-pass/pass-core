@@ -31,19 +31,30 @@ import org.eclipse.pass.object.model.Repository;
 public interface PolicyService {
 
     /**
+     * Retrieve the Set of Policies associated with this submission
      *
-     * @param submissionId - the string value of the Submission ID
-     * @param userPrincipal - the Principal from the Http Request in the Controller
-     * @return a Set of found Policies
+     * @param submissionId - The id for the submission
+     * @param userPrincipal - The user principal
+     * @param institution - the value for the institution as on the Affiliations field for a user, e.g. johnshopkins.edu
+     * @param institutionalPolicyTitle - the value for title on the institutions Policy object
+     * @return
+     * @throws IOException
      */
-    Set<Policy> findPoliciesForSubmission(Long submissionId, Principal userPrincipal) throws IOException;
+    Set<Policy> findPoliciesForSubmission(Long submissionId, Principal userPrincipal,
+                                          String institution, String institutionalPolicyTitle)
+        throws IOException;
 
     /**
+     * Retrieve the Ser of Repositories this submission may be deposited into
      *
-     * @param submissionId - the string value of the Submission ID
-     * @param userPrincipal - - the Principal from the Http Request in the Controller
-     * @return a Set of found Repositories
+     * @param submissionId - The id for the submission
+     * @param userPrincipal - The user principal
+     * @param institution - the value for the institution as on the Affiliations field for a user, e.g. johnshopkins.edu
+     * @param institutionalPolicyTitle - the value for title on the institutions Policy object
+     * @return
+     * @throws IOException
      */
-    Set<Repository> findRepositoriesForSubmission(Long submissionId, Principal userPrincipal) throws IOException;
-
+    Set<Repository> findRepositoriesForSubmission(Long submissionId, Principal userPrincipal,
+                                                  String institution, String institutionalPolicyTitle)
+        throws IOException;
 }
