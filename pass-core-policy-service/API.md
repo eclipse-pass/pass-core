@@ -38,43 +38,41 @@ deposited into in order to satisfy any applicable policies for that submission.
 GET `/policy-service/repositories?submission=${SUBMISSION_ID}`
 or, with urlencoded (with encoded submission=${SUBMISSION_ID}) as the body:
 
-```HTTP
-POST /policy-service/repositories
-Content-Type: application/x-www-form-urlencoded
-```
-
 ### Repositories Response
 
-Response an application/json document that lists repositories as follows:
+The response is an application/json document that lists repositories sorted into buckets as follows:
 
 ```json
-[
-   {
-     "url": "http://pass.local/fcrepo/rest/repositories/1",
-     "selected": false
-   },
-   {
-     "url": "http://pass.local/fcrepo/rest/repositories/2",
-     "selected": false
-   },
-   {
-     "url": "http://pass.local/fcrepo/rest/repositories/3",
-     "selected": false
-   },
-   {
-     "url": "http://pass.local/fcrepo/rest/repositories/4",
-     "selected":false
-   },
-   {
-     "url": "http://pass.local/fcrepo/rest/repositories/5",
-     "selected": false
-   },
-   {
-     "url": "http://pass.local/fcrepo/rest/repositories/6",
-     "selected": true
-   }
-]
-
+{
+  "required": [
+    {
+      "url": "1",
+      "selected": false
+    },
+    {
+      "url": "2",
+      "selected": false
+    },
+    {
+      "url": "3",
+      "selected": false
+    },
+    {
+      "url": "4",
+      "selected": false
+    },
+    {
+      "url": "5",
+      "selected": false
+    }
+  ],
+  "optional": [
+    {
+      "url": "6",
+      "selected": true
+    }
+  ]
+}
 ```
 
 

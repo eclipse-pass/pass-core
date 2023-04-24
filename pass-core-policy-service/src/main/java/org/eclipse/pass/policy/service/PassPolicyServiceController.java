@@ -29,12 +29,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.yahoo.elide.RefreshableElide;
-import org.eclipse.pass.object.PassClient;
 import org.eclipse.pass.object.model.Policy;
 import org.eclipse.pass.object.model.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -50,13 +50,14 @@ public class PassPolicyServiceController {
 
     private static final long serialVersionUID = 1L;
 
-    //defaults for environment variables are for the IT
-    private final String institutionalPolicyTitle = System.getenv("INSTITUTIONAL_POLICY_TITLE") != null ?
-                                                    System.getenv("INSTITUTIONAL_POLICY_TITLE") :
-                                                    "JHU Open Access Policy";
-    private final String institutionalRepositoryName = System.getenv("INSTITUTIONAL_REPOSITORY_NAME") != null ?
-                                                       System.getenv("INSTITUTIONAL_REPOSITORY_NAME") :
-                                                       "JScholarship";
+    @Value("${pass.policy-service.institution}")
+    private String institution;
+
+    @Value("${pass.policy-service.policy.institutional_policy_title}")
+    private String institutionalPolicyTitle;
+
+    @Value("${pass.policy-service.institutional_repository_name}")
+    private String institutionalRepositoryName;
 
     private static final Logger LOG = LoggerFactory.getLogger(PassPolicyServiceController.class);
     private final PolicyService policyService;
@@ -65,7 +66,7 @@ public class PassPolicyServiceController {
     private RefreshableElide refreshableElide;
 
     public PassPolicyServiceController(RefreshableElide refreshableElide) throws IOException {
-        this.policyService = new PolicyServiceSimpleImpl(refreshableElide);
+        this.policyService = new SimplePolicyService(refreshableElide, institution, institutionalPolicyTitle);
     }
 
     /**
@@ -86,7 +87,12 @@ public class PassPolicyServiceController {
 
         // retrieve submission ID from request
         String submissionParameter = request.getParameter("submission");
-        Long submissionId = Long.parseLong(submissionParameter);
+        Long submissionId;
+        try {
+            submissionId = Long.parseLong(submissionParameter);
+        } catch (NumberFormatException nfe) {
+            submissionId = null;
+        }
         Principal userPrincipal = request.getUserPrincipal();
 
         // handle empty or invalid request submission error
@@ -119,7 +125,7 @@ public class PassPolicyServiceController {
             jab.add(job.build());
         }
         JsonArray array = jab.build();
-        set_response(response,  array, HttpStatus.OK);
+        set_array_response(response,  array, HttpStatus.OK);
     }
 
     /**
@@ -160,25 +166,39 @@ public class PassPolicyServiceController {
             return;
         }
 
-        JsonArrayBuilder jab = Json.createArrayBuilder();
+        JsonObjectBuilder outerObject = Json.createObjectBuilder();
+        JsonArrayBuilder optional = Json.createArrayBuilder();
+        JsonArrayBuilder required = Json.createArrayBuilder();
+
         for (Repository repository : repositories) {
             JsonObjectBuilder job = Json.createObjectBuilder();
-            job.add("url", PassClient.getUrl(refreshableElide, repository));
+            job.add("url", repository.getId().toString());
             if ( institutionalRepositoryName != null && repository.getName() != null
                  && repository.getName().equals(institutionalRepositoryName)) {
                 job.add("selected", "true");
+                optional.add(job.build());
             } else {
-                job.add("selected", "false");
+                job.add("selected", "true");
+                required.add(job.build());
             }
-            jab.add(job.build());
         }
-        set_response(response,  jab.build(), HttpStatus.OK);
+
+        outerObject.add("optional", optional);
+        outerObject.add("required", required);
+
+        set_object_response(response,  outerObject.build(), HttpStatus.OK);
     }
 
-    private void set_response(HttpServletResponse response, JsonArray obj, HttpStatus status) throws IOException {
+    private void set_object_response(HttpServletResponse response, JsonObject obj, HttpStatus status) throws IOException {
         response.getWriter().print(obj.toString());
         response.setStatus(status.value());
     }
+
+    private void set_array_response(HttpServletResponse response, JsonArray obj, HttpStatus status) throws IOException {
+        response.getWriter().print(obj.toString());
+        response.setStatus(status.value());
+    }
+
 
     private void set_error_response(HttpServletResponse response, String message,
                                     HttpStatus status) throws IOException {

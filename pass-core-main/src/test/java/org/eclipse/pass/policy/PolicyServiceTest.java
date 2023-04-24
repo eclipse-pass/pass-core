@@ -93,6 +93,7 @@ public class PolicyServiceTest extends ShibIntegrationTest {
         policy2.getRepositories().add(repository2);
 
         policy3.setTitle("JHU Open Access Policy");
+        policy3.getRepositories().add(repository3);
 
         funder2.setPolicy(policy2);
         funder2.setName("Primary Funder");
@@ -168,19 +169,42 @@ public class PolicyServiceTest extends ShibIntegrationTest {
 
         try (Response okHttpResponse = call.execute()) {
             assertEquals(200, okHttpResponse.code());
-            JSONArray result = new JSONArray(okHttpResponse.body().string());
-            assertEquals(3, result.length());
+            JSONObject result = new JSONObject(okHttpResponse.body().string());
+            assertEquals(2, result.length());
 
-            for (int i = 0; i < result.length(); i++) {
-                JSONObject obj = result.getJSONObject(i);
-                String uri =  obj.getString("url");
-
-                if ( uri != null && uri.equals(PassClient.getUrl(refreshableElide, repository3))) { //the IR
-                    assertEquals("true", obj.getString("selected"));
-                } else {
-                    assertEquals("false", obj.getString("selected"));
-                }
+            //the IR - we recommend this by calling it selected
+            JSONArray optional = (JSONArray) result.get("optional");
+            for (int i = 0; i < optional.length(); i++) {
+                JSONObject obj = optional.getJSONObject(i);
+                String uri = obj.getString("url");
+                assertEquals("true", obj.getString("selected"));
             }
+
+            JSONArray required = (JSONArray) result.get("required");
+            for (int i = 0; i < required.length(); i++) {
+                JSONObject obj = required.getJSONObject(i);
+                String uri = obj.getString("url");
+                assertEquals("true", obj.getString("selected"));
+            }
+        }
+
+    }
+
+    @Test
+    public void InvalidSubmissionTest() {
+        HttpUrl url = formServiceUrl("repositories", "MOO");
+        Request.Builder builder = new Request.Builder();
+        setShibHeaders(builder);
+
+        Request okHttpRequest = builder
+            .url(url)
+            .build();
+
+        Call call = client.newCall(okHttpRequest);
+        try {
+            call.execute();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
     }

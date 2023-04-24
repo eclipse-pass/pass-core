@@ -38,23 +38,18 @@ import org.eclipse.pass.object.model.User;
  *
  * @author jrm
  */
-public class PolicyServiceSimpleImpl implements PolicyService {
+public class SimplePolicyService implements PolicyService {
 
     private RefreshableElide refreshableElide;
 
-    //defaults for environment variables are for the IT
-    private final String institutionalPolicyTitle = System.getenv("INSTITUTIONAL_POLICY_TITLE") != null ?
-                                                    System.getenv("INSTITUTIONAL_POLICY_TITLE") :
-                                                    "JHU Open Access Policy";
-    private final String institutionalRepositoryName = System.getenv("INSTITUTIONAL_REPOSITORY_NAME") != null ?
-                                                       System.getenv("INSTITUTIONAL_REPOSITORY_NAME") :
-                                                       "JScholarship";
-    private String institution = System.getenv("INSTITUTION") != null ?
-                                 System.getenv("INSTITUTION") :
-                                 "johnshopkins.edu";
+    private String institution;
 
-    public PolicyServiceSimpleImpl(RefreshableElide refreshableElide) {
+    private String institutionalPolicyTitle;
+
+    public SimplePolicyService(RefreshableElide refreshableElide, String institution, String institutionalPolicyTitle) {
         this.refreshableElide = refreshableElide;
+        this.institution = institution;
+        this.institutionalPolicyTitle = institutionalPolicyTitle;
     }
 
     @Override
@@ -136,17 +131,6 @@ public class PolicyServiceSimpleImpl implements PolicyService {
                 repositories.addAll(policy.getRepositories());
             }
 
-            //If the user is an affiliate of the institution, add the institutional repository
-            if (userResult.getObjects().size() == 1
-                && userResult.getObjects().get(0).getAffiliation().contains(institution)
-                && institutionalRepositoryName != null) { //have a unique user in the system
-                PassClientSelector<Repository> repositorySelector = new PassClientSelector<>(Repository.class);
-                repositorySelector.setFilter(RSQL.equals("name", institutionalRepositoryName));
-                PassClientResult<Repository> repositoryResult = passClient.selectObjects(repositorySelector);
-                if (repositoryResult.getObjects().size() == 1) {
-                    repositories.add(repositoryResult.getObjects().get(0));
-                }
-            }
         }
         return repositories;
     }
