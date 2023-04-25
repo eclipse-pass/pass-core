@@ -40,7 +40,7 @@ import org.eclipse.pass.object.model.User;
  */
 public class SimplePolicyService implements PolicyService {
 
-    private RefreshableElide refreshableElide;
+    private final RefreshableElide refreshableElide;
 
     public SimplePolicyService(RefreshableElide refreshableElide) {
         this.refreshableElide = refreshableElide;

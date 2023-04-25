@@ -37,8 +37,7 @@ public interface PolicyService {
      * @param userPrincipal - The user principal
      * @param institution - the value for the institution as on the Affiliations field for a user, e.g. johnshopkins.edu
      * @param institutionalPolicyTitle - the value for title on the institutions Policy object
-     * @return
-     * @throws IOException
+     * @throws IOException if the connection to the datastore fails
      */
     Set<Policy> findPoliciesForSubmission(Long submissionId, Principal userPrincipal,
                                           String institution, String institutionalPolicyTitle)
@@ -51,8 +50,7 @@ public interface PolicyService {
      * @param userPrincipal - The user principal
      * @param institution - the value for the institution as on the Affiliations field for a user, e.g. johnshopkins.edu
      * @param institutionalPolicyTitle - the value for title on the institutions Policy object
-     * @return
-     * @throws IOException
+     * @throws IOException if the connection to the datastore fails
      */
     Set<Repository> findRepositoriesForSubmission(Long submissionId, Principal userPrincipal,
                                                   String institution, String institutionalPolicyTitle)

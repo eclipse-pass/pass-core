@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 
 import com.yahoo.elide.RefreshableElide;
 import okhttp3.Call;
@@ -55,22 +56,22 @@ public class PolicyServiceTest extends ShibIntegrationTest {
     protected RefreshableElide refreshableElide;
 
     private Submission submission;
-    private Repository repository1 = new Repository();
-    private Repository repository2 = new Repository();
-    private Repository repository3 = new Repository();
-    private Policy policy1 = new Policy();
-    private Funder funder1 = new Funder();
-    private Policy policy2 = new Policy();
-    private Policy policy3 = new Policy();
-    private Funder funder2 = new Funder();
-    private Grant grant = new Grant();
+    private final Repository repository1 = new Repository();
+    private final Repository repository2 = new Repository();
+    private final Repository repository3 = new Repository();
+    private final Policy policy1 = new Policy();
+    private final Funder funder1 = new Funder();
+    private final Policy policy2 = new Policy();
+    private final Policy policy3 = new Policy();
+    private final Funder funder2 = new Funder();
+    private final Grant grant = new Grant();
 
     /**
      * We set up objects - a grant with two funders, each of which has a policy pointing to a
      * repository. The submission has the grant.
      *
      * A third repository unrelated to a funder is the institutional repository.
-     * @throws IOException
+     * @throws IOException if connection to data store fails
      */
     @BeforeAll
     public void setupObjects() throws IOException {
@@ -124,6 +125,12 @@ public class PolicyServiceTest extends ShibIntegrationTest {
         }
     }
 
+    /**
+     * This method test that the returned policies for a submission are as expected
+     *
+     * @throws IOException if the connection to the datastore fails
+     * @throws JSONException if as JSON assignment is invalid
+     */
     @Test
     public void SubmissionPoliciesTest() throws IOException, JSONException {
         HttpUrl url = formServiceUrl("policies", submission.getId().toString());
@@ -138,6 +145,7 @@ public class PolicyServiceTest extends ShibIntegrationTest {
 
         try (Response okHttpResponse = call.execute()) {
             assertEquals(200, okHttpResponse.code());
+            assert okHttpResponse.body() != null;
             JSONArray result = new JSONArray(okHttpResponse.body().string());
             assertEquals(3, result.length());
 
@@ -155,6 +163,12 @@ public class PolicyServiceTest extends ShibIntegrationTest {
         }
     }
 
+    /**
+     * This method test that the returned repositories for a submission are as expected
+     *
+     * @throws IOException if the connection to the datastore fails
+     * @throws JSONException if as JSON assignment is invalid
+     */
     @Test
     public void SubmissionRepositoriesTest() throws IOException, JSONException {
         HttpUrl url = formServiceUrl("repositories", submission.getId().toString());
@@ -169,6 +183,7 @@ public class PolicyServiceTest extends ShibIntegrationTest {
 
         try (Response okHttpResponse = call.execute()) {
             assertEquals(200, okHttpResponse.code());
+            assert okHttpResponse.body() != null;
             JSONObject result = new JSONObject(okHttpResponse.body().string());
             assertEquals(2, result.length());
 
@@ -188,6 +203,11 @@ public class PolicyServiceTest extends ShibIntegrationTest {
 
     }
 
+    /**
+     * This method checks that a submission parameter which cannot be evaluated as a Long fails
+     * as expected
+     * @throws IOException if connection to the data store fails
+     */
     @Test
     public void InvalidSubmissionTest() throws IOException {
         HttpUrl url = formServiceUrl("repositories", "MOO");
@@ -204,6 +224,69 @@ public class PolicyServiceTest extends ShibIntegrationTest {
         }
     }
 
+    /**
+     * Tests that if a submission is not associated with any grants with policies, that
+     * the institutional repository is the only repository, and it is flagged as required
+     *
+     * @throws IOException if the connection to the datastore fails
+     * @throws JSONException if a JSON assignment is invalid
+     */
+    @Test
+    public void noGrantsTest( ) throws IOException, JSONException {
+        Submission noGrantsSubmission = new Submission();
+        noGrantsSubmission.setGrants(new ArrayList<>());
+        assertEquals(0,noGrantsSubmission.getGrants().size());
+
+        try (PassClient client = PassClient.newInstance(refreshableElide)) {
+            client.createObject(noGrantsSubmission);
+        }
+
+        HttpUrl url = formServiceUrl("policies", noGrantsSubmission.getId().toString());
+        Request.Builder builder = new Request.Builder();
+        setShibHeaders(builder);
+
+        Request okHttpRequest = builder
+            .url(url)
+            .build();
+
+        Call call = client.newCall(okHttpRequest);
+
+        try (Response okHttpResponse = call.execute()) {
+            assertEquals(200, okHttpResponse.code());
+            assert okHttpResponse.body() != null;
+            JSONArray result = new JSONArray(okHttpResponse.body().string());
+            assertEquals(1, result.length());
+        }
+
+        HttpUrl url1 = formServiceUrl("repositories", noGrantsSubmission.getId().toString());
+        Request.Builder builder1 = new Request.Builder();
+        setShibHeaders(builder1);
+
+        Request okHttpRequest1 = builder1
+            .url(url1)
+            .build();
+
+        Call call1 = client.newCall(okHttpRequest1);
+
+        try (Response okHttpResponse = call1.execute()) {
+            assertEquals(200, okHttpResponse.code());
+            assert okHttpResponse.body() != null;
+            JSONObject result = new JSONObject(okHttpResponse.body().string());
+
+            JSONArray optional = (JSONArray) result.get("optional");
+            assertEquals(0, optional.length());
+
+            JSONArray required = (JSONArray) result.get("required");
+            assertEquals(1, required.length());
+        }
+    }
+
+    /**
+     * A convenience method to form urls
+     * @param endpoint the last path component for the service endpoint
+     * @param parameterValue the path component for the endpoint which identifies the service
+     * @return the url
+     */
     private HttpUrl formServiceUrl(String endpoint, String parameterValue) {
         return new HttpUrl.Builder()
             .scheme("http")
