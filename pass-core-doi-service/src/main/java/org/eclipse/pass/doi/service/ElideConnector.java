@@ -239,7 +239,7 @@ public class ElideConnector {
         //look for journals with any of these issns
         if (!issns.isEmpty()) {
             for (String issn : issns) {
-                filter = RSQL.hasMember("issns", issn); //probably not the right call, not implemented yet
+                filter = RSQL.hasMember("issns", issn);
                 result = passClient.
                     selectObjects(new PassClientSelector<>(Journal.class, 0, 100, filter, null));
                 result.getObjects().forEach(j -> {
