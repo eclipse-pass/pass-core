@@ -18,13 +18,17 @@ package org.eclipse.pass.object;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
 import com.yahoo.elide.Elide;
 import com.yahoo.elide.ElideSettings;
+import com.yahoo.elide.ElideSettingsBuilder;
 import com.yahoo.elide.RefreshableElide;
 import com.yahoo.elide.core.RequestScope;
+import com.yahoo.elide.core.datastore.DataStore;
 import com.yahoo.elide.core.datastore.DataStoreIterable;
 import com.yahoo.elide.core.datastore.DataStoreTransaction;
 import com.yahoo.elide.core.dictionary.EntityDictionary;
@@ -34,6 +38,7 @@ import com.yahoo.elide.core.pagination.PaginationImpl;
 import com.yahoo.elide.core.request.EntityProjection;
 import com.yahoo.elide.core.request.Pagination;
 import com.yahoo.elide.core.type.ClassType;
+import com.yahoo.elide.datastores.search.SearchDataStore;
 import org.eclipse.pass.object.model.PassEntity;
 
 /**
@@ -49,6 +54,8 @@ public class ElideDataStorePassClient implements PassClient {
     private final Elide elide;
     private final ElideSettings settings;
     private final DataStoreTransaction read_tx;
+    private final DataStore dataStore;
+    private final SearchDataStore searchStore;
 
     /**
      * Constructor for ElideDataStorePassClient.
@@ -60,6 +67,19 @@ public class ElideDataStorePassClient implements PassClient {
 
         // Keep a read transaction open for interacting with objects which have lazy loading relationships
         this.read_tx = elide.getDataStore().beginReadTransaction();
+
+        //get the Elide datastore
+        this.dataStore = settings.getDataStore();
+
+        //wrap it with the Search DataStore, however If the query cannot be answered by the SearchDataStore, it
+        //delegates the query to the underlying (wrapped) data store.
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("searchDataStoreEmf");
+
+        boolean indexOnStartup = true; //Create a fresh index when the server starts
+        searchStore = new SearchDataStore(this.dataStore, emf, indexOnStartup);
+
+        /* Configure Elide with your store */
+        ElideSettings elideSettings = new ElideSettingsBuilder(searchStore).build();
     }
 
     private RequestScope get_scope(String path, DataStoreTransaction tx) {

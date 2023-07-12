@@ -27,6 +27,9 @@ import javax.persistence.Table;
 
 import com.yahoo.elide.annotation.Include;
 import org.eclipse.pass.object.converter.AwardStatusToStringConverter;
+import org.hibernate.search.engine.backend.types.Projectable;
+import org.hibernate.search.engine.backend.types.Searchable;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 
 
 /**
@@ -43,6 +46,8 @@ public class Grant extends PassEntity {
     /**
      * Award number from funder
      */
+    @FullTextField(name = "awardNumber", searchable = Searchable.YES,
+            projectable = Projectable.NO, analyzer = "case_insensitive")
     private String awardNumber;
 
     /**
