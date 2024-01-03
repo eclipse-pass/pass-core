@@ -114,4 +114,14 @@ databaseChangeLog:
             path: /db/changelog/data/deposit-repo-copy-publication-id-fix.sql
             splitStatements: true
             stripComments: true
+  - changeSet:
+      id: 11
+      author: russ-poetker
+      changes:
+        - addColumn:
+            tableName: pass_deposit
+            columns:
+              - column:
+                  name: statusmessage
+                  type: text
 
