@@ -48,6 +48,11 @@ public class Deposit extends PassEntity {
     private String depositStatusRef;
 
     /**
+     * A status message pertaining to the deposit.
+     */
+    private String statusMessage;
+
+    /**
      * Status of deposit
      */
     @Convert(converter = DepositStatusToStringConverter.class)
@@ -105,6 +110,20 @@ public class Deposit extends PassEntity {
      */
     public DepositStatus getDepositStatus() {
         return depositStatus;
+    }
+
+    /**
+     * @return the deposit status message
+     */
+    public String getStatusMessage() {
+        return statusMessage;
+    }
+
+    /**
+     * @param statusMessage status the deposit status message to set
+     */
+    public void setStatusMessage(String statusMessage) {
+        this.statusMessage = statusMessage;
     }
 
     /**

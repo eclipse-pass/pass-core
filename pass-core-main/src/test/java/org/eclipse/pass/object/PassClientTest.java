@@ -30,6 +30,8 @@ import java.util.stream.Collectors;
 
 import org.eclipse.pass.main.IntegrationTest;
 import org.eclipse.pass.object.model.AggregatedDepositStatus;
+import org.eclipse.pass.object.model.Deposit;
+import org.eclipse.pass.object.model.DepositStatus;
 import org.eclipse.pass.object.model.Funder;
 import org.eclipse.pass.object.model.Grant;
 import org.eclipse.pass.object.model.Journal;
@@ -372,5 +374,21 @@ public abstract class PassClientTest extends IntegrationTest {
         // assertEquals(journal.getIssns(), test_journal.getIssns());
 
         assertEquals(journal, test_journal);
+    }
+
+    @Test
+    public void testCreateDeposit() throws IOException {
+        Deposit deposit = new Deposit();
+        deposit.setDepositStatus(DepositStatus.REJECTED);
+        deposit.setStatusMessage("test status message");
+        deposit.setDepositStatusRef("test status ref");
+
+        client.createObject(deposit);
+
+        Deposit actualDeposit = client.getObject(deposit.getClass(), deposit.getId());
+        assertNotNull(deposit.getId());
+        assertEquals(DepositStatus.REJECTED, actualDeposit.getDepositStatus());
+        assertEquals("test status message", actualDeposit.getStatusMessage());
+        assertEquals("test status ref", actualDeposit.getDepositStatusRef());
     }
 }
