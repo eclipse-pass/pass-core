@@ -359,6 +359,7 @@ public class FileStorageService {
      * file path. When using S3, this will provide the path of the file in the S3 bucket.
      * @param fileId The fileId of the file path to be returned.
      * @return The relative path of the file.
+     * @throws IOException If unable to get the relative path for a given fileId
      */
     public String getResourceFileRelativePath(String fileId) throws IOException {
         VersionDetails versionDetails = ocflRepository.describeVersion(ObjectVersionId.head(fileId));
