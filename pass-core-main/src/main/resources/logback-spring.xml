@@ -21,6 +21,7 @@
         </rollingPolicy>
     </appender>
 
+    <logger name="com.amazon.sqs.javamessaging" level="WARN" />
 
     <logger name="com.yahoo.elide.graphql.subscriptions" level="INFO" />
 
