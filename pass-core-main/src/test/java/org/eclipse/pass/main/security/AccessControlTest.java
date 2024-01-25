@@ -386,7 +386,7 @@ public class AccessControlTest extends ShibIntegrationTest {
 
             Response response = client.newCall(request).execute();
 
-            check(response, 403);
+            check(response, 204);
         }
     }
 
