@@ -169,7 +169,7 @@ public class PassFileServiceController {
             return ResponseEntity.ok().body("Deleted");
         } catch (Exception e) {
             LOG.error("File Service: Unable to delete file: " + e);
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.badRequest().build();
         }
     }
 }
