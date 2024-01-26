@@ -155,8 +155,9 @@ public class PassFileServiceController {
 
     private boolean canUserDeleteFile(String principalName, String fileId, HttpServletRequest request) {
         try {
-            return (request.isUserInRole(WebSecurityRole.BACKEND.getValue()) ||
-                    fileStorageService.checkUserDeletePermissions(fileId, principalName));
+            return (fileStorageService.checkUserDeletePermissions(fileId, principalName) ||
+                    request.isUserInRole(WebSecurityRole.BACKEND.getValue())
+                    );
         } catch (Exception e) {
             LOG.error("File Service: Unable to determine user permissions to delete file: " + e);
             return false;
