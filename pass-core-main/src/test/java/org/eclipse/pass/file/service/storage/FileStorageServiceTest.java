@@ -23,6 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -46,7 +48,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
@@ -60,6 +65,7 @@ import org.springframework.mock.web.MockMultipartFile;
  * @see FileStorageServiceS3Test
  * @see FileStorageService
  */
+@ExtendWith(MockitoExtension.class)
 public class FileStorageServiceTest extends IntegrationTest {
     protected final String USER_NAME = "USER1";
     protected final String USER_NAME2 = "USER2";
@@ -73,6 +79,9 @@ public class FileStorageServiceTest extends IntegrationTest {
     protected FileStorageService storageService;
     @Autowired
     protected StorageConfiguration storageConfiguration;
+
+    @SpyBean
+    protected FileStorageService spyStoreService;
 
     /**
      * Cleanup the FileStorageService after testing. Deletes the root directory.
@@ -433,6 +442,49 @@ public class FileStorageServiceTest extends IntegrationTest {
 
         try (Response response = httpClient.newCall(request).execute()) {
             assertEquals(HttpStatus.OK.value(), response.code());
+        }
+    }
+
+    @Test
+    void deleteFileUsingFileServiceControllerUserPermissionException() throws IOException {
+        StorageFile storageFile = spyStoreService.storeFile(new MockMultipartFile("test", "test.txt",
+                Objects.requireNonNull(MEDIA_TYPE_TEXT).toString(), "Test Pass-core".getBytes()), USER_NAME);
+
+        String url = getBaseUrl() + "file" + "/" + storageFile.getId();
+
+        doThrow(new RuntimeException("Test"))
+                .when(spyStoreService)
+                .checkUserDeletePermissions(anyString(), anyString());
+
+        Request request = new Request.Builder()
+                .url(url)
+                .delete()
+                .addHeader("Authorization", credentialsBackend)
+                .build();
+
+        try (Response response = httpClient.newCall(request).execute()) {
+            assertEquals(HttpStatus.FORBIDDEN.value(), response.code());
+        }
+    }
+
+    @Test
+    void deleteFileUsingFileServiceControllerDeleteException() throws IOException {
+        StorageFile storageFile = spyStoreService.storeFile(new MockMultipartFile("test", "test.txt",
+                Objects.requireNonNull(MEDIA_TYPE_TEXT).toString(), "Test Pass-core".getBytes()), USER_NAME);
+        String url = getBaseUrl() + "file" + "/" + storageFile.getId();
+
+        doThrow(new RuntimeException("Test"))
+                .when(spyStoreService)
+                .deleteFile(anyString());
+
+        Request request = new Request.Builder()
+                .url(url)
+                .delete()
+                .addHeader("Authorization", credentialsBackend)
+                .build();
+
+        try (Response response = httpClient.newCall(request).execute()) {
+            assertEquals(HttpStatus.BAD_REQUEST.value(), response.code());
         }
     }
 
