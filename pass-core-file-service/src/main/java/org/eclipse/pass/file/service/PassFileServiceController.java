@@ -149,15 +149,15 @@ public class PassFileServiceController {
             return ResponseEntity.notFound().build();
         }
 
-        return canUserDeleteFile(principalName, fileId, request) ? deleteFile(fileId) :
-                ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have permission to delete this file.");
+        return canUserDeleteFile(principalName, fileId, request)
+            ? deleteFile(fileId)
+            : ResponseEntity.status(HttpStatus.FORBIDDEN).body("User does not have permission to delete this file.");
     }
 
     private boolean canUserDeleteFile(String principalName, String fileId, HttpServletRequest request) {
         try {
-            return (fileStorageService.checkUserDeletePermissions(fileId, principalName) ||
-                    request.isUserInRole(WebSecurityRole.BACKEND.getValue())
-                    );
+            boolean hasDeletePermission = fileStorageService.checkUserDeletePermissions(fileId, principalName);
+            return hasDeletePermission || request.isUserInRole(WebSecurityRole.BACKEND.getValue());
         } catch (Exception e) {
             LOG.error("File Service: Unable to determine user permissions to delete file: " + e);
             return false;

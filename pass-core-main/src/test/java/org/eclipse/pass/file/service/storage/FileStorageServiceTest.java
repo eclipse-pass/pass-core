@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -43,6 +44,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import org.eclipse.pass.file.service.PassFileServiceController;
 import org.eclipse.pass.main.IntegrationTest;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -51,10 +53,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * The FileStorageServiceTest IT tests the FileStorageService and the FileStorageController. Since the
@@ -75,13 +77,10 @@ public class FileStorageServiceTest extends IntegrationTest {
             = MediaType.parse("text/plain");
     public static final MediaType MEDIA_TYPE_APPLICATION
             = MediaType.parse("application/octet-stream");
-    @Autowired
-    protected FileStorageService storageService;
-    @Autowired
-    protected StorageConfiguration storageConfiguration;
 
-    @SpyBean
-    protected FileStorageService spyStoreService;
+    @Autowired protected PassFileServiceController passFileServiceController;
+    @Autowired protected FileStorageService storageService;
+    @Autowired protected StorageConfiguration storageConfiguration;
 
     /**
      * Cleanup the FileStorageService after testing. Deletes the root directory.
@@ -447,14 +446,17 @@ public class FileStorageServiceTest extends IntegrationTest {
 
     @Test
     void deleteFileUsingFileServiceControllerUserPermissionException() throws IOException {
-        StorageFile storageFile = spyStoreService.storeFile(new MockMultipartFile("test", "test.txt",
+        StorageFile storageFile = storageService.storeFile(new MockMultipartFile("test", "test.txt",
                 Objects.requireNonNull(MEDIA_TYPE_TEXT).toString(), "Test Pass-core".getBytes()), USER_NAME);
 
         String url = getBaseUrl() + "file" + "/" + storageFile.getId();
 
+        FileStorageService spyStorageService = spy(storageService);
+        ReflectionTestUtils.setField(passFileServiceController, "fileStorageService", spyStorageService);
+
         doThrow(new RuntimeException("Test"))
-                .when(spyStoreService)
-                .checkUserDeletePermissions(anyString(), anyString());
+            .when(spyStorageService)
+            .checkUserDeletePermissions(anyString(), anyString());
 
         Request request = new Request.Builder()
                 .url(url)
@@ -469,12 +471,15 @@ public class FileStorageServiceTest extends IntegrationTest {
 
     @Test
     void deleteFileUsingFileServiceControllerDeleteException() throws IOException {
-        StorageFile storageFile = spyStoreService.storeFile(new MockMultipartFile("test", "test.txt",
+        StorageFile storageFile = storageService.storeFile(new MockMultipartFile("test", "test.txt",
                 Objects.requireNonNull(MEDIA_TYPE_TEXT).toString(), "Test Pass-core".getBytes()), USER_NAME);
         String url = getBaseUrl() + "file" + "/" + storageFile.getId();
 
+        FileStorageService spyStorageService = spy(storageService);
+        ReflectionTestUtils.setField(passFileServiceController, "fileStorageService", spyStorageService);
+
         doThrow(new RuntimeException("Test"))
-                .when(spyStoreService)
+                .when(spyStorageService)
                 .deleteFile(anyString());
 
         Request request = new Request.Builder()
