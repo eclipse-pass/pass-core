@@ -16,11 +16,12 @@
 package org.eclipse.pass.main;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
-import javax.jms.ConnectionFactory;
+
 import javax.jms.TextMessage;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
@@ -28,9 +29,7 @@ import javax.persistence.OptimisticLockException;
 
 import com.amazon.sqs.javamessaging.ProviderConfiguration;
 import com.amazon.sqs.javamessaging.SQSConnectionFactory;
-import com.amazonaws.client.builder.AwsClientBuilder;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
+
 import com.yahoo.elide.Elide;
 import com.yahoo.elide.ElideSettingsBuilder;
 import com.yahoo.elide.RefreshableElide;
@@ -52,6 +51,7 @@ import com.yahoo.elide.jsonapi.JsonApiMapper;
 import com.yahoo.elide.jsonapi.links.DefaultJSONApiLinks;
 import com.yahoo.elide.spring.config.ElideConfigProperties;
 import com.yahoo.elide.utils.HeaderUtils;
+import jakarta.jms.ConnectionFactory;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.pass.main.repository.DepositRepository;
@@ -74,6 +74,9 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.core.JmsTemplate;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.SqsClientBuilder;
 
 /**
  * Configures Elide such that updates to Submission, SubmissionEvent, and Deposit send messages to a JMS broker.
@@ -152,17 +155,18 @@ public class JmsConfiguration {
      */
     @Bean
     @ConditionalOnProperty(name = "pass.jms.sqs", havingValue = "true")
-    public ConnectionFactory jmsConnectionFactory(@Value("${aws.region}") String awsRegion) {
-        AmazonSQSClientBuilder sqsClientBuilder = configureSqsBuilder(AmazonSQSClientBuilder.standard(), awsRegion);
-        return new SQSConnectionFactory(new ProviderConfiguration(), sqsClientBuilder);
+    public ConnectionFactory jmsConnectionFactory(@Value("${aws.region}") String awsRegion) throws URISyntaxException {
+        SqsClientBuilder sqsClient = configureSqsBuilder(SqsClient.builder(), awsRegion);
+        return new SQSConnectionFactory(new ProviderConfiguration(), sqsClient);
     }
 
-    private AmazonSQSClientBuilder configureSqsBuilder(AmazonSQSClientBuilder sqsClientBuilder, String awsRegion) {
+    private SqsClientBuilder configureSqsBuilder(SqsClientBuilder sqsClientBuilder, String awsRegion) throws URISyntaxException {
         if (StringUtils.isNotEmpty(awsSqsEndpointOverride)) {
-            return sqsClientBuilder.withEndpointConfiguration(
-                    new AwsClientBuilder.EndpointConfiguration(awsSqsEndpointOverride, awsRegion));
+            return sqsClientBuilder
+                .endpointOverride(new URI(awsSqsEndpointOverride))
+                .region(Region.of(awsRegion));
         }
-        return sqsClientBuilder.withRegion(Regions.fromName(awsRegion));
+        return sqsClientBuilder.region(Region.of(awsRegion));
     }
 
     /**
