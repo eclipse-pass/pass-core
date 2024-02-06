@@ -68,40 +68,34 @@
   </scm>
 
   <properties>
+    <maven-dependency-plugin.version>3.6.1</maven-dependency-plugin.version>
+    <spring-boot-maven-plugin.version>2.7.5</spring-boot-maven-plugin.version>
+    <elide.version>6.1.12</elide.version>
     <javax.json.version>1.1.4</javax.json.version>
     <javax.json.api.version>1.1.4</javax.json.api.version>
-    <h2.version>2.1.210</h2.version>
-    <liquibase.version>4.8.0</liquibase.version>
-    <postgres.version>42.3.3</postgres.version>
-    <rest-assured.version>2.9.0</rest-assured.version>
+    <h2.version>2.2.224</h2.version>
+    <liquibase.version>4.25.1</liquibase.version>
+    <postgres.version>42.7.1</postgres.version>
+    <rest-assured.version>5.3.1</rest-assured.version>
+
+    <!-- TODO major upgrade -->
     <ocfl.java.core.version>1.5.0</ocfl.java.core.version>
     <ocfl.java.aws.version>1.5.0</ocfl.java.aws.version>
-    <apache.commons.io.version>2.8.0</apache.commons.io.version>
-    <apache.commons-lang.version>2.4</apache.commons-lang.version>
+
+    <apache.commons.io.version>2.15.1</apache.commons.io.version>
+    <apache.commons-lang.version>3.14.0</apache.commons-lang.version>
     <s3mock.version>0.2.6</s3mock.version>
-    <jsoup.version>1.15.3</jsoup.version>
-    <mockito.core.version>4.8.1</mockito.core.version>
-    <commons.codec.version>1.13</commons.codec.version>
-    <spring.boot.version>2.7.5</spring.boot.version>
-    <amazon.sqs.version>1.0.4</amazon.sqs.version>
+    <jsoup.version>1.17.2</jsoup.version>
+    <commons.codec.version>1.16.0</commons.codec.version>
+    <amazon.sqs.version>2.1.1</amazon.sqs.version>
+    <jakarta.jms-api.version>3.1.0</jakarta.jms-api.version>
+
+    <logback.version>1.4.14</logback.version>
+    <slf4j.version>2.0.11</slf4j.version>
+    <okhttp.version>4.12.0</okhttp.version>
+
+    <junit.jupiter.version>5.10.1</junit.jupiter.version>
   </properties>
-
-  <dependencyManagement>
-    <dependencies>
-      <!-- Test dependencies -->
-      <dependency>
-        <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter-api</artifactId>
-        <version>${junit.jupiter.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter-engine</artifactId>
-        <version>${junit.jupiter.version}</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 
   <repositories>
     <repository>
@@ -116,14 +110,9 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <version>${spring-boot-maven-plugin.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -134,7 +123,7 @@
         <plugin>
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-maven-plugin</artifactId>
-          <version>${maven.spring.plugin.version}</version>
+          <version>${spring-boot-maven-plugin.version}</version>
           <configuration>
             <mainClass>org.eclipse.pass.main.Main</mainClass>
             <finalName>pass-core-main</finalName>
@@ -181,6 +170,114 @@
             </tag>
           </tags>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>enforce-dependency-convergence</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <dependencyConvergence>
+                  <excludes>
+                    <!-- Transitive deps from elide-spring-boot-starter-->
+                    <exclude>org.checkerframework:checker-qual:</exclude>
+                    <exclude>com.google.code.findbugs:jsr305:</exclude>
+                    <exclude>com.google.protobuf:protobuf-java:</exclude>
+                    <exclude>com.google.guava:guava:</exclude>
+                    <exclude>jakarta.activation:jakarta.activation-api:</exclude>
+                    <exclude>org.yaml:snakeyaml:</exclude>
+                    <exclude>org.apache.commons:commons-pool2:</exclude>
+                    <exclude>org.apache.httpcomponents:</exclude>
+                    <exclude>javax.validation:validation-api:</exclude>
+                    <exclude>com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:</exclude>
+                    <exclude>com.fasterxml.jackson.core:jackson-core:</exclude>
+                    <exclude>com.fasterxml.jackson.core:jackson-annotations:</exclude>
+                    <exclude>com.fasterxml.jackson.core:jackson-databind:</exclude>
+                    <exclude>org.apache.commons:commons-lang3:</exclude>
+                    <exclude>com.google.code.gson:gson:</exclude>
+                    <exclude>commons-codec:commons-codec:</exclude>
+                    <exclude>com.google.errorprone:error_prone_annotations:</exclude>
+                    <exclude>com.jayway.jsonpath:json-path:</exclude>
+                    <exclude>org.jboss.logging:jboss-logging:</exclude>
+                    <exclude>org.hibernate:hibernate-core:</exclude>
+                    <exclude>com.zaxxer:HikariCP:</exclude>
+                    <!-- Transitive deps from elide-spring-boot-starter-->
+                    <exclude>org.jetbrains.kotlin:kotlin-stdlib:*</exclude>
+                  </excludes>
+                </dependencyConvergence>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>${maven-dependency-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>analyze-dependencies</id>
+            <goals>
+              <goal>analyze-only</goal>
+            </goals>
+            <phase>test-compile</phase>
+            <configuration>
+              <failOnWarning>true</failOnWarning>
+<!--              <ignoredDependencies>-->
+<!--                &lt;!&ndash; These come from bundled jars &ndash;&gt;-->
+<!--                <ignoredDependency>org.springframework*::</ignoredDependency>-->
+<!--                <ignoredDependency>software.amazon.awssdk::</ignoredDependency>-->
+<!--                &lt;!&ndash; Comes from outdated sword2 client &ndash;&gt;-->
+<!--                <ignoredDependency>org.apache.abdera::</ignoredDependency>-->
+<!--                <ignoredDependency>junit:junit:</ignoredDependency>-->
+<!--                <ignoredDependency>commons-httpclient:commons-httpclient:</ignoredDependency>-->
+<!--                <ignoredDependency>commons-lang:commons-lang:</ignoredDependency>-->
+<!--              </ignoredDependencies>-->
+<!--              <ignoredUsedUndeclaredDependencies>-->
+<!--                &lt;!&ndash; These both come from junit-jupiter, so version is tied to that direct dependency &ndash;&gt;-->
+<!--                <ignoredUsedUndeclaredDependency>org.junit.jupiter:junit-jupiter-api:</ignoredUsedUndeclaredDependency>-->
+<!--                &lt;!&ndash; These come from spring boot starter json &ndash;&gt;-->
+<!--                <ignoredUsedUndeclaredDependency>com.fasterxml.jackson.core::</ignoredUsedUndeclaredDependency>-->
+<!--                <ignoredUsedUndeclaredDependency>com.fasterxml.jackson.datatype::</ignoredUsedUndeclaredDependency>-->
+<!--                &lt;!&ndash; These come from spring boot starter mail &ndash;&gt;-->
+<!--                <ignoredUsedUndeclaredDependency>org.eclipse.angus:jakarta.mail:</ignoredUsedUndeclaredDependency>-->
+<!--                &lt;!&ndash; These come from spring boot starter test &ndash;&gt;-->
+<!--                <ignoredUsedUndeclaredDependency>org.mockito::</ignoredUsedUndeclaredDependency>-->
+<!--                <ignoredUsedUndeclaredDependency>org.awaitility::</ignoredUsedUndeclaredDependency>-->
+<!--                <ignoredUsedUndeclaredDependency>org.junit.jupiter::</ignoredUsedUndeclaredDependency>-->
+<!--                &lt;!&ndash; These come from testcontainers junit-jupiter &ndash;&gt;-->
+<!--                <ignoredUsedUndeclaredDependency>org.testcontainers::</ignoredUsedUndeclaredDependency>-->
+<!--                &lt;!&ndash; These come from amazon sqs java messaging &ndash;&gt;-->
+<!--                <ignoredUsedUndeclaredDependency>jakarta.jms::</ignoredUsedUndeclaredDependency>-->
+<!--                &lt;!&ndash; These come from greenmail junit5 &ndash;&gt;-->
+<!--                <ignoredUsedUndeclaredDependency>com.icegreen:greenmail:</ignoredUsedUndeclaredDependency>-->
+<!--                &lt;!&ndash; These come from sshd-sftp &ndash;&gt;-->
+<!--                <ignoredUsedUndeclaredDependency>org.apache.sshd:sshd*:</ignoredUsedUndeclaredDependency>-->
+<!--              </ignoredUsedUndeclaredDependencies>-->
+<!--              <ignoredUnusedDeclaredDependencies>-->
+<!--                &lt;!&ndash; junit-jupiter is a module containing the junit api jars used directly &ndash;&gt;-->
+<!--                <ignoredUnusedDeclaredDependency>org.junit.jupiter:junit-jupiter</ignoredUnusedDeclaredDependency>-->
+<!--                &lt;!&ndash; slf4j is the API used in the code, logback is the logging provider not used directly &ndash;&gt;-->
+<!--                <ignoredUnusedDeclaredDependency>ch.qos.logback:logback-classic:</ignoredUnusedDeclaredDependency>-->
+<!--                &lt;!&ndash; slf4j is the API used in the code, log4j is used by a transitive dep &ndash;&gt;-->
+<!--                <ignoredUnusedDeclaredDependency>org.slf4j:log4j-over-slf4j:</ignoredUnusedDeclaredDependency>-->
+<!--                &lt;!&ndash; mockito-inline is needed to mock final classes &ndash;&gt;-->
+<!--                <ignoredUnusedDeclaredDependency>org.mockito:mockito-inline:</ignoredUnusedDeclaredDependency>-->
+<!--              </ignoredUnusedDeclaredDependencies>-->
+<!--              <ignoredNonTestScopedDependencies>-->
+<!--                &lt;!&ndash; junit-jupiter is a module containing the junit api jars used directly &ndash;&gt;-->
+<!--                <ignoredNonTestScopedDependency>com.fasterxml.jackson.datatype::</ignoredNonTestScopedDependency>-->
+<!--              </ignoredNonTestScopedDependencies>-->
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
