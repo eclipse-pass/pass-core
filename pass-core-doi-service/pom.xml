@@ -15,6 +15,14 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.pass</groupId>
             <artifactId>pass-core-object-service</artifactId>
             <version>${project.version}</version>
@@ -30,9 +38,10 @@
             <version>${okhttp.version}</version>
         </dependency>
         <dependency>
-            <groupId>javax.json</groupId>
-            <artifactId>javax.json-api</artifactId>
-            <version>${javax.json.api.version}</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <version>${spring-boot-maven-plugin.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

@@ -12,6 +12,14 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.pass</groupId>
             <artifactId>pass-core-object-service</artifactId>
             <version>${project.version}</version>
@@ -25,11 +33,6 @@
             <groupId>edu.wisc.library.ocfl</groupId>
             <artifactId>ocfl-java-aws</artifactId>
             <version>${ocfl.java.aws.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>javax.json</artifactId>
-            <version>${javax.json.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -46,6 +49,12 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>${apache.commons-lang.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <version>${spring-boot-maven-plugin.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

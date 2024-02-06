@@ -110,6 +110,12 @@
     </dependency>
     
     <!-- Test dependencies -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <version>${spring-boot-maven-plugin.version}</version>
+      <scope>test</scope>
+    </dependency>
 
     <dependency>
       <groupId>com.yahoo.elide</groupId>
