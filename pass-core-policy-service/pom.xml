@@ -16,6 +16,14 @@
 
   <dependencies>
     <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.eclipse.pass</groupId>
       <artifactId>pass-core-object-service</artifactId>
       <version>${project.version}</version>
@@ -23,7 +31,7 @@
     <dependency>
       <groupId>org.glassfish</groupId>
       <artifactId>javax.json</artifactId>
-      <version>1.1.4</version>
+      <version>${javax.json.version}</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
