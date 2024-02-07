@@ -123,6 +123,14 @@
         <artifactId>logback-classic</artifactId>
         <version>${logback.version}</version>
       </dependency>
+
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${spring-boot-maven-plugin.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -272,6 +280,7 @@
                 <ignoredUsedUndeclaredDependency>org.mockito::</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>org.junit.jupiter:junit-jupiter-api:</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>org.assertj:assertj-core:</ignoredUsedUndeclaredDependency>
+                <ignoredUsedUndeclaredDependency>com.vaadin.external.google:android-json:</ignoredUsedUndeclaredDependency>
                 <!-- These come from doi service jar -->
                 <ignoredUsedUndeclaredDependency>org.glassfish:javax.json:</ignoredUsedUndeclaredDependency>
                 <!-- These come from s3mock jar -->
