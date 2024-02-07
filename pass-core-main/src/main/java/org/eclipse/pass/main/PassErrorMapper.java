@@ -15,12 +15,13 @@
  */
 package org.eclipse.pass.main;
 
+import javax.annotation.Nullable;
 import javax.persistence.OptimisticLockException;
 
 import com.yahoo.elide.core.exceptions.CustomErrorException;
 import com.yahoo.elide.core.exceptions.ErrorMapper;
 import com.yahoo.elide.core.exceptions.ErrorObjects;
-import org.jetbrains.annotations.Nullable;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
