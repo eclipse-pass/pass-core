@@ -77,25 +77,26 @@
     <logback.version>1.2.11</logback.version>
     <slf4j.version>1.7.36</slf4j.version>
 
-    <javax.json.version>1.1.4</javax.json.version>
-    <javax.json.api.version>1.1.4</javax.json.api.version>
-    <h2.version>2.2.224</h2.version>
-
-    <postgres.version>42.7.1</postgres.version>
-    <rest-assured.version>5.3.1</rest-assured.version>
-    <org.json.version>5.3.1</org.json.version>
-    <okhttp.version>4.12.0</okhttp.version>
+    <!-- TODO upgrade once elide/spring boot are upgraded -->
+    <amazon.sqs.version>1.0.4</amazon.sqs.version>
+    <rest-assured.version>4.5.1</rest-assured.version>
 
     <!-- TODO major upgrade -->
     <ocfl.java.core.version>1.5.0</ocfl.java.core.version>
     <ocfl.java.aws.version>1.5.0</ocfl.java.aws.version>
+
+    <javax.json.version>1.1.4</javax.json.version>
+    <javax.json.api.version>1.1.4</javax.json.api.version>
+    <h2.version>2.2.224</h2.version>
+    <postgres.version>42.7.1</postgres.version>
+    <org.json.version>5.3.1</org.json.version>
+    <okhttp.version>4.12.0</okhttp.version>
 
     <apache.commons.io.version>2.15.1</apache.commons.io.version>
     <apache.commons-lang.version>3.14.0</apache.commons-lang.version>
     <s3mock.version>0.2.6</s3mock.version>
     <jsoup.version>1.17.2</jsoup.version>
     <commons.codec.version>1.16.0</commons.codec.version>
-    <amazon.sqs.version>2.1.1</amazon.sqs.version>
     <jakarta.jms-api.version>3.1.0</jakarta.jms-api.version>
   </properties>
 
@@ -227,6 +228,7 @@
                     <exclude>com.zaxxer:HikariCP:</exclude>
                     <exclude>commons-io:commons-io:</exclude>
                     <exclude>org.ow2.asm:asm:</exclude>
+                    <exlude>joda-time:joda-time:</exlude>
                     <!-- Transitive deps from okhttp-->
                     <exclude>org.jetbrains.kotlin:kotlin-stdlib*:</exclude>
                     <!-- Transitive deps from ocfl-->
@@ -285,6 +287,9 @@
                 <ignoredUsedUndeclaredDependency>org.glassfish:javax.json:</ignoredUsedUndeclaredDependency>
                 <!-- These come from s3mock jar -->
                 <ignoredUsedUndeclaredDependency>com.typesafe.akka:akka-http-core_2.13:</ignoredUsedUndeclaredDependency>
+                <!-- These come from aws sqs jar -->
+                <ignoredUsedUndeclaredDependency>com.amazonaws:aws-java-sdk-core:</ignoredUsedUndeclaredDependency>
+                <ignoredUsedUndeclaredDependency>com.amazonaws:aws-java-sdk-sqs:</ignoredUsedUndeclaredDependency>
               </ignoredUsedUndeclaredDependencies>
               <ignoredUnusedDeclaredDependencies>
                 <!-- This is the elide starter jar -->

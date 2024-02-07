@@ -15,7 +15,6 @@
  */
 package org.eclipse.pass.main;
 
-
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
