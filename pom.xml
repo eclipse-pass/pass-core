@@ -69,14 +69,22 @@
 
   <properties>
     <maven-dependency-plugin.version>3.6.1</maven-dependency-plugin.version>
+
+    <!-- TODO update these deps when elide/spring-boot are upgraded -->
     <spring-boot-maven-plugin.version>2.7.5</spring-boot-maven-plugin.version>
+    <liquibase.version>4.23.1</liquibase.version>
     <elide.version>6.1.12</elide.version>
+    <logback.version>1.2.13</logback.version>
+    <slf4j.version>1.7.36</slf4j.version>
+
     <javax.json.version>1.1.4</javax.json.version>
     <javax.json.api.version>1.1.4</javax.json.api.version>
     <h2.version>2.2.224</h2.version>
-    <liquibase.version>4.25.1</liquibase.version>
+
     <postgres.version>42.7.1</postgres.version>
     <rest-assured.version>5.3.1</rest-assured.version>
+    <org.json.version>5.3.1</org.json.version>
+    <okhttp.version>4.12.0</okhttp.version>
 
     <!-- TODO major upgrade -->
     <ocfl.java.core.version>1.5.0</ocfl.java.core.version>
@@ -89,12 +97,6 @@
     <commons.codec.version>1.16.0</commons.codec.version>
     <amazon.sqs.version>2.1.1</amazon.sqs.version>
     <jakarta.jms-api.version>3.1.0</jakarta.jms-api.version>
-
-    <logback.version>1.4.14</logback.version>
-    <slf4j.version>2.0.11</slf4j.version>
-    <okhttp.version>4.12.0</okhttp.version>
-
-    <junit.jupiter.version>5.10.1</junit.jupiter.version>
   </properties>
 
   <repositories>
@@ -251,32 +253,51 @@
                 <ignoredDependency>software.amazon.awssdk::</ignoredDependency>
               </ignoredDependencies>
               <ignoredUsedUndeclaredDependencies>
-                <!-- These both come from junit-jupiter, so version is tied to that direct dependency -->
-                <ignoredUsedUndeclaredDependency>org.junit.jupiter:junit-jupiter-api:</ignoredUsedUndeclaredDependency>
                 <!-- fill in -->
                 <ignoredUsedUndeclaredDependency>javax.ws.rs:javax.ws.rs-api:</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>javax.persistence:javax.persistence-api::</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>javax.servlet:javax.servlet-api:</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>edu.wisc.library.ocfl:ocfl-java-api:</ignoredUsedUndeclaredDependency>
-                <!-- These come from spring boot starter test -->
-                <ignoredUsedUndeclaredDependency>org.mockito::</ignoredUsedUndeclaredDependency>
+                <!-- These come from elide starter -->
+                <ignoredUsedUndeclaredDependency>org.json:json:</ignoredUsedUndeclaredDependency>
+                <ignoredUsedUndeclaredDependency>javax.jms:javax.jms-api:</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>com.fasterxml.jackson.core:jackson-core:</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>com.fasterxml.jackson.core:jackson-databind:</ignoredUsedUndeclaredDependency>
-<!--                &lt;!&ndash; These come from testcontainers junit-jupiter &ndash;&gt;-->
-<!--                <ignoredUsedUndeclaredDependency>org.testcontainers::</ignoredUsedUndeclaredDependency>-->
-<!--                &lt;!&ndash; These come from amazon sqs java messaging &ndash;&gt;-->
-<!--                <ignoredUsedUndeclaredDependency>jakarta.jms::</ignoredUsedUndeclaredDependency>-->
-<!--                &lt;!&ndash; These come from greenmail junit5 &ndash;&gt;-->
-<!--                <ignoredUsedUndeclaredDependency>com.icegreen:greenmail:</ignoredUsedUndeclaredDependency>-->
-                <!-- fill in -->
-                <ignoredUsedUndeclaredDependency>com.yahoo.elide:elide-core:</ignoredUsedUndeclaredDependency>
+                <ignoredUsedUndeclaredDependency>com.yahoo.elide::</ignoredUsedUndeclaredDependency>
+                <!-- These come from ocfl -->
+                <ignoredUsedUndeclaredDependency>com.google.code.findbugs:jsr305:</ignoredUsedUndeclaredDependency>
+                <!-- These come from spring boot activemq starter test -->
+                <ignoredUsedUndeclaredDependency>org.apache.activemq:activemq-broker:</ignoredUsedUndeclaredDependency>
+                <!-- These come from spring boot starter test -->
+                <ignoredUsedUndeclaredDependency>org.mockito::</ignoredUsedUndeclaredDependency>
+                <ignoredUsedUndeclaredDependency>org.junit.jupiter:junit-jupiter-api:</ignoredUsedUndeclaredDependency>
+                <ignoredUsedUndeclaredDependency>org.assertj:assertj-core:</ignoredUsedUndeclaredDependency>
+                <!-- These come from doi service jar -->
+                <ignoredUsedUndeclaredDependency>org.glassfish:javax.json:</ignoredUsedUndeclaredDependency>
+                <!-- These come from s3mock jar -->
+                <ignoredUsedUndeclaredDependency>com.typesafe.akka:akka-http-core_2.13:</ignoredUsedUndeclaredDependency>
               </ignoredUsedUndeclaredDependencies>
               <ignoredUnusedDeclaredDependencies>
-                <!-- This is a starter jar -->
+                <!-- This is the elide starter jar -->
                 <ignoredUnusedDeclaredDependency>com.yahoo.elide:elide-spring-boot-starter:</ignoredUnusedDeclaredDependency>
                 <!-- slf4j is the API used in the code, logback is the logging provider not used directly -->
                 <ignoredUnusedDeclaredDependency>ch.qos.logback:logback-classic:</ignoredUnusedDeclaredDependency>
+                <!-- These are runtime scope -->
+                <ignoredUnusedDeclaredDependency>org.liquibase:liquibase-core:</ignoredUnusedDeclaredDependency>
+                <ignoredUnusedDeclaredDependency>com.h2database:h2:</ignoredUnusedDeclaredDependency>
+                <ignoredUnusedDeclaredDependency>org.postgresql:postgresql:</ignoredUnusedDeclaredDependency>
+                <!-- These are module jars used via spring IOC -->
+                <ignoredUnusedDeclaredDependency>org.eclipse.pass:pass-core-doi-service:</ignoredUnusedDeclaredDependency>
+                <ignoredUnusedDeclaredDependency>org.eclipse.pass:pass-core-user-service:</ignoredUnusedDeclaredDependency>
+                <ignoredUnusedDeclaredDependency>org.eclipse.pass:pass-core-policy-service:</ignoredUnusedDeclaredDependency>
+                <ignoredUnusedDeclaredDependency>org.eclipse.pass:pass-core-metadataschema-service:</ignoredUnusedDeclaredDependency>
               </ignoredUnusedDeclaredDependencies>
+              <ignoredNonTestScopedDependencies>
+                <!-- This is the elide starter jar -->
+                <ignoredNonTestScopedDependency>org.json:json:</ignoredNonTestScopedDependency>
+                <!-- These are module jars used via spring IOC -->
+                <ignoredNonTestScopedDependency>org.eclipse.pass:pass-core-file-service:jar:</ignoredNonTestScopedDependency>
+              </ignoredNonTestScopedDependencies>
             </configuration>
           </execution>
         </executions>
