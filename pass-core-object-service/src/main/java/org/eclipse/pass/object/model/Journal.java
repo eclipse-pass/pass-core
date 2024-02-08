@@ -25,6 +25,7 @@ import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Table;
 
 /**
@@ -45,7 +46,7 @@ public class Journal extends PassEntity {
     /**
      * Array of ISSN(s) for Journal
      */
-    @ElementCollection(targetClass = String.class)
+    @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "pass_journal_issns")
     private List<String> issns = new ArrayList<>();
 

@@ -34,6 +34,7 @@ import com.yahoo.elide.core.dictionary.EntityDictionary;
 import com.yahoo.elide.core.request.route.Route;
 import com.yahoo.elide.core.security.User;
 import com.yahoo.elide.core.type.ClassType;
+import com.yahoo.elide.datastores.aggregation.QueryEngine;
 import com.yahoo.elide.jsonapi.JsonApi;
 import com.yahoo.elide.jsonapi.JsonApiMapper;
 import com.yahoo.elide.jsonapi.JsonApiRequestScope;
@@ -57,7 +58,6 @@ public class ElidePassClient implements PassClient {
     private final ElideSettings settings;
     private final User user;
     private final String api_version;
-    private final DataStoreTransaction read_tx;
     private final JsonApi jsonApi;
     private final JsonApiMapper jsonApiMapper;
 
@@ -74,7 +74,6 @@ public class ElidePassClient implements PassClient {
         this.jsonApi = new JsonApi(elide);
         this.user = user;
         this.api_version = settings.getEntityDictionary().getApiVersions().iterator().next();
-        this.read_tx = elide.getDataStore().beginReadTransaction();
         JsonApiSettings jsonApiSettings = elide.getSettings(JsonApiSettings.class);
         this.jsonApiMapper = jsonApiSettings.getJsonApiMapper();
     }
@@ -236,7 +235,10 @@ public class ElidePassClient implements PassClient {
 
         JsonApiDocument doc = jsonApiMapper.readJsonApiDocument(response.getBody());
 
-        return type.cast(doc.getData().getSingleValue().toPersistentResource(get_scope(path, read_tx)).getObject());
+        try (DataStoreTransaction tx = jsonApi.getElide().getDataStore().beginReadTransaction()) {
+            RequestScope scope = get_scope(path, tx);
+            return type.cast(doc.getData().getSingleValue().toPersistentResource(scope).getObject());
+        }
     }
 
     @Override
@@ -287,13 +289,15 @@ public class ElidePassClient implements PassClient {
 
         PassClientResult<T> result = new PassClientResult<>(total);
 
-        RequestScope scope = get_scope(path, read_tx);
+        try (DataStoreTransaction tx = jsonApi.getElide().getDataStore().beginReadTransaction()) {
+            RequestScope scope = get_scope(path, tx);
 
-        doc.getData().get().forEach(r -> {
-            @SuppressWarnings("unchecked")
-            T o = (T) r.toPersistentResource(scope).getObject();
-            result.getObjects().add(o);
-        });
+            doc.getData().get().forEach(r -> {
+                @SuppressWarnings("unchecked")
+                T o = (T) r.toPersistentResource(scope).getObject();
+                result.getObjects().add(o);
+            });
+        }
 
         return result;
     }
@@ -311,6 +315,6 @@ public class ElidePassClient implements PassClient {
 
     @Override
     public void close() throws IOException {
-        read_tx.close();
+        // no-op
     }
 }

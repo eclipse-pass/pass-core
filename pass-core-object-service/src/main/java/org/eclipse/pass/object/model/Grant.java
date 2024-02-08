@@ -23,6 +23,7 @@ import java.util.Objects;
 import com.yahoo.elide.annotation.Include;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -78,11 +79,10 @@ public class Grant extends PassEntity {
      */
     @ManyToOne
     private User pi;
-
     /**
      * List of User who are the co-principal investigators
      */
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private List<User> coPis = new ArrayList<>();
 
     /**

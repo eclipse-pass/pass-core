@@ -44,7 +44,7 @@ public interface PassClient extends Closeable {
      * @return new instance
      */
     static PassClient newInstance(RefreshableElide elide) {
-        return new ElideDataStorePassClient(elide);
+        return new ElidePassClient(elide);
     }
 
     /**

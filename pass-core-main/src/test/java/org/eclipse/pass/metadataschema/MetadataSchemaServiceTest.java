@@ -37,7 +37,7 @@ public class MetadataSchemaServiceTest extends IntegrationTest {
     protected RefreshableElide refreshableElide;
 
     @BeforeAll
-    public void setupRepos() {
+    public void setupRepos() throws IOException {
         repo1Id = setupRepo1();
         repo2Id = setupRepo2();
         repo3Id = setupRepo3(); //contains missing schema to test error handling
@@ -151,7 +151,7 @@ public class MetadataSchemaServiceTest extends IntegrationTest {
         assertThat(response.body()).isNotNull();
     }
 
-    private Long setupRepo1() {
+    private Long setupRepo1() throws IOException {
         Repository repository = new Repository();
         repository.setName("Test Repository 1");
         repository.setDescription("Repository 1 description");
@@ -162,23 +162,14 @@ public class MetadataSchemaServiceTest extends IntegrationTest {
                 URI.create("https://example.com/metadata-schemas/jhu/schema2.json")));
         repository.setRepositoryKey("nih-repository");
 
-        PassClient passClient = PassClient.newInstance(refreshableElide);
-
-        try {
+        try (PassClient passClient = PassClient.newInstance(refreshableElide)) {
             passClient.createObject(repository);
-            String filter = RSQL.equals("name", "Test Repository 1");
-            PassClientResult<Repository> result = passClient.
-                    selectObjects(new PassClientSelector<>(Repository.class, 0, 100,
-                            filter, null));
-            return result.getObjects().get(0).getId();
-        } catch (IOException e) {
-            assertThat("error creating repository")
-                    .isEqualTo("error creating repository1 " + e.getMessage());
         }
-        return null;
+
+        return repository.getId();
     }
 
-    private Long setupRepo2() {
+    private Long setupRepo2() throws IOException {
         Repository repository = new Repository();
         repository.setName("Test Repository 2");
         repository.setDescription("Repository 2 description");
@@ -190,23 +181,14 @@ public class MetadataSchemaServiceTest extends IntegrationTest {
                 URI.create("https://example.com/metadata-schemas/jhu/schema_to_deref.json")));
         repository.setRepositoryKey("nih-repository");
 
-        PassClient passClient = PassClient.newInstance(refreshableElide);
-
-        try {
+        try (PassClient passClient = PassClient.newInstance(refreshableElide)) {
             passClient.createObject(repository);
-            String filter = RSQL.equals("name", "Test Repository 2");
-            PassClientResult<Repository> result = passClient.
-                    selectObjects(new PassClientSelector<>(Repository.class, 0, 100,
-                            filter, null));
-            return result.getObjects().get(0).getId();
-        } catch (IOException e) {
-            assertThat("error creating repository")
-                    .isEqualTo("error creating repository2 " + e.getMessage());
         }
-        return null;
+
+        return repository.getId();
     }
 
-    private Long setupRepo3() {
+    private Long setupRepo3() throws IOException {
         Repository repository = new Repository();
         repository.setName("Test Repository 3");
         repository.setDescription("Repository 3 - missing schema");
@@ -218,23 +200,14 @@ public class MetadataSchemaServiceTest extends IntegrationTest {
                 URI.create("https://example.com/metadata-schemas/jhu/schema_to_deref.json")));
         repository.setRepositoryKey("nih-repository");
 
-        PassClient passClient = PassClient.newInstance(refreshableElide);
-
-        try {
+        try (PassClient passClient = PassClient.newInstance(refreshableElide)) {
             passClient.createObject(repository);
-            String filter = RSQL.equals("name", "Test Repository 3");
-            PassClientResult<Repository> result = passClient.
-                    selectObjects(new PassClientSelector<>(Repository.class, 0, 100,
-                            filter, null));
-            return result.getObjects().get(0).getId();
-        } catch (IOException e) {
-            assertThat("error creating repository")
-                    .isEqualTo("error creating repository3 " + e.getMessage());
         }
-        return null;
+
+        return repository.getId();
     }
 
-    private Long setupRepo4() {
+    private Long setupRepo4() throws IOException {
         Repository repository = new Repository();
         repository.setName("Test Repository 4");
         repository.setDescription("Repository 4 - missing schema");
@@ -246,23 +219,14 @@ public class MetadataSchemaServiceTest extends IntegrationTest {
                 URI.create("https://example.com/metadata-schemas/jhu/schema_to_deref.json")));
         repository.setRepositoryKey("nih-repository");
 
-        PassClient passClient = PassClient.newInstance(refreshableElide);
-
-        try {
+        try (PassClient passClient = PassClient.newInstance(refreshableElide)) {
             passClient.createObject(repository);
-            String filter = RSQL.equals("name", "Test Repository 4");
-            PassClientResult<Repository> result = passClient.
-                    selectObjects(new PassClientSelector<>(Repository.class, 0, 100,
-                            filter, null));
-            return result.getObjects().get(0).getId();
-        } catch (IOException e) {
-            assertThat("error creating repository")
-                    .isEqualTo("error creating repository4 " + e.getMessage());
         }
-        return null;
+
+        return repository.getId();
     }
 
-    private Long setupRepo5() {
+    private Long setupRepo5() throws IOException {
         Repository repository = new Repository();
         repository.setName("Test Repository 5");
         repository.setDescription("Repository 5 - merge conflict schema");
@@ -273,20 +237,11 @@ public class MetadataSchemaServiceTest extends IntegrationTest {
                 URI.create("https://example.com/metadata-schemas/jhu/schema_merge_conflict2.json")));
         repository.setRepositoryKey("nih-repository");
 
-        PassClient passClient = PassClient.newInstance(refreshableElide);
-
-        try {
+        try (PassClient passClient = PassClient.newInstance(refreshableElide)) {
             passClient.createObject(repository);
-            String filter = RSQL.equals("name", "Test Repository 5");
-            PassClientResult<Repository> result = passClient.
-                    selectObjects(new PassClientSelector<>(Repository.class, 0, 100,
-                            filter, null));
-            return result.getObjects().get(0).getId();
-        } catch (IOException e) {
-            assertThat("error creating repository")
-                    .isEqualTo("error creating repository5 " + e.getMessage());
         }
-        return null;
+
+        return repository.getId();
     }
 
 }

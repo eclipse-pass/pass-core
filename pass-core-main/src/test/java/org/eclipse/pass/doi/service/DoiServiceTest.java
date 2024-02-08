@@ -17,7 +17,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.eclipse.pass.main.IntegrationTest;
-import org.eclipse.pass.object.ElideDataStorePassClient;
 import org.eclipse.pass.object.PassClient;
 import org.eclipse.pass.object.PassClientResult;
 import org.eclipse.pass.object.PassClientSelector;
@@ -32,7 +31,7 @@ public class DoiServiceTest extends IntegrationTest {
     protected RefreshableElide refreshableElide;
 
     protected PassClient getNewClient() {
-        return new ElideDataStorePassClient(refreshableElide);
+        return PassClient.newInstance(refreshableElide);
     }
 
     private OkHttpClient httpClient = new OkHttpClient();
