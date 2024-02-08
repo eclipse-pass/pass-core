@@ -20,7 +20,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.persistence.AttributeConverter;
+
+import jakarta.persistence.AttributeConverter;
 
 /**
  * Converter class for List of URIs. Converts List of URIs to a database value that is a string of comma-separated

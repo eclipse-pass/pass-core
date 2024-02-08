@@ -16,26 +16,25 @@
 package org.eclipse.pass.main;
 
 import javax.annotation.Nullable;
-import javax.persistence.OptimisticLockException;
 
-import com.yahoo.elide.core.exceptions.CustomErrorException;
-import com.yahoo.elide.core.exceptions.ErrorMapper;
-import com.yahoo.elide.core.exceptions.ErrorObjects;
-import org.springframework.http.HttpStatus;
+import jakarta.persistence.OptimisticLockException;
+
+import com.yahoo.elide.ElideErrorResponse;
+import com.yahoo.elide.ElideErrors;
+import com.yahoo.elide.core.exceptions.ErrorContext;
+import com.yahoo.elide.core.exceptions.ExceptionMapper;
 import org.springframework.stereotype.Component;
 
 /**
  * @author Russ Poetker (rpoetke1@jh.edu)
  */
 @Component
-public class PassErrorMapper implements ErrorMapper {
+public class OptimisticLockExceptionMapper implements ExceptionMapper<OptimisticLockException, ElideErrors> {
+
     @Nullable
     @Override
-    public CustomErrorException map(Exception e) {
-        if (e instanceof OptimisticLockException) {
-            ErrorObjects errors = ErrorObjects.builder().addError().withDetail(e.getMessage()).build();
-            return new CustomErrorException(HttpStatus.CONFLICT.value(), e.getMessage(), errors);
-        }
-        return null;
+    public ElideErrorResponse<ElideErrors> toErrorResponse(OptimisticLockException exception, ErrorContext errorContext) {
+        return ElideErrorResponse.status(400)
+            .errors(errors -> errors.error(error -> error.message(exception.getMessage())));
     }
 }

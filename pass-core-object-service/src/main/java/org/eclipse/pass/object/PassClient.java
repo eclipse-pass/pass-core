@@ -17,6 +17,9 @@ package org.eclipse.pass.object;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -51,7 +54,7 @@ public interface PassClient extends Closeable {
     static String getBaseUrl(RefreshableElide elide) {
         ElideSettings settings = elide.getElide().getElideSettings();
 
-        return settings.getBaseUrl() + settings.getJsonApiPath() + "/";
+        return settings.getBaseUrl() + settings.getBaseUrl() + "/";
     }
 
     /**
@@ -63,6 +66,10 @@ public interface PassClient extends Closeable {
         String type = EntityDictionary.getEntityName(ClassType.of(entity.getClass()));
 
         return getBaseUrl(elide) + type + "/" + entity.getId();
+    }
+
+    static void addParam(Map<String, List<String>> params, String key, String value) {
+        params.computeIfAbsent(key, k -> new ArrayList<>()).add(value);
     }
 
     /**

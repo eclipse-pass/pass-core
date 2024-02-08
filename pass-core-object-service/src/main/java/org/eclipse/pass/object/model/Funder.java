@@ -17,11 +17,11 @@ package org.eclipse.pass.object.model;
 
 import java.net.URI;
 import java.util.Objects;
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
 
 import com.yahoo.elide.annotation.Include;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 /**
  * The funder or sponsor of Grant or award.

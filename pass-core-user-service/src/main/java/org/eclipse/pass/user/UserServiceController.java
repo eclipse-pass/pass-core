@@ -5,10 +5,10 @@ import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import javax.json.Json;
 import javax.json.JsonObject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import com.yahoo.elide.RefreshableElide;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.eclipse.pass.object.PassClient;
 import org.eclipse.pass.object.PassClientResult;
 import org.eclipse.pass.object.PassClientSelector;

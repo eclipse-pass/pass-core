@@ -16,10 +16,10 @@
 package org.eclipse.pass.object;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
 
 import com.yahoo.elide.Elide;
 import com.yahoo.elide.ElideSettings;
@@ -33,7 +33,9 @@ import com.yahoo.elide.core.filter.expression.FilterExpression;
 import com.yahoo.elide.core.pagination.PaginationImpl;
 import com.yahoo.elide.core.request.EntityProjection;
 import com.yahoo.elide.core.request.Pagination;
+import com.yahoo.elide.core.request.route.Route;
 import com.yahoo.elide.core.type.ClassType;
+import com.yahoo.elide.jsonapi.JsonApiRequestScope;
 import org.eclipse.pass.object.model.PassEntity;
 
 /**
@@ -62,25 +64,34 @@ public class ElideDataStorePassClient implements PassClient {
         this.read_tx = elide.getDataStore().beginReadTransaction();
     }
 
-    private RequestScope get_scope(String path, DataStoreTransaction tx) {
-        String version = settings.getDictionary().getApiVersions().iterator().next();
-        RequestScope scope = new RequestScope(settings.getBaseUrl(), path, version, null, tx, null, null, null,
-                UUID.randomUUID(), settings);
-
-        return scope;
+    private JsonApiRequestScope get_scope(String path, DataStoreTransaction tx) {
+        String version = settings.getEntityDictionary().getApiVersions().iterator().next();
+        Route route = Route.builder()
+            .baseUrl(settings.getBaseUrl())
+            .path(path)
+            .apiVersion(version)
+            .build();
+        return JsonApiRequestScope.builder()
+            .route(route)
+            .dataStoreTransaction(tx)
+            .requestId(UUID.randomUUID())
+            .elideSettings(settings)
+            .build();
     }
 
-    private EntityProjection get_projection(RequestScope scope, PassClientSelector<?> selector) throws IOException {
+    private EntityProjection get_projection(JsonApiRequestScope scope, PassClientSelector<?> selector)
+        throws IOException {
         Pagination pagination = new PaginationImpl(selector.getType(), selector.getOffset(), selector.getLimit(),
-                settings.getDefaultPageSize(), settings.getDefaultMaxPageSize(), true, false);
+                settings.getDefaultPageSize(), settings.getMaxPageSize(), true, false);
 
         FilterExpression filter = null;
 
         if (selector.getFilter() != null) {
             try {
-                MultivaluedMap<String, String> params = new MultivaluedHashMap<>();
-                params.add("filter", selector.getFilter());
-                filter = scope.getFilterDialect().parseGlobalExpression(scope.getPath(), params, scope.getApiVersion());
+                Map<String, List<String>> params = new LinkedHashMap<>();
+                PassClient.addParam(params, "filter", selector.getFilter());
+                filter = scope.getFilterDialect().parseGlobalExpression(
+                    scope.getRoute().getPath(), params, scope.getRoute().getApiVersion());
             } catch (ParseException e) {
                 throw new IOException("Failed to parse filter of selector: " + selector.getFilter(), e);
             }
@@ -142,7 +153,7 @@ public class ElideDataStorePassClient implements PassClient {
     @Override
     public <T extends PassEntity> PassClientResult<T> selectObjects(PassClientSelector<T> selector) throws IOException {
         String path = get_path(selector.getType(), null);
-        RequestScope scope = get_scope(path, read_tx);
+        JsonApiRequestScope scope = get_scope(path, read_tx);
         EntityProjection proj = get_projection(scope, selector);
 
         DataStoreIterable<T> iterable = read_tx.loadObjects(proj, scope);

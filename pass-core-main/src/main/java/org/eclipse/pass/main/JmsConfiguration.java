@@ -16,43 +16,32 @@
 package org.eclipse.pass.main;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Set;
-import java.util.TimeZone;
-import javax.jms.ConnectionFactory;
-import javax.jms.TextMessage;
+
+import com.yahoo.elide.jsonapi.JsonApiRequestScope;
+import com.yahoo.elide.jsonapi.JsonApiSettings;
+import com.yahoo.elide.jsonapi.JsonApiSettingsBuilderCustomizer;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.TextMessage;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
-import javax.persistence.OptimisticLockException;
+import jakarta.persistence.OptimisticLockException;
 
 import com.amazon.sqs.javamessaging.ProviderConfiguration;
 import com.amazon.sqs.javamessaging.SQSConnectionFactory;
-import com.amazonaws.client.builder.AwsClientBuilder;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
-import com.yahoo.elide.Elide;
-import com.yahoo.elide.ElideSettingsBuilder;
 import com.yahoo.elide.RefreshableElide;
 import com.yahoo.elide.annotation.LifeCycleHookBinding.Operation;
 import com.yahoo.elide.annotation.LifeCycleHookBinding.TransactionPhase;
 import com.yahoo.elide.core.RequestScope;
-import com.yahoo.elide.core.TransactionRegistry;
-import com.yahoo.elide.core.audit.Slf4jLogger;
-import com.yahoo.elide.core.datastore.DataStore;
 import com.yahoo.elide.core.dictionary.EntityDictionary;
 import com.yahoo.elide.core.dictionary.Injector;
-import com.yahoo.elide.core.exceptions.ErrorMapper;
-import com.yahoo.elide.core.filter.dialect.RSQLFilterDialect;
 import com.yahoo.elide.core.lifecycle.LifeCycleHook;
 import com.yahoo.elide.core.type.Type;
 import com.yahoo.elide.core.utils.ClassScanner;
 import com.yahoo.elide.core.utils.coerce.CoerceUtil;
-import com.yahoo.elide.jsonapi.JsonApiMapper;
-import com.yahoo.elide.jsonapi.links.DefaultJSONApiLinks;
-import com.yahoo.elide.spring.config.ElideConfigProperties;
-import com.yahoo.elide.utils.HeaderUtils;
-import org.apache.activemq.broker.BrokerService;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.pass.main.repository.DepositRepository;
 import org.eclipse.pass.main.repository.SubmissionRepository;
@@ -67,13 +56,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.core.JmsTemplate;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.SqsClientBuilder;
 
 /**
  * Configures Elide such that updates to Submission, SubmissionEvent, and Deposit send messages to a JMS broker.
@@ -129,12 +118,10 @@ public class JmsConfiguration {
      * Return TokenFactory configured with a key. Generate the key if it is not given.
      *
      * @param key token key or null
-     * @param refreshableElide a RefreshableElide instance
      * @return TokenFactory
      */
     @Bean
-    public TokenFactory userTokenFactory(@Value("${pass.usertoken.key:#{null}}") String key,
-            RefreshableElide refreshableElide) {
+    public TokenFactory userTokenFactory(@Value("${pass.usertoken.key:#{null}}") String key) {
         if (key == null || key.isEmpty()) {
             key = KeyGenerator.generateKey();
 
@@ -152,88 +139,42 @@ public class JmsConfiguration {
      */
     @Bean
     @ConditionalOnProperty(name = "pass.jms.sqs", havingValue = "true")
-    public ConnectionFactory jmsConnectionFactory(@Value("${aws.region}") String awsRegion) {
-        AmazonSQSClientBuilder sqsClientBuilder = configureSqsBuilder(AmazonSQSClientBuilder.standard(), awsRegion);
-        return new SQSConnectionFactory(new ProviderConfiguration(), sqsClientBuilder);
+    public ConnectionFactory jmsConnectionFactory(@Value("${aws.region}") String awsRegion) throws URISyntaxException {
+        SqsClientBuilder sqsClient = configureSqsBuilder(SqsClient.builder(), awsRegion);
+        return new SQSConnectionFactory(new ProviderConfiguration(), sqsClient);
     }
 
-    private AmazonSQSClientBuilder configureSqsBuilder(AmazonSQSClientBuilder sqsClientBuilder, String awsRegion) {
+    private SqsClientBuilder configureSqsBuilder(SqsClientBuilder sqsClientBuilder, String awsRegion) throws URISyntaxException {
         if (StringUtils.isNotEmpty(awsSqsEndpointOverride)) {
-            return sqsClientBuilder.withEndpointConfiguration(
-                    new AwsClientBuilder.EndpointConfiguration(awsSqsEndpointOverride, awsRegion));
+            return sqsClientBuilder
+                .endpointOverride(new URI(awsSqsEndpointOverride))
+                .region(Region.of(awsRegion));
         }
-        return sqsClientBuilder.withRegion(Regions.fromName(awsRegion));
+        return sqsClientBuilder.region(Region.of(awsRegion));
     }
 
-    /**
-     * Optionally start a JMS broker
-     *
-     * @param url for the broker
-     * @return BrokerService
-     * @throws Exception on error creating broker
-     */
+    // TODO activemq migration
+//    /**
+//     * Optionally start a JMS broker
+//     *
+//     * @param url for the broker
+//     * @return BrokerService
+//     * @throws Exception on error creating broker
+//     */
+//    @Bean
+//    @ConditionalOnExpression("#{${pass.jms.embed} and !${pass.jms.sqs}}")
+//    public BrokerService brokerService(@Value("${spring.activemq.broker-url}") String url) throws Exception {
+//        BrokerService brokerService = new BrokerService();
+//        brokerService.setPersistent(false);
+//        brokerService.setUseJmx(false);
+//        brokerService.addConnector(url);
+//        brokerService.setUseShutdownHook(false);
+//        return brokerService;
+//    }
+
     @Bean
-    @ConditionalOnExpression("#{${pass.jms.embed} and !${pass.jms.sqs}}")
-    public BrokerService brokerService(@Value("${spring.activemq.broker-url}") String url) throws Exception {
-        BrokerService brokerService = new BrokerService();
-        brokerService.setPersistent(false);
-        brokerService.setUseJmx(false);
-        brokerService.addConnector(url);
-        brokerService.setUseShutdownHook(false);
-        return brokerService;
-    }
-
-    /**
-     * This Bean override for RefreshableElide is needed because of the `withUpdate200Status` setting.
-     * If Elide adds this to the config props, then it can be set application.yml, but until then,
-     * this is the only way of changing this setting.
-     * <p>
-     * The other settings were copied from the ElideAutoConfiguration.getRefreshableElide method.
-     *
-     * @param dictionary the elide dictionary
-     * @param dataStore the elide datastore
-     * @param headerProcessor the elide header processor
-     * @param transactionRegistry the elide transaction reg
-     * @param settings the elide settings
-     * @param mapper the elide mapper
-     * @param errorMapper the elide error mapper
-     * @return the refreshable elide
-     */
-    @Bean
-    @RefreshScope
-    @ConditionalOnMissingBean
-    public RefreshableElide getRefreshableElide(EntityDictionary dictionary, DataStore dataStore,
-                                                HeaderUtils.HeaderProcessor headerProcessor,
-                                                TransactionRegistry transactionRegistry,
-                                                ElideConfigProperties settings, JsonApiMapper mapper,
-                                                ErrorMapper errorMapper) {
-        ElideSettingsBuilder builder = new ElideSettingsBuilder(dataStore)
-            .withEntityDictionary(dictionary)
-            .withErrorMapper(errorMapper)
-            .withJsonApiMapper(mapper)
-            .withDefaultMaxPageSize(settings.getMaxPageSize())
-            .withDefaultPageSize(settings.getPageSize())
-            .withJoinFilterDialect(RSQLFilterDialect.builder().dictionary(dictionary).build())
-            .withSubqueryFilterDialect(RSQLFilterDialect.builder().dictionary(dictionary).build())
-            .withAuditLogger(new Slf4jLogger()).withBaseUrl(settings.getBaseUrl())
-            .withISO8601Dates("yyyy-MM-dd'T'HH:mm'Z'", TimeZone.getTimeZone("UTC"))
-            .withJsonApiPath(settings.getJsonApi().getPath()).withHeaderProcessor(headerProcessor)
-            .withGraphQLApiPath(settings.getGraphql().getPath())
-            .withUpdate200Status();
-
-        if (settings.getJsonApi() != null && settings.getJsonApi().isEnabled()
-            && settings.getJsonApi().isEnableLinks()) {
-            String baseUrl = settings.getBaseUrl();
-            if (StringUtils.isEmpty(baseUrl)) {
-                builder.withJSONApiLinks(new DefaultJSONApiLinks());
-            } else {
-                String jsonApiBaseUrl = baseUrl + settings.getJsonApi().getPath() + "/";
-                builder.withJSONApiLinks(new DefaultJSONApiLinks(jsonApiBaseUrl));
-            }
-        }
-
-        Elide elide = new Elide(builder.build(), transactionRegistry, dictionary.getScanner(), true);
-        return new RefreshableElide(elide);
+    JsonApiSettingsBuilderCustomizer jsonApiSettingsBuilderCustomizer() {
+        return JsonApiSettings.JsonApiSettingsBuilderSupport::updateStatus200;
     }
 
     /**
@@ -271,7 +212,7 @@ public class JmsConfiguration {
         };
 
         LifeCycleHook<Submission> sub_hook = (op, phase, sub, scope, changes) -> {
-            if (sub.getSubmitted() != null && sub.getSubmitted() == true) {
+            if (sub.getSubmitted() != null && Boolean.TRUE.equals(sub.getSubmitted())) {
                 send(jms, submission_queue, createMessage(sub), SUBMISSION_MESSAGE_TYPE);
             }
         };
@@ -296,13 +237,13 @@ public class JmsConfiguration {
                                         DepositRepository depositRepository) {
         LifeCycleHook<Submission> submission_version_check = (op, phase, sub, scope, changes) -> {
             Long repoSubVersion = submissionRepository.findSubmissionVersionById(sub.getId());
-            Long requestVersion = getRequestVersion((RequestScope) scope);
+            Long requestVersion = getRequestVersion((JsonApiRequestScope) scope);
             validateEntityVersions(repoSubVersion, requestVersion, sub);
         };
 
         LifeCycleHook<Deposit> deposit_version_check = (op, phase, dep, scope, changes) -> {
             Long repoDepVersion = depositRepository.findDepositVersionById(dep.getId());
-            Long requestVersion = getRequestVersion((RequestScope) scope);
+            Long requestVersion = getRequestVersion((JsonApiRequestScope) scope);
             validateEntityVersions(repoDepVersion, requestVersion, dep);
         };
 
@@ -312,7 +253,7 @@ public class JmsConfiguration {
             deposit_version_check, false);
     }
 
-    private Long getRequestVersion(RequestScope scope) {
+    private Long getRequestVersion(JsonApiRequestScope scope) {
         Object requestVersion = scope.getJsonApiDocument().getData().getSingleValue().getAttributes().get("version");
         // The string -> double -> long conversion is needed because json could send number as float
         return Objects.isNull(requestVersion) ? null : Double.valueOf(requestVersion.toString()).longValue();

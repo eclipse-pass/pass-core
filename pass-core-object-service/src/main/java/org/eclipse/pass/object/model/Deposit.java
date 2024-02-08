@@ -16,13 +16,13 @@
 package org.eclipse.pass.object.model;
 
 import java.util.Objects;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Version;
 
 import com.yahoo.elide.annotation.Include;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import org.eclipse.pass.object.converter.DepositStatusToStringConverter;
 
 /**

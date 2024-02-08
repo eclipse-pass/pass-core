@@ -18,13 +18,13 @@ package org.eclipse.pass.object.model;
 import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.Objects;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
 
 import com.yahoo.elide.annotation.CreatePermission;
 import com.yahoo.elide.annotation.Include;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import org.eclipse.pass.object.converter.EventTypeToStringConverter;
 import org.eclipse.pass.object.converter.PerformerRoleToStringConverter;
 

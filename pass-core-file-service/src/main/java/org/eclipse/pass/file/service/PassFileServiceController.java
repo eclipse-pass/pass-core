@@ -19,8 +19,8 @@ package org.eclipse.pass.file.service;
 import java.io.IOException;
 import java.net.URI;
 import java.security.Principal;
-import javax.servlet.http.HttpServletRequest;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.pass.file.service.storage.FileStorageService;
 import org.eclipse.pass.file.service.storage.StorageFile;
