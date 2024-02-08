@@ -27,6 +27,7 @@ import com.yahoo.elide.annotation.UpdatePermission;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -96,7 +97,7 @@ public class Submission extends PassEntity {
      * List of repositories that the submission will be deposited to
      * Note that the order of the list does not carry any particular significance
      */
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private List<Repository> repositories = new ArrayList<>();
 
     /**
@@ -123,20 +124,20 @@ public class Submission extends PassEntity {
      * select Repositories) but cannot approve any Repository agreements or submit the Publication.
      * Note that the order of the list does not carry any particular significance
      */
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private List<User> preparers = new ArrayList<>();
 
     /**
      * List of grants associated with the submission
      * Note that the order of the list does not carry any particular significance
      */
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private List<Grant> grants = new ArrayList<>();
 
     /**
      * List of the Policy resources being satisfied upon submission
      */
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private List<Policy> effectivePolicies = new ArrayList<>();
 
     /**

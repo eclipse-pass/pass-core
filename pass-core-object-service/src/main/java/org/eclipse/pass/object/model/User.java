@@ -26,6 +26,7 @@ import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Convert;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Table;
 import org.eclipse.pass.object.converter.SetToStringConverter;
 import org.eclipse.pass.object.converter.UserRoleListToStringConverter;
@@ -85,7 +86,7 @@ public class User extends PassEntity {
      * For example, @{code ["johnshopkins.edu:hopkinsid:DRA2D", "johnshopkins.edu:employeeid:12345",
      * "johnshopkins.edu:jhed:bostaur1"]}
      */
-    @ElementCollection(targetClass = String.class)
+    @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "pass_user_locators")
     private List<String> locatorIds = new ArrayList<String>();
 

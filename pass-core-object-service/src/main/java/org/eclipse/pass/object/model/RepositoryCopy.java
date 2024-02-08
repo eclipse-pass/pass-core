@@ -25,6 +25,7 @@ import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Convert;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import org.eclipse.pass.object.converter.CopyStatusToStringConverter;
@@ -42,7 +43,7 @@ public class RepositoryCopy extends PassEntity {
     /**
      * IDs assigned by the repository
      */
-    @ElementCollection(targetClass = String.class)
+    @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "pass_repository_copy_external_ids")
     private List<String> externalIds = new ArrayList<>();
 
