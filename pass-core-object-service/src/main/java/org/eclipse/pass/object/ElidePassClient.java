@@ -18,12 +18,11 @@ package org.eclipse.pass.object;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
 
 import com.yahoo.elide.Elide;
 import com.yahoo.elide.ElideResponse;
@@ -32,8 +31,13 @@ import com.yahoo.elide.RefreshableElide;
 import com.yahoo.elide.core.RequestScope;
 import com.yahoo.elide.core.datastore.DataStoreTransaction;
 import com.yahoo.elide.core.dictionary.EntityDictionary;
+import com.yahoo.elide.core.request.route.Route;
 import com.yahoo.elide.core.security.User;
 import com.yahoo.elide.core.type.ClassType;
+import com.yahoo.elide.jsonapi.JsonApi;
+import com.yahoo.elide.jsonapi.JsonApiMapper;
+import com.yahoo.elide.jsonapi.JsonApiRequestScope;
+import com.yahoo.elide.jsonapi.JsonApiSettings;
 import com.yahoo.elide.jsonapi.models.Data;
 import com.yahoo.elide.jsonapi.models.JsonApiDocument;
 import com.yahoo.elide.jsonapi.models.Relationship;
@@ -50,11 +54,12 @@ import org.eclipse.pass.object.security.WebSecurityRole;
  * This is because relationships are loaded lazily.
  */
 public class ElidePassClient implements PassClient {
-    private final Elide elide;
     private final ElideSettings settings;
     private final User user;
     private final String api_version;
     private final DataStoreTransaction read_tx;
+    private final JsonApi jsonApi;
+    private final JsonApiMapper jsonApiMapper;
 
     /**
      * Constructor for ElidePassClient. Will initialize the Elide instance, User, Elide settings, DataStoreTransaction,
@@ -64,11 +69,14 @@ public class ElidePassClient implements PassClient {
      * @param user User to use for the Elide PassClient
      */
     public ElidePassClient(RefreshableElide refreshableElide, User user) {
-        this.elide = refreshableElide.getElide();
+        Elide elide = refreshableElide.getElide();
         this.settings = elide.getElideSettings();
+        this.jsonApi = new JsonApi(elide);
         this.user = user;
-        this.api_version = settings.getDictionary().getApiVersions().iterator().next();
+        this.api_version = settings.getEntityDictionary().getApiVersions().iterator().next();
         this.read_tx = elide.getDataStore().beginReadTransaction();
+        JsonApiSettings jsonApiSettings = elide.getSettings(JsonApiSettings.class);
+        this.jsonApiMapper = jsonApiSettings.getJsonApiMapper();
     }
 
     /**
@@ -90,11 +98,15 @@ public class ElidePassClient implements PassClient {
         });
     }
 
-    private RequestScope get_scope(String path, DataStoreTransaction tx) {
-        RequestScope scope = new RequestScope(settings.getBaseUrl(), path, api_version, null, tx, user, null, null,
-                UUID.randomUUID(), settings);
-
-        return scope;
+    private JsonApiRequestScope get_scope(String path, DataStoreTransaction tx) {
+        Route route = getRoute(path, null);
+        return JsonApiRequestScope.builder()
+            .route(route)
+            .user(user)
+            .dataStoreTransaction(tx)
+            .requestId(UUID.randomUUID())
+            .elideSettings(settings)
+            .build();
     }
 
     private String get_path(Class<?> type, Long id) {
@@ -112,7 +124,7 @@ public class ElidePassClient implements PassClient {
     }
 
     private JsonApiDocument to_json_api_doc(PassEntity obj) {
-        EntityDictionary dict = settings.getDictionary();
+        EntityDictionary dict = settings.getEntityDictionary();
 
         String typeName = EntityDictionary.getEntityName(ClassType.of(obj.getClass()));
 
@@ -169,15 +181,16 @@ public class ElidePassClient implements PassClient {
     public <T extends PassEntity> void createObject(T obj) throws IOException {
         String path = get_path(obj.getClass(), null);
 
-        String json = elide.getMapper().writeJsonApiDocument(to_json_api_doc(obj));
-        ElideResponse response = elide.post(settings.getBaseUrl(), path, json, user, api_version);
+        String json = jsonApiMapper.writeJsonApiDocument(to_json_api_doc(obj));
+        Route route = getRoute(path, null);
+        ElideResponse<String> response = jsonApi.post(route, json, user, UUID.randomUUID());
 
-        if (response.getResponseCode() != 201) {
-            throw new IOException("Failed to create object: " + response.getResponseCode() + " " + response.getBody());
+        if (response.getStatus() != 201) {
+            throw new IOException("Failed to create object: " + response.getStatus() + " " + response.getBody());
         }
 
-        String id = elide.getMapper().readJsonApiDocument(response.getBody()).getData().getSingleValue().getId();
-        settings.getDictionary().setId(obj, id);
+        String id = jsonApiMapper.readJsonApiDocument(response.getBody()).getData().getSingleValue().getId();
+        settings.getEntityDictionary().setId(obj, id);
         setVersionIfNeeded(response, obj);
     }
 
@@ -185,11 +198,11 @@ public class ElidePassClient implements PassClient {
     public <T extends PassEntity> void updateObject(T obj) throws IOException {
         String path = get_path(obj.getClass(), obj.getId());
 
-        String json = elide.getMapper().writeJsonApiDocument(to_json_api_doc(obj));
-        ElideResponse response = elide.patch(settings.getBaseUrl(), Elide.JSONAPI_CONTENT_TYPE,
-                Elide.JSONAPI_CONTENT_TYPE, path, json, user, api_version);
+        String json = jsonApiMapper.writeJsonApiDocument(to_json_api_doc(obj));
+        Route route = getRoute(path, null);
+        ElideResponse<String> response = jsonApi.patch(route, json, user, UUID.randomUUID());
 
-        int code = response.getResponseCode();
+        int code = response.getStatus();
 
         if (code < 200 || code > 204) {
             throw new IOException("Failed to update object: " + code + " " + response.getBody());
@@ -198,30 +211,30 @@ public class ElidePassClient implements PassClient {
         setVersionIfNeeded(response, obj);
     }
 
-    private <T extends PassEntity> void setVersionIfNeeded(ElideResponse response, T obj) throws IOException {
-        Object version = elide.getMapper().readJsonApiDocument(response.getBody()).getData().getSingleValue()
+    private <T extends PassEntity> void setVersionIfNeeded(ElideResponse<String> response, T obj) throws IOException {
+        Object version = jsonApiMapper.readJsonApiDocument(response.getBody()).getData().getSingleValue()
             .getAttributes().get("version");
         if (Objects.nonNull(version)) {
-            settings.getDictionary().setValue(obj, "version", version);
+            settings.getEntityDictionary().setValue(obj, "version", version);
         }
     }
 
     @Override
     public <T extends PassEntity> T getObject(Class<T> type, Long id) throws IOException {
         String path = get_path(type, id);
+        Route route = getRoute(path, null);
 
-        MultivaluedMap<String, String> params = new MultivaluedHashMap<>();
-        ElideResponse response = elide.get(settings.getBaseUrl(), path, params, user, api_version);
+        ElideResponse<String> response = jsonApi.get(route, user, UUID.randomUUID());
 
-        if (response.getResponseCode() == 404) {
+        if (response.getStatus() == 404) {
             return null;
         }
 
-        if (response.getResponseCode() != 200) {
-            throw new IOException("Failed to get object: " + response.getResponseCode() + " " + response.getBody());
+        if (response.getStatus() != 200) {
+            throw new IOException("Failed to get object: " + response.getStatus() + " " + response.getBody());
         }
 
-        JsonApiDocument doc = elide.getMapper().readJsonApiDocument(response.getBody());
+        JsonApiDocument doc = jsonApiMapper.readJsonApiDocument(response.getBody());
 
         return type.cast(doc.getData().getSingleValue().toPersistentResource(get_scope(path, read_tx)).getObject());
     }
@@ -229,43 +242,41 @@ public class ElidePassClient implements PassClient {
     @Override
     public <T extends PassEntity> void deleteObject(Class<T> type, Long id) throws IOException {
         String path = get_path(type, id);
+        Route route = getRoute(path, null);
+        ElideResponse<String> response = jsonApi.delete(route, "", user, UUID.randomUUID());
 
-        ElideResponse response = elide.delete(settings.getBaseUrl(), path, api_version, user, api_version);
-
-        if (response.getResponseCode() != 204) {
-            throw new IOException("Failed to delete object: " + response.getResponseCode() + " " + response.getBody());
+        if (response.getStatus() != 204) {
+            throw new IOException("Failed to delete object: " + response.getStatus() + " " + response.getBody());
         }
     }
 
     @Override
     public <T extends PassEntity> PassClientResult<T> selectObjects(PassClientSelector<T> selector) throws IOException {
-        String path = get_path(selector.getType(), null);
-
-        MultivaluedMap<String, String> params = new MultivaluedHashMap<>();
-
+        Map<String, List<String>> params = new LinkedHashMap<>();
         if (selector.getFilter() != null) {
-            params.add("filter", selector.getFilter());
+            PassClient.addParam(params, "filter", selector.getFilter());
         }
-
         if (selector.getSorting() != null) {
-            params.add("sort", selector.getSorting());
+            PassClient.addParam(params, "sort", selector.getSorting());
         }
+        PassClient.addParam(params, "page[offset]", String.valueOf(selector.getOffset()));
+        PassClient.addParam(params, "page[limit]",  String.valueOf(selector.getLimit()));
+        PassClient.addParam(params, "page[totals]", null);
 
-        params.add("page[offset]", "" + selector.getOffset());
-        params.add("page[limit]", "" + selector.getLimit());
-        params.add("page[totals]", null);
+        String path = get_path(selector.getType(), null);
+        Route route = getRoute(path, params);
 
-        ElideResponse response = elide.get(settings.getBaseUrl(), path, params, user, api_version);
+        ElideResponse<String> response = jsonApi.get(route, user, UUID.randomUUID());
 
-        if (response.getResponseCode() == 404) {
+        if (response.getStatus() == 404) {
             return null;
         }
 
-        if (response.getResponseCode() != 200) {
-            throw new IOException("Failed to get object: " + response.getResponseCode() + " " + response.getBody());
+        if (response.getStatus() != 200) {
+            throw new IOException("Failed to get object: " + response.getStatus() + " " + response.getBody());
         }
 
-        JsonApiDocument doc = elide.getMapper().readJsonApiDocument(response.getBody());
+        JsonApiDocument doc = jsonApiMapper.readJsonApiDocument(response.getBody());
 
         Object totalval = doc.getMeta().getValue("page", Map.class).get("totalRecords");
         long total = -1;
@@ -285,6 +296,17 @@ public class ElidePassClient implements PassClient {
         });
 
         return result;
+    }
+
+    private Route getRoute(String path, Map<String, List<String>> parameters) {
+        Route.RouteBuilder builder = Route.builder()
+            .baseUrl(settings.getBaseUrl())
+            .path(path)
+            .apiVersion(api_version);
+
+        return Objects.nonNull(parameters)
+            ? builder.parameters(parameters).build()
+            : builder.build();
     }
 
     @Override

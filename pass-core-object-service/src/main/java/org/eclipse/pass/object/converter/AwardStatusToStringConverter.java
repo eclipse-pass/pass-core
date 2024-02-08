@@ -15,8 +15,7 @@
  */
 package org.eclipse.pass.object.converter;
 
-import javax.persistence.AttributeConverter;
-
+import jakarta.persistence.AttributeConverter;
 import org.eclipse.pass.object.model.AwardStatus;
 
 /**

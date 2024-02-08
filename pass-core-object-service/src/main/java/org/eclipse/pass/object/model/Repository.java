@@ -19,12 +19,12 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 import com.yahoo.elide.annotation.Include;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import org.eclipse.pass.object.converter.IntegrationTypeToStringConverter;
 import org.eclipse.pass.object.converter.ListToURIStringConverter;
 

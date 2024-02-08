@@ -9,31 +9,17 @@ elide:
   json-api:
     path: /data
     enabled: true
-    enableLinks: true    
+    links:
+      enabled: true
   graphql:
-    path: /graphql/api/v1
     enabled: false
-  swagger:
+  api-docs:
     path: /doc
     enabled: true
-  subscription:
-    enabled: false
-    path: /subscription
+    version: openapi_3_1
   async:
     enabled: false
-    threadPoolSize: 2
-    maxRunTime: 65
-    cleanupEnabled: true
-    queryCleanupDays: 7
-    defaultAsyncQueryDAO: true
-    export:
-      enabled: false
   aggregation-store:
-    enabled: false
-    default-dialect: h2
-    enableMetaDataStore: false
-  dynamic-config:
-    path: src/main/resources/analytics
     enabled: false
 
 spring:

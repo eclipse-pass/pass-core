@@ -30,8 +30,8 @@ public final class SchemaTestUtils {
         ElideSettings elideSettingsMock = mock(ElideSettings.class);
         when(elideMock.getElideSettings()).thenReturn(elideSettingsMock);
         EntityDictionary entityDictionaryMock = mock(EntityDictionary.class);
-        when(elideSettingsMock.getDictionary()).thenReturn(entityDictionaryMock);
-        when(elideSettingsMock.getDictionary().getApiVersions()).thenReturn(Set.of("1"));
+        when(elideSettingsMock.getEntityDictionary()).thenReturn(entityDictionaryMock);
+        when(elideSettingsMock.getEntityDictionary().getApiVersions()).thenReturn(Set.of("1"));
         DataStore dataStoreMock = mock(DataStore.class);
         when(elideMock.getDataStore()).thenReturn(dataStoreMock);
         DataStoreTransaction dataStoreTransactionMock = mock(DataStoreTransaction.class);

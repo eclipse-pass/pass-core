@@ -19,7 +19,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import javax.persistence.AttributeConverter;
+
+import jakarta.persistence.AttributeConverter;
 
 /**
  * Converter class for Set of Strings. Converts Set of Strings to a comma separated String and a comma separated String

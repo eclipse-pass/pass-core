@@ -17,10 +17,12 @@ package org.eclipse.pass.object.model;
 
 import java.util.List;
 import java.util.Objects;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
+
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.SequenceGenerator;
 
 /**
  * Abstract method that all PASS model entities inherit from. All entities can include
@@ -65,7 +67,8 @@ public abstract class PassEntity {
      * Unique id for the resource.
      */
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibernate_gen")
+    @SequenceGenerator(name = "hibernate_gen", sequenceName = "hibernate_sequence", allocationSize = 1)
     private Long id;
 
     /**

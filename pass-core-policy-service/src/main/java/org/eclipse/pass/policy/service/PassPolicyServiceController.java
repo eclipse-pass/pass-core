@@ -25,10 +25,10 @@ import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import com.yahoo.elide.RefreshableElide;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.eclipse.pass.object.model.Policy;
 import org.eclipse.pass.object.model.Repository;
 import org.slf4j.Logger;
