@@ -25,8 +25,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.util.ReflectionTestUtils;
+import software.amazon.awssdk.core.client.config.SdkClientOption;
+import software.amazon.awssdk.utils.AttributeMap;
 
 @TestPropertySource(properties = {
+    "spring.artemis.embedded.enabled=false",
     "pass.jms.sqs=true",
     "pass.jms.embed=false"
 })
@@ -41,7 +44,9 @@ public class JmsSqsConfigurationTest extends IntegrationTest {
         Object amazonSQSClientSupplier = ReflectionTestUtils.getField(sqsConnectionFactory,
             "amazonSQSClientSupplier");
         Object sqsClient = ReflectionTestUtils.invokeGetterMethod(amazonSQSClientSupplier, "get");
-        URI endpoint = (URI) ReflectionTestUtils.getField(sqsClient, "endpoint");
+        Object clientConfig = ReflectionTestUtils.getField(sqsClient, "clientConfiguration");
+        AttributeMap attributes = (AttributeMap) ReflectionTestUtils.getField(clientConfig, "attributes");
+        URI endpoint = attributes.get(SdkClientOption.ENDPOINT);
 
         // THEN
         assertEquals(URI.create("https://sqs.us-east-1.amazonaws.com"), endpoint);
