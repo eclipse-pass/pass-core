@@ -20,15 +20,8 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Set;
-
-import com.yahoo.elide.jsonapi.JsonApiRequestScope;
-import com.yahoo.elide.jsonapi.JsonApiSettings;
-import com.yahoo.elide.jsonapi.JsonApiSettingsBuilderCustomizer;
-import jakarta.jms.ConnectionFactory;
-import jakarta.jms.TextMessage;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
-import jakarta.persistence.OptimisticLockException;
 
 import com.amazon.sqs.javamessaging.ProviderConfiguration;
 import com.amazon.sqs.javamessaging.SQSConnectionFactory;
@@ -40,6 +33,12 @@ import com.yahoo.elide.core.lifecycle.LifeCycleHook;
 import com.yahoo.elide.core.type.Type;
 import com.yahoo.elide.core.utils.ClassScanner;
 import com.yahoo.elide.core.utils.coerce.CoerceUtil;
+import com.yahoo.elide.jsonapi.JsonApiRequestScope;
+import com.yahoo.elide.jsonapi.JsonApiSettings;
+import com.yahoo.elide.jsonapi.JsonApiSettingsBuilderCustomizer;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.TextMessage;
+import jakarta.persistence.OptimisticLockException;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.pass.main.repository.DepositRepository;
 import org.eclipse.pass.main.repository.SubmissionRepository;
@@ -142,7 +141,8 @@ public class JmsConfiguration {
         return new SQSConnectionFactory(new ProviderConfiguration(), sqsClient);
     }
 
-    private SqsClientBuilder configureSqsBuilder(SqsClientBuilder sqsClientBuilder, String awsRegion) throws URISyntaxException {
+    private SqsClientBuilder configureSqsBuilder(SqsClientBuilder sqsClientBuilder, String awsRegion)
+        throws URISyntaxException {
         if (StringUtils.isNotEmpty(awsSqsEndpointOverride)) {
             return sqsClientBuilder
                 .endpointOverride(new URI(awsSqsEndpointOverride))

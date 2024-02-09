@@ -17,12 +17,11 @@ package org.eclipse.pass.main;
 
 import javax.annotation.Nullable;
 
-import jakarta.persistence.OptimisticLockException;
-
 import com.yahoo.elide.ElideErrorResponse;
 import com.yahoo.elide.ElideErrors;
 import com.yahoo.elide.core.exceptions.ErrorContext;
 import com.yahoo.elide.core.exceptions.ExceptionMapper;
+import jakarta.persistence.OptimisticLockException;
 import org.springframework.stereotype.Component;
 
 /**
@@ -33,7 +32,8 @@ public class OptimisticLockExceptionMapper implements ExceptionMapper<Optimistic
 
     @Nullable
     @Override
-    public ElideErrorResponse<ElideErrors> toErrorResponse(OptimisticLockException exception, ErrorContext errorContext) {
+    public ElideErrorResponse<ElideErrors> toErrorResponse(OptimisticLockException exception,
+                                                           ErrorContext errorContext) {
         return ElideErrorResponse.status(409)
             .errors(errors -> errors.error(error -> error.message(exception.getMessage())));
     }

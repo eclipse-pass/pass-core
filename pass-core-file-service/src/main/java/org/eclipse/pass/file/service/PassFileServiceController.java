@@ -101,7 +101,8 @@ public class PassFileServiceController {
      */
     @GetMapping("/file/{uuid:.+}/{origFileName:.+}")
     @ResponseBody
-    public ResponseEntity<?> getFileById(@PathVariable String uuid, @PathVariable String origFileName) {
+    public ResponseEntity<?> getFileById(@PathVariable("uuid") String uuid,
+                                         @PathVariable("origFileName") String origFileName) {
         String fileId = uuid  + "/" + origFileName;
         if (StringUtils.isEmpty(uuid) || StringUtils.isEmpty(origFileName)) {
             LOG.error("File ID not provided to get a file.");
@@ -136,7 +137,8 @@ public class PassFileServiceController {
      * @return File
      */
     @DeleteMapping("/file/{uuid:.+}/{origFileName:.+}")
-    public ResponseEntity<?> deleteFileById(@PathVariable String uuid, @PathVariable String origFileName,
+    public ResponseEntity<?> deleteFileById(@PathVariable("uuid") String uuid,
+                                            @PathVariable("origFileName") String origFileName,
                                             Principal principal, HttpServletRequest request) {
         String principalName = principal.getName();
         String fileId = uuid  + "/" + origFileName;
