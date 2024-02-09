@@ -18,8 +18,16 @@ package org.eclipse.pass.main.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AnonymousConfigurer;
+import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
+import org.springframework.security.config.annotation.web.configurers.ExceptionHandlingConfigurer;
+import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
+import org.springframework.security.config.annotation.web.configurers.RequestCacheConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
@@ -42,17 +50,26 @@ public class SecurityConfiguration {
      */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable();
-        http.formLogin().disable();
-        http.logout().disable();
-        http.anonymous().disable();
-        http.exceptionHandling().disable();
-        http.headers().disable();
-        http.requestCache().disable();
+        http.csrf(CsrfConfigurer::disable);
+        http.formLogin(FormLoginConfigurer::disable);
+        http.logout(LogoutConfigurer::disable);
+        http.anonymous(AnonymousConfigurer::disable);
+        http.exceptionHandling(ExceptionHandlingConfigurer::disable);
+        http.headers(HeadersConfigurer::disable);
+        http.requestCache(RequestCacheConfigurer::disable);
 
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        http.authorizeRequests().anyRequest().authenticated();
-        http.httpBasic();
+        http.sessionManagement((sessionManagement) ->
+            sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        // TODO revisit to implement in spring sec 6.x way:
+        // https://docs.spring.io/spring-security/reference/servlet/authentication/persistence.html
+        http.securityContext((securityContext) ->
+            securityContext.requireExplicitSave(false));
+
+        http.authorizeHttpRequests((authorizeHttpRequests) ->
+            authorizeHttpRequests.anyRequest().authenticated());
+
+        http.httpBasic(Customizer.withDefaults());
         http.addFilterBefore(shibAuthFilter, BasicAuthenticationFilter.class);
 
         return http.build();
