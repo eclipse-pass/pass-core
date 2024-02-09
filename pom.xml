@@ -128,6 +128,12 @@
       </dependency>
 
       <dependency>
+        <groupId>com.squareup.okhttp3</groupId>
+        <artifactId>okhttp</artifactId>
+        <version>${okhttp.version}</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
         <version>${spring-boot-maven-plugin.version}</version>
@@ -313,6 +319,10 @@
                 <ignoredNonTestScopedDependency>org.json:json:</ignoredNonTestScopedDependency>
                 <!-- These are module jars used via spring IOC -->
                 <ignoredNonTestScopedDependency>org.eclipse.pass:pass-core-file-service:jar:</ignoredNonTestScopedDependency>
+                <!-- This needs to stay compile scope to be included in pass-core exec jar -->
+                <ignoredNonTestScopedDependency>com.squareup.okhttp3:okhttp:</ignoredNonTestScopedDependency>
+                <!-- This needs to stay compile scope to be included in pass-core exec jar -->
+                <ignoredNonTestScopedDependency>edu.wisc.library.ocfl:ocfl-java-api:</ignoredNonTestScopedDependency>
               </ignoredNonTestScopedDependencies>
             </configuration>
           </execution>
