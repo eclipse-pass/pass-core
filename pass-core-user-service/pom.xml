@@ -33,5 +33,11 @@
             <artifactId>pass-core-usertoken</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>javax.json</groupId>
+            <artifactId>javax.json-api</artifactId>
+            <version>${javax.json.version}</version>
+        </dependency>
     </dependencies>
 </project>
