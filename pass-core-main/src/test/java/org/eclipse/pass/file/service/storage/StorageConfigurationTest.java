@@ -17,8 +17,6 @@ package org.eclipse.pass.file.service.storage;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import java.io.IOException;
-
 import org.eclipse.pass.main.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +31,7 @@ public class StorageConfigurationTest extends IntegrationTest {
     @Autowired private StorageConfiguration storageConfiguration;
 
     @Test
-    public void testDefaultValuesFromConfiguration() throws IOException {
+    public void testDefaultValuesFromConfiguration() {
         assertFalse(storageConfiguration.getStorageProperties().getStorageRootDir().isEmpty());
         assertFalse(storageConfiguration.getStorageProperties().getStorageRootDir().contains("#{null}"));
     }

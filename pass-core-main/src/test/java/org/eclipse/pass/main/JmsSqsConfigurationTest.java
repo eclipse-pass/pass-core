@@ -18,9 +18,9 @@ package org.eclipse.pass.main;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.net.URI;
-import jakarta.jms.ConnectionFactory;
 
 import com.amazon.sqs.javamessaging.SQSConnectionFactory;
+import jakarta.jms.ConnectionFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
