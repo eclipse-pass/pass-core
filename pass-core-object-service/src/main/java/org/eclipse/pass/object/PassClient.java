@@ -29,6 +29,7 @@ import com.yahoo.elide.ElideSettings;
 import com.yahoo.elide.RefreshableElide;
 import com.yahoo.elide.core.dictionary.EntityDictionary;
 import com.yahoo.elide.core.type.ClassType;
+import com.yahoo.elide.jsonapi.JsonApiSettings;
 import org.eclipse.pass.object.model.PassEntity;
 
 /**
@@ -53,8 +54,8 @@ public interface PassClient extends Closeable {
      */
     static String getBaseUrl(RefreshableElide elide) {
         ElideSettings settings = elide.getElide().getElideSettings();
-
-        return settings.getBaseUrl() + settings.getBaseUrl() + "/";
+        JsonApiSettings jsonApiSettings = settings.getSettings(JsonApiSettings.class);
+        return settings.getBaseUrl() + jsonApiSettings.getPath() + "/";
     }
 
     /**
