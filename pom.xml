@@ -321,8 +321,8 @@
                 <ignoredNonTestScopedDependency>org.eclipse.pass:pass-core-file-service:jar:</ignoredNonTestScopedDependency>
                 <!-- This needs to stay compile scope to be included in pass-core exec jar -->
                 <ignoredNonTestScopedDependency>com.squareup.okhttp3:okhttp:</ignoredNonTestScopedDependency>
-                <!-- This needs to stay compile scope to be included in pass-core exec jar -->
                 <ignoredNonTestScopedDependency>edu.wisc.library.ocfl:ocfl-java-api:</ignoredNonTestScopedDependency>
+                <ignoredNonTestScopedDependency>commons-io:commons-io:</ignoredNonTestScopedDependency>
               </ignoredNonTestScopedDependencies>
             </configuration>
           </execution>
