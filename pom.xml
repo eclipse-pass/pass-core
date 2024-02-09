@@ -74,18 +74,13 @@
 
   <properties>
     <maven-dependency-plugin.version>3.6.1</maven-dependency-plugin.version>
-
-    <!-- TODO update these deps when elide/spring-boot are upgraded -->
     <spring-boot-maven-plugin.version>3.2.2</spring-boot-maven-plugin.version>
     <elide.version>7.0.2</elide.version>
     <amazon.sqs.version>2.1.1</amazon.sqs.version>
     <logback.version>1.4.14</logback.version>
     <slf4j.version>2.0.7</slf4j.version>
-    <rest-assured.version>5.4.0</rest-assured.version>
-
-    <!-- TODO upgrade once elide/spring boot are upgraded -->
     <liquibase.version>4.25.1</liquibase.version>
-
+    <rest-assured.version>5.4.0</rest-assured.version>
 
     <!-- TODO major upgrade -->
     <ocfl.java.core.version>1.5.0</ocfl.java.core.version>

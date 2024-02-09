@@ -239,7 +239,11 @@ public class JmsConfiguration {
     }
 
     private void validateEntityVersions(Long repoVersion, Long requestVersion, PassEntity passEntity) {
-        if (!Objects.equals(repoVersion, requestVersion)) {
+        // Need to add 1 here because repoVersion will be the value to be saved after update
+        Long checkRequestVersion = Objects.nonNull(requestVersion)
+            ? Long.valueOf(requestVersion + 1)
+            : requestVersion;
+        if (!Objects.equals(repoVersion, checkRequestVersion)) {
             throw new OptimisticLockException(
                 String.format("Optimistic lock check failed for %s [ID=%d]. Request version: %d, Stored version: %d",
                     passEntity.getClass().getSimpleName(), passEntity.getId(), requestVersion, repoVersion));

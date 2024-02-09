@@ -34,7 +34,7 @@ public class OptimisticLockExceptionMapper implements ExceptionMapper<Optimistic
     @Nullable
     @Override
     public ElideErrorResponse<ElideErrors> toErrorResponse(OptimisticLockException exception, ErrorContext errorContext) {
-        return ElideErrorResponse.status(400)
+        return ElideErrorResponse.status(409)
             .errors(errors -> errors.error(error -> error.message(exception.getMessage())));
     }
 }
