@@ -32,10 +32,8 @@ import jakarta.persistence.OptimisticLockException;
 
 import com.amazon.sqs.javamessaging.ProviderConfiguration;
 import com.amazon.sqs.javamessaging.SQSConnectionFactory;
-import com.yahoo.elide.RefreshableElide;
 import com.yahoo.elide.annotation.LifeCycleHookBinding.Operation;
 import com.yahoo.elide.annotation.LifeCycleHookBinding.TransactionPhase;
-import com.yahoo.elide.core.RequestScope;
 import com.yahoo.elide.core.dictionary.EntityDictionary;
 import com.yahoo.elide.core.dictionary.Injector;
 import com.yahoo.elide.core.lifecycle.LifeCycleHook;
@@ -152,25 +150,6 @@ public class JmsConfiguration {
         }
         return sqsClientBuilder.region(Region.of(awsRegion));
     }
-
-    // TODO activemq migration
-//    /**
-//     * Optionally start a JMS broker
-//     *
-//     * @param url for the broker
-//     * @return BrokerService
-//     * @throws Exception on error creating broker
-//     */
-//    @Bean
-//    @ConditionalOnExpression("#{${pass.jms.embed} and !${pass.jms.sqs}}")
-//    public BrokerService brokerService(@Value("${spring.activemq.broker-url}") String url) throws Exception {
-//        BrokerService brokerService = new BrokerService();
-//        brokerService.setPersistent(false);
-//        brokerService.setUseJmx(false);
-//        brokerService.addConnector(url);
-//        brokerService.setUseShutdownHook(false);
-//        return brokerService;
-//    }
 
     @Bean
     JsonApiSettingsBuilderCustomizer jsonApiSettingsBuilderCustomizer() {

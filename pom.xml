@@ -286,8 +286,8 @@
                 <ignoredUsedUndeclaredDependency>com.yahoo.elide::</ignoredUsedUndeclaredDependency>
                 <!-- These come from ocfl -->
                 <ignoredUsedUndeclaredDependency>com.google.code.findbugs:jsr305:</ignoredUsedUndeclaredDependency>
-                <!-- These come from spring boot activemq starter test -->
-                <ignoredUsedUndeclaredDependency>org.apache.activemq:activemq-broker:</ignoredUsedUndeclaredDependency>
+                <!-- These come from spring boot activemq artemis starter -->
+                <ignoredUsedUndeclaredDependency>org.apache.activemq:artemis-jakarta-server:</ignoredUsedUndeclaredDependency>
                 <!-- These come from spring boot starter test -->
                 <ignoredUsedUndeclaredDependency>org.mockito::</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>org.junit.jupiter:junit-jupiter-api:</ignoredUsedUndeclaredDependency>
@@ -315,6 +315,8 @@
                 <ignoredUnusedDeclaredDependency>org.eclipse.pass:pass-core-user-service:</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>org.eclipse.pass:pass-core-policy-service:</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>org.eclipse.pass:pass-core-metadataschema-service:</ignoredUnusedDeclaredDependency>
+                <!-- These come from spring boot activemq artemis starter -->
+                <ignoredUsedUndeclaredDependency>org.apache.activemq:artemis-jakarta-server:</ignoredUsedUndeclaredDependency>
               </ignoredUnusedDeclaredDependencies>
               <ignoredNonTestScopedDependencies>
                 <!-- This is the elide starter jar -->

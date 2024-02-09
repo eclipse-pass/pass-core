@@ -45,9 +45,10 @@ spring:
     change-log: 'classpath:db/changelog/core-changelog.yaml'
     parameters:
       institution-changelog-file: ${PASS_CORE_INSTN_CHG_LOG:file:////tmp/instn-changelog.yaml}
-  activemq:
-    broker-url: 'vm://embedded?broker.persistent=false,useShutdownHook=false'
-    in-memory: true
+  artemis:
+    embedded:
+      enabled: ${PASS_CORE_EMBED_JMS_BROKER:true}
+      queues: pass-submission,pass-deposit,pass-submission-event
   security:
     user:
       name: ${PASS_CORE_BACKEND_USER:backend}
