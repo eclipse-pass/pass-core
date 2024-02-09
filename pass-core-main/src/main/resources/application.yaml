@@ -64,7 +64,8 @@ server:
   shutdown: graceful
 
 logging:
-  path: ${PASS_CORE_LOG_DIR:${java.io.tmpdir}/pass-core}
+  file:
+    path: ${PASS_CORE_LOG_DIR:${java.io.tmpdir}/pass-core}
 
 aws:
   region: us-east-1
