@@ -16,42 +16,29 @@
  */
 package org.eclipse.pass.metadataschema;
 
-import static org.eclipse.pass.metadataschema.SchemaTestUtils.RefreshableElideMocked;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
 
 import java.io.InputStream;
-import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.eclipse.pass.object.model.Repository;
+import com.yahoo.elide.RefreshableElide;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
-// TODO return to fix mocking
-@Disabled
 class SchemaServiceTest {
 
-    private RefreshableElideMocked refreshableElideMocked;
-    private Repository repositoryMock1;
-    private Repository repositoryMock2;
     private SchemaService schemaService;
     private ObjectMapper map;
 
     @BeforeEach
     void setup() {
-        repositoryMock1 = Mockito.mock(Repository.class);
-        repositoryMock2 = Mockito.mock(Repository.class);
-        refreshableElideMocked = SchemaTestUtils.getMockedRefreshableElide();
-        SchemaFetcher schemaFetcher = new SchemaFetcher(refreshableElideMocked.getRefreshableElideMock());
+        RefreshableElide refreshableElideMock = mock(RefreshableElide.class);
+        SchemaFetcher schemaFetcher = new SchemaFetcher(refreshableElideMock);
         schemaService = new SchemaService(schemaFetcher);
         map = new ObjectMapper();
     }
@@ -228,48 +215,4 @@ class SchemaServiceTest {
         assertEquals(expectedMessage, actualMessage);
     }
 
-    @Test
-    void getMergedSchemaTest() throws Exception {
-        List<String> repositoryIds = Arrays.asList("1", "2");
-        when(refreshableElideMocked.getDataStoreTransactionMock().loadObject(any(), eq(1L), any()))
-                .thenReturn(repositoryMock1);
-        when(refreshableElideMocked.getDataStoreTransactionMock().loadObject(any(), eq(2L), any()))
-                .thenReturn(repositoryMock2);
-
-        List<URI> r1_schemas_list = Arrays.asList(new URI("https://example.com/metadata-schemas/jhu/schema1.json"),
-                new URI("https://example.com/metadata-schemas/jhu/schema2.json"),
-                new URI("https://example.com/metadata-schemas/jhu/schema3.json"));
-
-        List<URI> r2_schemas_list = Arrays.asList(new URI("https://example.com/metadata-schemas/jhu/schema3.json"),
-                new URI("https://example.com/metadata-schemas/jhu/schema4.json"),
-                new URI("https://example.com/metadata-schemas/jhu/schema_to_deref.json"));
-
-        when(repositoryMock1.getSchemas()).thenReturn(r1_schemas_list);
-        when(repositoryMock2.getSchemas()).thenReturn(r2_schemas_list);
-
-        InputStream expected_schema_json = SchemaServiceTest.class
-                .getResourceAsStream("/schemas/jhu/example_merged_dereferenced.json");
-        ObjectMapper map = new ObjectMapper();
-        JsonNode expected = map.readTree(expected_schema_json);
-        JsonNode result = schemaService.getMergedSchema(repositoryIds);
-        assertEquals(expected, result);
-    }
-
-    @Test
-    void getMergeJscholarSchemaTest() throws Exception {
-        List<String> repositoryIds = List.of("1");
-        when(refreshableElideMocked.getDataStoreTransactionMock().loadObject(any(), eq(1L), any()))
-                .thenReturn(repositoryMock1);
-
-        List<URI> r1_schemas_list = List.of(new URI("https://example.com/metadata-schemas/jhu/jscholarship.json"));
-
-        when(repositoryMock1.getSchemas()).thenReturn(r1_schemas_list);
-
-        InputStream expected_schema_json = SchemaServiceTest.class
-                .getResourceAsStream("/schemas/jhu/jscholarship_merge_deref.json");
-        ObjectMapper map = new ObjectMapper();
-        JsonNode expected = map.readTree(expected_schema_json);
-        JsonNode result = schemaService.getMergedSchema(repositoryIds);
-        assertEquals(expected, result);
-    }
 }

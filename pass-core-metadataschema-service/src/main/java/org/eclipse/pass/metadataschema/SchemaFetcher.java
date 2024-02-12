@@ -67,7 +67,7 @@ public class SchemaFetcher {
      * @return an ArrayList of relevant JsonNode objects
      * @throws IOException if the schemas cannot be fetched
      */
-    public List<JsonNode> getSchemas(List<String> entityIds) throws IOException {
+    List<JsonNode> getSchemas(List<String> entityIds) throws IOException {
         List<JsonNode> schemas = new ArrayList<>();
         List<SchemaInstance> schema_instances = new ArrayList<>();
 
@@ -107,6 +107,32 @@ public class SchemaFetcher {
     }
 
     /**
+     * Get the local schema from the path. If the schema is already in the cache, return the cached schema.
+     * Otherwise, read the schema from the path and add it to the cache.
+     *
+     * @param path the path to the local schema
+     * @return the local schema
+     * @throws IOException if the schema cannot be found or is corrupted
+     */
+    JsonNode getLocalSchema(String path) throws IOException {
+        ObjectMapper objmapper = new ObjectMapper();
+        if (localSchemaCache.containsKey(path)) {
+            JsonNode cacheSchema = localSchemaCache.get(path);
+            return cacheSchema.deepCopy();
+        }
+
+        try {
+            InputStream schema_json = SchemaFetcher.class.getResourceAsStream(path);
+            JsonNode schema = objmapper.readTree(schema_json);
+            localSchemaCache.put(path, schema.deepCopy());
+            return schema.deepCopy();
+        } catch (StreamCorruptedException | NullPointerException e) {
+            LOG.error("Schema not found at " + path, e);
+            throw new IOException("Schema not found at " + path, e);
+        }
+    }
+
+    /**
      * Gets the Repository PASS entity at the URI and generates the corresponding
      * SchemaInstance objects
      *
@@ -114,7 +140,7 @@ public class SchemaFetcher {
      * @return an Arraylist of schemas from the repository
      * @throws IOException if the repository cannot be found.
      */
-    public List<JsonNode> getRepositorySchemas(String entityId) throws IOException {
+    private List<JsonNode> getRepositorySchemas(String entityId) throws IOException {
         List<JsonNode> repository_schemas = new ArrayList<>();
         try (PassClient passClient = PassClient.newInstance(refreshableElide)) {
             Repository repo = passClient.getObject(Repository.class, Long.parseLong(entityId));
@@ -136,7 +162,7 @@ public class SchemaFetcher {
      * @return SchemaInstance schema at URI
      * @throws IOException if the schema cannot be fetched
      */
-    public JsonNode getSchemaFromUri(URI schemaUri) throws IOException {
+    private JsonNode getSchemaFromUri(URI schemaUri) throws IOException {
         // Given the schema's $id url, go to the corresponding local json file
         // by loading it as a resource stream based on the last 2 parts of the $id
         // Create a SchemaInstance object from the json file and return it
@@ -144,31 +170,5 @@ public class SchemaFetcher {
         String[] path_segments = path.split("/metadata-schemas");
         String path_to_schema = "/schemas" + path_segments[path_segments.length - 1];
         return getLocalSchema(path_to_schema);
-    }
-
-    /**
-     * Get the local schema from the path. If the schema is already in the cache, return the cached schema.
-     * Otherwise, read the schema from the path and add it to the cache.
-     *
-     * @param path the path to the local schema
-     * @return the local schema
-     * @throws IOException if the schema cannot be found or is corrupted
-     */
-    public JsonNode getLocalSchema(String path) throws IOException {
-        ObjectMapper objmapper = new ObjectMapper();
-        if (localSchemaCache.containsKey(path)) {
-            JsonNode cacheSchema = localSchemaCache.get(path);
-            return cacheSchema.deepCopy();
-        }
-
-        try {
-            InputStream schema_json = SchemaFetcher.class.getResourceAsStream(path);
-            JsonNode schema = objmapper.readTree(schema_json);
-            localSchemaCache.put(path, schema.deepCopy());
-            return schema.deepCopy();
-        } catch (StreamCorruptedException | NullPointerException e) {
-            LOG.error("Schema not found at " + path, e);
-            throw new IOException("Schema not found at " + path, e);
-        }
     }
 }

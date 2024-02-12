@@ -39,7 +39,7 @@ public class UnpaywallDoiServiceTest {
     public void testProcessObject() {
 
         assertEquals(unpaywallData,
-            underTest.processObject(JsonTestObjects.unpaywallTestJsonObject()).toString());
+            underTest.processObject(JsonTestObjectsUtil.unpaywallTestJsonObject()).toString());
     }
 
 }
