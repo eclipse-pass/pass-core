@@ -464,7 +464,7 @@ public class ElidePassClientTest extends IntegrationTest {
 
         assertTrue(ioException.getMessage().startsWith("Failed to update object: 409 " +
             "{\"errors\":[{\"detail\":\"Optimistic lock check failed for Submission [ID="));
-        assertTrue(ioException.getMessage().endsWith("]. Request version: 0, Stored version: 2\"}]}"));
+        assertTrue(ioException.getMessage().endsWith("]. Request version: 1, Stored version: 2\"}]}"));
     }
 
     @Test
@@ -494,7 +494,7 @@ public class ElidePassClientTest extends IntegrationTest {
 
         assertTrue(ioException.getMessage().startsWith("Failed to update object: 409 " +
             "{\"errors\":[{\"detail\":\"Optimistic lock check failed for Submission [ID="));
-        assertTrue(ioException.getMessage().endsWith("]. Request version: null, Stored version: 2\"}]}"));
+        assertTrue(ioException.getMessage().endsWith("]. Request version: -1, Stored version: 2\"}]}"));
     }
 
     @Test
@@ -520,7 +520,7 @@ public class ElidePassClientTest extends IntegrationTest {
 
         assertTrue(ioException.getMessage().startsWith("Failed to update object: 409 " +
             "{\"errors\":[{\"detail\":\"Optimistic lock check failed for Deposit [ID="));
-        assertTrue(ioException.getMessage().endsWith("]. Request version: 0, Stored version: 2\"}]}"));
+        assertTrue(ioException.getMessage().endsWith("]. Request version: 1, Stored version: 2\"}]}"));
     }
 
     @Test
@@ -545,6 +545,6 @@ public class ElidePassClientTest extends IntegrationTest {
 
         assertTrue(ioException.getMessage().startsWith("Failed to update object: 409 " +
             "{\"errors\":[{\"detail\":\"Optimistic lock check failed for Deposit [ID="));
-        assertTrue(ioException.getMessage().endsWith("]. Request version: null, Stored version: 2\"}]}"));
+        assertTrue(ioException.getMessage().endsWith("]. Request version: -1, Stored version: 2\"}]}"));
     }
 }
