@@ -322,6 +322,7 @@
                 <ignoredNonTestScopedDependency>com.squareup.okhttp3:okhttp:</ignoredNonTestScopedDependency>
                 <ignoredNonTestScopedDependency>edu.wisc.library.ocfl:ocfl-java-api:</ignoredNonTestScopedDependency>
                 <ignoredNonTestScopedDependency>commons-io:commons-io:</ignoredNonTestScopedDependency>
+                <ignoredNonTestScopedDependency>com.fasterxml.jackson.core:jackson-*:</ignoredNonTestScopedDependency>
               </ignoredNonTestScopedDependencies>
             </configuration>
           </execution>

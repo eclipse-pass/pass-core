@@ -16,14 +16,11 @@
  */
 package org.eclipse.pass.metadataschema;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -56,38 +53,6 @@ public class PassSchemaServiceController {
      */
     public PassSchemaServiceController(SchemaService schemaService) {
         this.schemaService = schemaService;
-    }
-
-    /**
-     * Handle GET text requests
-     * @param r BufferedReader to read the request body
-     * @return List of repository schema names
-     * @throws IOException if there is an error reading the request body
-     */
-    protected List<String> readText(BufferedReader r) throws IOException {
-        String next;
-        List<String> repository_list = new ArrayList<>();
-        while ((next = r.readLine()) != null) {
-            repository_list.add(next);
-        }
-        return repository_list;
-    }
-
-    /**
-     * Handle GET JSON requests
-     * @param r BufferedReader to read the request body
-     * @return List of repository schema names
-     * @throws Exception if there is an error reading the request body
-     */
-    protected List<String> readJson(BufferedReader r) throws Exception {
-        String json_list = r.readLine();
-        ObjectMapper o = new ObjectMapper();
-        List<String> repository_list = o.readValue(json_list, new TypeReference<ArrayList<String>>() {
-        });
-        if (r.readLine() != null) {
-            throw new Exception("Too many lines");
-        }
-        return repository_list;
     }
 
     /**
