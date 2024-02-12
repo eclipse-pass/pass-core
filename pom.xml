@@ -79,7 +79,7 @@
     <amazon.sqs.version>2.1.1</amazon.sqs.version>
     <logback.version>1.4.14</logback.version>
     <slf4j.version>2.0.7</slf4j.version>
-    <liquibase.version>4.25.1</liquibase.version>
+    <liquibase.version>4.26.0</liquibase.version>
     <rest-assured.version>5.4.0</rest-assured.version>
 
     <!-- TODO major upgrade -->
@@ -212,29 +212,11 @@
                     <exclude>com.google.code.findbugs:jsr305:</exclude>
                     <exclude>com.google.protobuf:protobuf-java:</exclude>
                     <exclude>com.google.guava:guava:</exclude>
-                    <exclude>jakarta.activation:jakarta.activation-api:</exclude>
-                    <exclude>org.yaml:snakeyaml:</exclude>
-                    <exclude>org.apache.commons:commons-pool2:</exclude>
-                    <exclude>org.apache.httpcomponents:</exclude>
-                    <exclude>javax.validation:validation-api:</exclude>
-                    <exclude>com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:</exclude>
-                    <exclude>com.fasterxml.jackson.core:jackson-core:</exclude>
-                    <exclude>com.fasterxml.jackson.core:jackson-annotations:</exclude>
-                    <exclude>com.fasterxml.jackson.core:jackson-databind:</exclude>
-                    <exclude>com.fasterxml.jackson.datatype:jackson-datatype-jsr310:</exclude>
-                    <exclude>org.apache.commons:commons-lang3:</exclude>
-                    <exclude>com.google.code.gson:gson:</exclude>
-                    <exclude>commons-codec:commons-codec:</exclude>
-                    <exclude>com.google.errorprone:error_prone_annotations:</exclude>
-                    <exclude>com.jayway.jsonpath:json-path:</exclude>
-                    <exclude>org.jboss.logging:jboss-logging:</exclude>
-                    <exclude>org.hibernate:hibernate-core:</exclude>
-                    <exclude>com.zaxxer:HikariCP:</exclude>
                     <exclude>commons-io:commons-io:</exclude>
                     <exclude>org.ow2.asm:asm:</exclude>
-                    <exlude>joda-time:joda-time:</exlude>
-
                     <exclude>org.antlr:antlr4-runtime:</exclude>
+                    <!-- Transitive deps from liquibase-->
+                    <exclude>org.apache.commons:commons-text:</exclude>
                     <!-- Transitive deps from okhttp-->
                     <exclude>org.jetbrains.kotlin:kotlin-stdlib*:</exclude>
                     <!-- Transitive deps from ocfl-->
@@ -269,17 +251,14 @@
                 <ignoredDependency>software.amazon.awssdk::</ignoredDependency>
               </ignoredDependencies>
               <ignoredUsedUndeclaredDependencies>
-                <!-- fill in -->
-                <ignoredUsedUndeclaredDependency>jakarta.persistence:jakarta.persistence-api::</ignoredUsedUndeclaredDependency>
-                <ignoredUsedUndeclaredDependency>jakarta.servlet:jakarta.servlet-api:</ignoredUsedUndeclaredDependency>
-                <ignoredUsedUndeclaredDependency>edu.wisc.library.ocfl:ocfl-java-api:</ignoredUsedUndeclaredDependency>
                 <!-- These come from elide starter -->
-                <ignoredUsedUndeclaredDependency>org.json:json:</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>jakarta.jms:jakarta.jms-api:</ignoredUsedUndeclaredDependency>
+                <ignoredUsedUndeclaredDependency>jakarta.servlet:jakarta.servlet-api:</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>com.fasterxml.jackson.core:jackson-core:</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>com.fasterxml.jackson.core:jackson-databind:</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>com.yahoo.elide::</ignoredUsedUndeclaredDependency>
                 <!-- These come from ocfl -->
+                <ignoredUsedUndeclaredDependency>edu.wisc.library.ocfl:ocfl-java-api:</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>com.google.code.findbugs:jsr305:</ignoredUsedUndeclaredDependency>
                 <!-- These come from spring boot activemq artemis starter -->
                 <ignoredUsedUndeclaredDependency>org.apache.activemq:artemis-jakarta-server:</ignoredUsedUndeclaredDependency>
@@ -288,6 +267,7 @@
                 <ignoredUsedUndeclaredDependency>org.junit.jupiter:junit-jupiter-api:</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>org.assertj:assertj-core:</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>com.vaadin.external.google:android-json:</ignoredUsedUndeclaredDependency>
+                <ignoredUsedUndeclaredDependency>jakarta.persistence:jakarta.persistence-api::</ignoredUsedUndeclaredDependency>
                 <!-- These come from doi service jar -->
                 <ignoredUsedUndeclaredDependency>org.glassfish:javax.json:</ignoredUsedUndeclaredDependency>
                 <!-- These come from s3mock jar -->
