@@ -48,7 +48,7 @@ public class ExternalDoiServiceConnectorTest {
         String realDoi = "10.4137/cmc.s38446";
         JsonObject blob = underTest.retrieveMetadata(realDoi, xrefService);
         //these results will differ by a timestamp - but a good check is that they return the same journal objects
-        JsonObject object = JsonTestObjects.xrefTestJsonObject();
+        JsonObject object = JsonTestObjectsUtil.xrefTestJsonObject();
 
         assertNotNull(blob.getJsonObject("message").getJsonArray("ISSN"));
         assertEquals(blob.getJsonObject("message").getJsonArray("ISSN"),
@@ -63,7 +63,7 @@ public class ExternalDoiServiceConnectorTest {
         String realDoi = "10.4137/cmc.s38446"; //"10.1038/nature12373";
         JsonObject blob = underTest.retrieveMetadata(realDoi, unpaywallService);
 
-        JsonObject object = JsonTestObjects.unpaywallTestJsonObject();
+        JsonObject object = JsonTestObjectsUtil.unpaywallTestJsonObject();
 
         assertNotNull(blob.getJsonString("doi"));
         assertEquals(blob.getJsonString("doi"), object.getJsonString("doi"));
