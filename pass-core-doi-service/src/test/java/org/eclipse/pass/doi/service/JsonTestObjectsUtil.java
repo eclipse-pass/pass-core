@@ -26,9 +26,9 @@ import javax.json.JsonReader;
  *
  * @author jrm
  */
-public class JsonTestObjects {
+public class JsonTestObjectsUtil {
 
-    private JsonTestObjects() {
+    private JsonTestObjectsUtil() {
         //empty constructor
     }
 
