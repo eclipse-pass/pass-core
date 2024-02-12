@@ -547,4 +547,23 @@ public class ElidePassClientTest extends IntegrationTest {
             "{\"errors\":[{\"detail\":\"Optimistic lock check failed for Deposit [ID="));
         assertTrue(ioException.getMessage().endsWith("]. Request version: -1, Stored version: 2\"}]}"));
     }
+
+    @Test
+    public void testUpdateDeposit_OptimisticLocking_NoUpdate() throws IOException {
+        // GIVEN
+        Deposit deposit = new Deposit();
+        deposit.setDepositStatus(DepositStatus.SUBMITTED);
+        client.createObject(deposit);
+
+        Deposit updateDep1 = client.getObject(deposit.getClass(), deposit.getId());
+        updateDep1.setDepositStatus(DepositStatus.FAILED);
+        client.updateObject(updateDep1);
+
+        // WHEN
+        client.updateObject(updateDep1);
+
+        // THEN
+        assertEquals(DepositStatus.FAILED, updateDep1.getDepositStatus());
+        assertEquals(1, updateDep1.getVersion());
+    }
 }
