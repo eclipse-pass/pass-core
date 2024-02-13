@@ -241,7 +241,7 @@ public class Repository extends PassEntity {
         return Objects.equals(agreementText, other.agreementText) && Objects.equals(description, other.description)
                 && Objects.equals(formSchema, other.formSchema) && integrationType == other.integrationType
                 && Objects.equals(name, other.name) && Objects.equals(repositoryKey, other.repositoryKey)
-                && Objects.equals(schemas, other.schemas) && Objects.equals(url, other.url);
+                && listEquals(schemas, other.schemas) && Objects.equals(url, other.url);
     }
 
     @Override

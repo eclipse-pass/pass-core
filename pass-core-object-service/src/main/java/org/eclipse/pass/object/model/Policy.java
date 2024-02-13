@@ -169,7 +169,7 @@ public class Policy extends PassEntity {
         }
         Policy other = (Policy) obj;
         return Objects.equals(description, other.description) && Objects.equals(institution, other.institution)
-                && Objects.equals(policyUrl, other.policyUrl) && Objects.equals(repositories, other.repositories)
+                && Objects.equals(policyUrl, other.policyUrl) && listEquals(repositories, other.repositories)
                 && Objects.equals(title, other.title);
     }
 
