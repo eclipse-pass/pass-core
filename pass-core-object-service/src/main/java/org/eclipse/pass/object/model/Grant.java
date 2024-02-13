@@ -295,7 +295,7 @@ public class Grant extends PassEntity {
         return Objects.equals(awardDate == null ? null : awardDate.toInstant(),
                     other.awardDate == null ? null : other.awardDate.toInstant())
                && Objects.equals(awardNumber, other.awardNumber)
-               && awardStatus == other.awardStatus && Objects.equals(coPis, other.coPis)
+               && awardStatus == other.awardStatus && listEquals(coPis, other.coPis)
                && Objects.equals(directFunder, other.directFunder)
                && Objects.equals(endDate == null ? null : endDate.toInstant(),
                     other.endDate == null ? null : other.endDate.toInstant())

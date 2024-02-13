@@ -401,12 +401,12 @@ public class Submission extends PassEntity {
         }
         Submission other = (Submission) obj;
         return aggregatedDepositStatus == other.aggregatedDepositStatus
-            && Objects.equals(effectivePolicies, other.effectivePolicies)
-            && Objects.equals(grants, other.grants)
+            && listEquals(effectivePolicies, other.effectivePolicies)
+            && listEquals(grants, other.grants)
             && Objects.equals(metadata, other.metadata)
-            && Objects.equals(preparers, other.preparers)
+            && listEquals(preparers, other.preparers)
             && Objects.equals(publication, other.publication)
-            && Objects.equals(repositories, other.repositories)
+            && listEquals(repositories, other.repositories)
             && source == other.source
             && submissionStatus == other.submissionStatus
             && Objects.equals(submitted, other.submitted)
