@@ -219,6 +219,54 @@ public class AccessControlTest extends ShibIntegrationTest {
     }
 
     @Test
+    public void testReadGrantsAsShibUser_HeaderRequiredEveryRequest() throws IOException {
+        String url = getBaseUrl() + "data/grant";
+
+        Request.Builder builder = new Request.Builder();
+        setShibHeaders(builder);
+        Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
+            .addHeader("Content-Type", JSON_API_CONTENT_TYPE).get().build();
+
+        Response response = client.newCall(request).execute();
+
+        check(response, 200);
+
+        // no shib headers
+        builder = new Request.Builder();
+        Request request2 = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
+            .addHeader("Content-Type", JSON_API_CONTENT_TYPE).get().build();
+
+        Response response2 = client.newCall(request2).execute();
+
+        check(response2, 401);
+    }
+
+    @Test
+    public void testReadGrantsAsShibUser_HeadersAuthEveryRequest() throws IOException {
+        String url = getBaseUrl() + "data/grant";
+
+        Request.Builder builder = new Request.Builder();
+        setShibHeaders(builder);
+        Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
+            .addHeader("Content-Type", JSON_API_CONTENT_TYPE).get().build();
+
+        Response response = client.newCall(request).execute();
+
+        check(response, 200);
+
+        // invalid eppn header shib headers
+        Request.Builder builder2 = new Request.Builder();
+        setShibHeaders(builder2);
+        builder2.header(ShibConstants.EPPN_HEADER, "badeppnheadervalue");
+        Request request2 = builder2.url(url).header("Accept", JSON_API_CONTENT_TYPE)
+            .addHeader("Content-Type", JSON_API_CONTENT_TYPE).get().build();
+
+        Response response2 = client.newCall(request2).execute();
+
+        check(response2, 400);
+    }
+
+    @Test
     public void testCreateGrantAsShibUser() throws IOException, JSONException {
 
         String url = getBaseUrl() + "data/grant";
