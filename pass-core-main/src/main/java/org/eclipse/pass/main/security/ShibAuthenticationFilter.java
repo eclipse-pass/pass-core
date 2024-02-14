@@ -40,7 +40,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolderStrategy;
+import org.springframework.security.web.context.RequestAttributeSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -58,6 +62,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Component
 public class ShibAuthenticationFilter extends OncePerRequestFilter {
     private static final Logger LOG = LoggerFactory.getLogger(ShibAuthenticationFilter.class);
+
+    private final SecurityContextHolderStrategy securityContextHolderStrategy =
+        SecurityContextHolder.getContextHolderStrategy();
+    private final SecurityContextRepository securityContextRepository = new RequestAttributeSecurityContextRepository();
 
     private final ConcurrentHashMap<String, ShibAuthentication> auth_cache;
     private final RefreshableElide elide;
@@ -292,7 +300,7 @@ public class ShibAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         // The filter seems to always get triggered twice.
         // If we are already authenticated, continue on.
-        Authentication existing_auth = SecurityContextHolder.getContext().getAuthentication();
+        Authentication existing_auth = this.securityContextHolderStrategy.getContext().getAuthentication();
 
         if (existing_auth != null && existing_auth.isAuthenticated()) {
             chain.doFilter(request, response);
@@ -302,7 +310,10 @@ public class ShibAuthenticationFilter extends OncePerRequestFilter {
         if (isShibRequest(request)) {
             try {
                 Authentication auth = authenticate(request);
-                SecurityContextHolder.getContext().setAuthentication(auth);
+                SecurityContext context = this.securityContextHolderStrategy.createEmptyContext();
+                context.setAuthentication(auth);
+                this.securityContextHolderStrategy.setContext(context);
+                this.securityContextRepository.saveContext(context, request, response);
 
                 LOG.debug("Shib user logged in {}", auth.getName());
             } catch (AuthenticationException e) {
