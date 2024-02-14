@@ -57,18 +57,10 @@ public class SecurityConfiguration {
         http.exceptionHandling(ExceptionHandlingConfigurer::disable);
         http.headers(HeadersConfigurer::disable);
         http.requestCache(RequestCacheConfigurer::disable);
-
         http.sessionManagement((sessionManagement) ->
             sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
-        // TODO revisit to implement in spring sec 6.x way:
-        // https://docs.spring.io/spring-security/reference/servlet/authentication/persistence.html
-        http.securityContext((securityContext) ->
-            securityContext.requireExplicitSave(false));
-
         http.authorizeHttpRequests((authorizeHttpRequests) ->
             authorizeHttpRequests.anyRequest().authenticated());
-
         http.httpBasic(Customizer.withDefaults());
         http.addFilterBefore(shibAuthFilter, BasicAuthenticationFilter.class);
 
