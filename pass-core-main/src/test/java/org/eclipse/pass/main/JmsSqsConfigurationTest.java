@@ -30,8 +30,7 @@ import software.amazon.awssdk.utils.AttributeMap;
 
 @TestPropertySource(properties = {
     "spring.artemis.embedded.enabled=false",
-    "pass.jms.sqs=true",
-    "pass.jms.embed=false"
+    "pass.jms.sqs=true"
 })
 public class JmsSqsConfigurationTest extends IntegrationTest {
 
