@@ -126,7 +126,6 @@ server:
 pass:
   jms:
     sqs: ${PASS_CORE_USE_SQS:true}
-    embed: ${PASS_CORE_EMBED_JMS_BROKER:false}
   file-service:
     storage-type: ${PASS_CORE_FILE_SERVICE_TYPE:FILE_SYSTEM}
     root-dir: ${PASS_CORE_FILE_SERVICE_ROOT_DIR:}
