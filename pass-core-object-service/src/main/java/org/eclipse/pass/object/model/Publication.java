@@ -18,6 +18,7 @@ package org.eclipse.pass.object.model;
 import java.util.Objects;
 
 import com.yahoo.elide.annotation.CreatePermission;
+import com.yahoo.elide.annotation.DeletePermission;
 import com.yahoo.elide.annotation.Include;
 import com.yahoo.elide.annotation.UpdatePermission;
 import jakarta.persistence.Column;
@@ -33,6 +34,7 @@ import jakarta.persistence.Table;
 
 @CreatePermission(expression = "User is Backend OR User is Submitter")
 @UpdatePermission(expression = "User is Backend OR User is Submitter")
+@DeletePermission(expression = "User is Backend OR User is Submitter")
 @Include
 @Entity
 @Table(name = "pass_publication")

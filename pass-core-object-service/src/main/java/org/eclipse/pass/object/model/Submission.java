@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Objects;
 
 import com.yahoo.elide.annotation.CreatePermission;
+import com.yahoo.elide.annotation.DeletePermission;
 import com.yahoo.elide.annotation.Include;
 import com.yahoo.elide.annotation.UpdatePermission;
 import jakarta.persistence.Column;
@@ -44,6 +45,7 @@ import org.eclipse.pass.object.converter.SubmissionStatusToStringConverter;
 
 @CreatePermission(expression = "User is Backend OR User is Submitter")
 @UpdatePermission(expression = "User is Backend OR Object part of User Submission")
+@DeletePermission(expression = "User is Backend OR Object part of User Submission")
 @Include
 @Entity
 @Table(name = "pass_submission")
