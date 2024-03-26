@@ -27,11 +27,11 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 /**
- * A ShibAuthentication wraps information from a PASS user.
+ * A PassAuthentication wraps information from a PASS user.
  * The PASS user roles are mapped to authorities.
  * The PASS user username becomes the name and can be used to lookup the user object.
  */
-public class ShibAuthentication implements Authentication {
+public class PassAuthentication implements Authentication {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -49,9 +49,9 @@ public class ShibAuthentication implements Authentication {
      *
      * @param user PASS user
      */
-    public ShibAuthentication(User user) {
+    public PassAuthentication(User user) {
         this.user_name = user.getUsername();
-        this.authorities = user.getRoles().stream().map(ShibAuthentication::as_authority).
+        this.authorities = user.getRoles().stream().map(PassAuthentication::as_authority).
                 filter(Objects::nonNull).collect(Collectors.toList());
     }
 
