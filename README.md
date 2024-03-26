@@ -64,7 +64,8 @@ Environment variables:
 * PASS_CORE_SUBMISSION_QUEUE=pass-submission
 * PASS_CORE_DEPOSIT_QUEUE=pass-deposit
 * PASS_CORE_IDP_METADATA=classpath:saml2/idp-metadata.xml
-* PASS_CORE_SP_ID=https://sp.pass/shibboleth}
+* PASS_CORE_SP_ID=https://sp.pass/shibboleth
+* PASS_CORE_SP_ACS=http://localhost:8080/login/saml2/sso/pass
 * PASS_CORE_SP_KEY=classpath:saml2/sp-key.pem
 * PASS_CORE_SP_CERT=classpath:saml2/sp-cert.pem
 * PASS_CORE_SUBMISSION_EVENT_QUEUE=pass-submission-event
@@ -92,7 +93,8 @@ The `SUBMITTER` has full access to all other services.
 # SAML configuration
 
 The `PASS_CORE_SP_KEY` and `PASS_CORE_SP_CERT` environment variables set the location of the keys used by pass-core to encrypt SAML communication.
-Use `PASS_CORE_SP_ID` to set the identifier of the pass-core SP and `PASS_CORE_IDP_METADATA` to set the location where IDP metadata can be retrieved.
+Use `PASS_CORE_SP_ID` to set the identifier of the pass-core SP, `PASS_CORE_IDP_METADATA` to set the location where IDP metadata can be retrieved,
+and `PASS_CORE_SP_ACS` for the Assertion Consumer Service of the SP.
 
 The defaults are set such that the integration tests can run against a [SimpleSAMLphp based IDP](https://github.com/kenchan0130/docker-simplesamlphp/).
 
