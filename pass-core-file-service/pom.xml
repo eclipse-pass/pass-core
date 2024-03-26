@@ -25,12 +25,12 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>edu.wisc.library.ocfl</groupId>
+            <groupId>io.ocfl</groupId>
             <artifactId>ocfl-java-core</artifactId>
             <version>${ocfl.java.core.version}</version>
         </dependency>
         <dependency>
-            <groupId>edu.wisc.library.ocfl</groupId>
+            <groupId>io.ocfl</groupId>
             <artifactId>ocfl-java-aws</artifactId>
             <version>${ocfl.java.aws.version}</version>
             <exclusions>

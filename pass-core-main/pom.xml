@@ -143,7 +143,7 @@
     </dependency>
 
     <dependency>
-      <groupId>edu.wisc.library.ocfl</groupId>
+      <groupId>io.ocfl</groupId>
       <artifactId>ocfl-java-api</artifactId>
       <version>${ocfl.java.core.version}</version>
     </dependency>
@@ -169,15 +169,8 @@
     </dependency>
 
     <dependency>
-      <groupId>io.findify</groupId>
-      <artifactId>s3mock_2.13</artifactId>
-      <version>${s3mock.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>commons-logging</groupId>
-          <artifactId>commons-logging</artifactId>
-        </exclusion>
-      </exclusions>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>localstack</artifactId>
       <scope>test</scope>
     </dependency>
 
