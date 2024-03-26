@@ -28,11 +28,11 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("default-test")
 public class StorageConfigurationTest extends IntegrationTest {
 
-    @Autowired private StorageConfiguration storageConfiguration;
+    @Autowired private StorageProperties storageProperties;
 
     @Test
     public void testDefaultValuesFromConfiguration() {
-        assertFalse(storageConfiguration.getStorageProperties().getStorageRootDir().isEmpty());
-        assertFalse(storageConfiguration.getStorageProperties().getStorageRootDir().contains("#{null}"));
+        assertFalse(storageProperties.getStorageRootDir().isEmpty());
+        assertFalse(storageProperties.getStorageRootDir().contains("#{null}"));
     }
 }

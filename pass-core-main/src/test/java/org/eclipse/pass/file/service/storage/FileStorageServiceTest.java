@@ -36,7 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import edu.wisc.library.ocfl.api.exception.NotFoundException;
+import io.ocfl.api.exception.NotFoundException;
 import okhttp3.Credentials;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -80,7 +80,7 @@ public class FileStorageServiceTest extends IntegrationTest {
 
     @Autowired protected PassFileServiceController passFileServiceController;
     @Autowired protected FileStorageService storageService;
-    @Autowired protected StorageConfiguration storageConfiguration;
+    @Autowired protected StorageProperties storageProperties;
 
     /**
      * Cleanup the FileStorageService after testing. Deletes the root directory.
@@ -88,7 +88,7 @@ public class FileStorageServiceTest extends IntegrationTest {
     @AfterAll
     protected void tearDown() throws IOException {
         Path tempDir = Paths.get(System.getProperty("java.io.tmpdir"));
-        String rootDirName = storageConfiguration.getStorageProperties().getStorageRootDir();
+        String rootDirName = storageProperties.getStorageRootDir();
         File tempRootDir = tempDir.resolve(rootDirName).toFile();
         deleteDirectory(tempRootDir);
     }
@@ -127,8 +127,8 @@ public class FileStorageServiceTest extends IntegrationTest {
                 Objects.requireNonNull(MEDIA_TYPE_TEXT).toString(), "Test Pass-core".getBytes()), USER_NAME);
 
         Path tempDir = Paths.get(System.getProperty("java.io.tmpdir"));
-        String rootDirName = storageConfiguration.getStorageProperties().getStorageRootDir();
-        String tempDirName = storageConfiguration.getStorageProperties().getStorageTempDir();
+        String rootDirName = storageProperties.getStorageRootDir();
+        String tempDirName = storageProperties.getStorageTempDir();
         int fileCount = Objects.requireNonNull(tempDir.resolve(Paths.get(rootDirName, tempDirName))
                 .toFile().listFiles()).length;
         assertEquals(0, fileCount);
