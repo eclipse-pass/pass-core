@@ -16,8 +16,32 @@
  */
 package org.eclipse.pass.file.service.storage;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import io.ocfl.api.OcflRepository;
+import io.ocfl.aws.OcflS3Client;
+import io.ocfl.core.OcflRepositoryBuilder;
+import io.ocfl.core.extension.storage.layout.config.HashedNTupleLayoutConfig;
+import io.ocfl.core.path.constraint.ContentPathConstraints;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3ClientBuilder;
+import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 
 /**
  * The StorageConfiguration is responsible for handling the StorageProperties. The FileStorageService does not get the
@@ -29,35 +53,115 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @EnableConfigurationProperties(StorageProperties.class)
 public class StorageConfiguration {
-    private StorageProperties storageProperties;
+    private static final Logger LOG = LoggerFactory.getLogger(StorageConfiguration.class);
 
-    /**
-     * StorageConfiguration constructor that initializes the StorageProperties.
-     *
-     * @param storageProperties are injected into the StorageConfiguration at startup.
-     */
-    public StorageConfiguration(StorageProperties storageProperties) {
-        this.storageProperties = storageProperties;
+    @Value("${aws.region}")
+    private String awsRegion;
+
+    @Bean
+    @ConditionalOnProperty(name = "pass.file-service.storage-type", havingValue = "S3")
+    public S3Client s3Client(StorageProperties storageProperties) throws IOException {
+        String bucketName = storageProperties.getBucketName().
+            orElseThrow(() -> new IOException("File Service: S3 bucket name is not set"));
+
+        S3ClientBuilder builder = S3Client.builder()
+            .credentialsProvider(DefaultCredentialsProvider.create())
+            .region(Region.of(awsRegion));
+
+        String endpoint = storageProperties.getS3Endpoint().orElse(null);
+        S3Client s3Client = StringUtils.isNotBlank(endpoint)
+            ? builder.endpointOverride(URI.create(endpoint)).build()
+            : builder.build();
+
+        if (s3Client.listBuckets().buckets().stream().noneMatch(b -> b.name().equals(bucketName))) {
+            s3Client.createBucket(CreateBucketRequest.builder().bucket(bucketName).build());
+        }
+        return s3Client;
     }
 
-    /**
-     * Gets the StorageProperties of the StorageConfiguration.
-     *
-     * @return An instance of the StorageProperties
-     */
-    public StorageProperties getStorageProperties() {
-        return storageProperties;
+    @Bean
+    @ConditionalOnProperty(name = "pass.file-service.storage-type", havingValue = "S3")
+    public OcflRepository ocflS3Repository(S3Client s3Client, StorageProperties storageProperties,
+                                           @Qualifier("rootPath") Path rootLoc) throws IOException {
+        String bucketName = storageProperties.getBucketName().
+            orElseThrow(() -> new IOException("File Service: S3 bucket name is not set"));
+        String repoPrefix = storageProperties.getS3RepoPrefix().orElse(null);
+
+        OcflS3Client.Builder builder = OcflS3Client.builder()
+            .s3Client(s3Client)
+            .bucket(bucketName);
+        OcflS3Client ocflS3Client = StringUtils.isNotBlank(repoPrefix)
+            ? builder.repoPrefix(repoPrefix).build()
+            : builder.build();
+
+        Path workLoc = ocflWorkingDir(storageProperties, rootLoc);
+        OcflRepository ocflRepository = new OcflRepositoryBuilder()
+            .defaultLayoutConfig(new HashedNTupleLayoutConfig())
+            .contentPathConstraints(ContentPathConstraints.cloud())
+            .storage(storage -> storage.cloud(ocflS3Client))
+            .workDir(workLoc)
+            .build();
+        LOG.info("File Service: S3 OCFL is configured and OCFL repository is built");
+        return ocflRepository;
     }
 
-    /**
-     * Sets the StorageProperties of the StorageConfiguration. The FileService is designed to load the application
-     * variables defined in the .env file. To override the StorageProperties should be used with caution as there might
-     * be unintended results. If the configuration of the FileService needs to be modified, do so in the .env file.
-     *
-     * @param storageProperties The StorageProperties to set in the StorageConfiguration.
-     */
-    public void setStorageProperties(StorageProperties storageProperties) {
-        this.storageProperties = storageProperties;
+    @Bean
+    @ConditionalOnProperty(name = "pass.file-service.storage-type", havingValue = "FILE_SYSTEM")
+    public OcflRepository ocflFileRepository(StorageProperties storageProperties,
+                                             @Qualifier("rootPath") Path rootLoc) throws IOException {
+        Path ocflLoc = Paths.get(rootLoc.toString(), storageProperties.getStorageOcflDir());
+        if (!Files.exists(ocflLoc)) {
+            Files.createDirectory(ocflLoc);
+        }
+        if (!Files.isReadable(ocflLoc) || !Files.isWritable(ocflLoc)) {
+            throw new IOException("File Service: No permission to read/write OCFL directory.");
+        }
+        Path workLoc = ocflWorkingDir(storageProperties, rootLoc);
+        OcflRepository ocflRepository = new OcflRepositoryBuilder()
+            .defaultLayoutConfig(new HashedNTupleLayoutConfig())
+            .storage(storage -> storage.fileSystem(ocflLoc))
+            .workDir(workLoc)
+            .build();
+        LOG.info("File Service: File Service OCFL is configured and OCFL repository is built");
+        return ocflRepository;
+    }
+
+    @Bean
+    @Qualifier("rootPath")
+    public Path rootPath(StorageProperties storageProperties) throws IOException {
+        Path rootLoc;
+        if (StringUtils.isBlank(storageProperties.getStorageRootDir())) {
+            //when a storage root is not specified, then it should be: system_temp/create_temp_dir
+            rootLoc = Files.createTempDirectory(Paths.get(System.getProperty("java.io.tmpdir")),null);
+            //set the rootLoc in the storageProperties
+            storageProperties.setRootDir(rootLoc.toString().
+                substring(rootLoc.toString().lastIndexOf(File.separator) + 1));
+        } else {
+            rootLoc = Paths.get(storageProperties.getStorageRootDir());
+        }
+        LOG.info("File Service: " + rootLoc + " Storage Root Directory");
+        return rootLoc;
+    }
+
+    private Path ocflWorkingDir(StorageProperties storageProperties, Path rootLoc) throws IOException {
+        Path workLoc = Paths.get(rootLoc.toString(), storageProperties.getStorageWorkDir());
+        try {
+            if (!Files.exists(rootLoc)) {
+                Files.createDirectory(rootLoc);
+            }
+            if (!Files.exists(workLoc)) {
+                Files.createDirectory(workLoc);
+            }
+            if (!Files.isReadable(workLoc) || !Files.isWritable(workLoc)) {
+                throw new IOException("File Service: No permission to read/write work directory.");
+            }
+            if (!Files.isReadable(rootLoc) || !Files.isWritable(rootLoc)) {
+                throw new IOException("File Service: No permission to read/write File Service root directory.");
+            }
+        } catch (IOException e) {
+            throw new IOException("File Service: Unable to setup File Storage directories: " + e);
+        }
+        return workLoc;
     }
 
 }

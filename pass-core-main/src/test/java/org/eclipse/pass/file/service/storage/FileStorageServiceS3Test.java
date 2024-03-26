@@ -15,12 +15,15 @@
  */
 package org.eclipse.pass.file.service.storage;
 
-import io.findify.s3mock.S3Mock;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3;
+
+import java.io.IOException;
+
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.localstack.LocalStackContainer;
+import org.testcontainers.utility.DockerImageName;
 
 /**
  * The FileStorageServiceS3Test class is a test class for the FileStorageService that uses the S3 mock server. The S3
@@ -33,42 +36,31 @@ import org.springframework.test.context.DynamicPropertySource;
  */
 @ActiveProfiles("test-S3")
 class FileStorageServiceS3Test extends FileStorageServiceTest {
-    private static final S3Mock s3MockApi;
-    private static final int S3_MOCK_PORT = 8010;
+    private static final DockerImageName LOCALSTACK_IMG =
+        DockerImageName.parse("localstack/localstack:3.1.0");
 
-    // Set up the S3 mock server before the Application Context is loaded.
+    private static final LocalStackContainer localStack =
+        new LocalStackContainer(LOCALSTACK_IMG)
+            .withServices(S3);
+
     static {
-        s3MockApi = new S3Mock.Builder().withPort(S3_MOCK_PORT).withInMemoryBackend().build();
-        s3MockApi.start();
+        try {
+            System.setProperty("aws.accessKeyId", "test");
+            System.setProperty("aws.secretAccessKey", "test");
+            setupS3();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    /**
-     * Set up the FileStorageService for testing. Set environment variables for AWS access key and secret key that are
-     * required for the aws s3 client.
-     * @param registry the dynamic property registry
-     */
     @DynamicPropertySource
-    static void setupBeforeAppContext(DynamicPropertyRegistry registry) {
-        System.setProperty("aws.accessKeyId", "A B C");
-        System.setProperty("aws.secretAccessKey", "D E F");
-
+    static void overrideProperties(DynamicPropertyRegistry registry) {
+        registry.add("pass.file-service.s3-endpoint", () -> localStack.getEndpointOverride(S3).toString());
     }
 
-    /**
-     * Start the S3 mock server.
-     */
-    @BeforeEach
-    protected void setUp() {
-        s3MockApi.stop();
-        s3MockApi.start();
-    }
-
-    /**
-     * Stop the S3 mock server.
-     */
-    @AfterEach
-    protected void stops3Server() {
-        s3MockApi.stop();
+    static void setupS3() throws IOException, InterruptedException {
+        localStack.start();
+        localStack.execInContainer("awslocal", "s3", "mb", "s3://pass-core-file-s3-it");
     }
 
 }
