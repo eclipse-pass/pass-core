@@ -25,6 +25,10 @@ elide:
 spring:
   application:
     name: pass-core
+  artemis:
+    embedded:
+      enabled: ${PASS_CORE_EMBED_JMS_BROKER:true}
+      queues: pass-submission,pass-deposit,pass-submission-event
   jpa:
     properties:
       hibernate:
@@ -45,11 +49,24 @@ spring:
     change-log: 'classpath:db/changelog/core-changelog.yaml'
     parameters:
       institution-changelog-file: ${PASS_CORE_INSTN_CHG_LOG:file:////tmp/instn-changelog.yaml}
-  artemis:
-    embedded:
-      enabled: ${PASS_CORE_EMBED_JMS_BROKER:true}
-      queues: pass-submission,pass-deposit,pass-submission-event
+  mvc:
+    static-path-pattern: '/app/**'
   security:
+    saml2:
+      relyingparty:
+        registration:
+          pass:
+            entity-id: ${PASS_CORE_SP_ID:https://sp.pass/shibboleth}
+            signing:
+              credentials:
+                - private-key-location: ${PASS_CORE_SP_KEY:classpath:saml2/sp-key.pem}
+                  certificate-location: ${PASS_CORE_SP_CERT:classpath:saml2/sp-cert.pem}
+            decryption:
+              credentials:
+                - private-key-location: ${PASS_CORE_SP_KEY:classpath:saml2/sp-key.pem}
+                  certificate-location: ${PASS_CORE_SP_CERT:classpath:saml2/sp-cert.pem}
+            assertingparty:
+              metadata-uri: ${PASS_CORE_IDP_METADATA:classpath:saml2/idp-metadata.xml}
     user:
       name: ${PASS_CORE_BACKEND_USER:backend}
       password: ${PASS_CORE_BACKEND_PASSWORD:moo}
@@ -58,6 +75,9 @@ spring:
     multipart:
       max-file-size: 100MB
       max-request-size: 100MB
+  web:
+    resources:
+      static-locations: ${PASS_CORE_APP_LOCATION:classpath:app}
 
 server:
   port: 8080
@@ -76,6 +96,15 @@ pass:
   auth:
     max-cache-size: 100
     cache-duration: 30
+    attribute-map:
+      DISPLAY_NAME: 'urn:oid:2.16.840.1.113730.3.1.241'
+      SCOPED_AFFILIATION: 'urn:oid:1.3.6.1.4.1.5923.1.1.1.9'
+      EMAIL: 'urn:oid:0.9.2342.19200300.100.1.3'
+      EPPN: 'urn:oid:1.3.6.1.4.1.5923.1.1.1.6'
+      GIVEN_NAME: 'urn:oid:2.5.4.42'
+      SURNAME: 'urn:oid:2.5.4.4'
+      EMPLOYEE_ID: 'urn:oid:2.16.840.1.113730.3.1.3'
+      UNIQUE_ID: 'urn:oid:1.3.6.1.4.1.5923.1.1.1.13'
   file-service:
     storage-type: 'FILE_SYSTEM'
   jms:
@@ -132,4 +161,3 @@ pass:
     s3-bucket-name: ${PASS_CORE_S3_BUCKET_NAME:pass-core-file}
     s3-repo-prefix: ${PASS_CORE_S3_REPO_PREFIX:pass-core-file}
     s3-endpoint: ${PASS_CORE_S3_ENDPOINT:}
- 
