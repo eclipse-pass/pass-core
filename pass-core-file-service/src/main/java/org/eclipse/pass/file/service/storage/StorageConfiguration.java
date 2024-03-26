@@ -70,7 +70,7 @@ public class StorageConfiguration {
 
         String endpoint = storageProperties.getS3Endpoint().orElse(null);
         S3Client s3Client = StringUtils.isNotBlank(endpoint)
-            ? builder.endpointOverride(URI.create(endpoint)).build()
+            ? builder.endpointOverride(URI.create(endpoint)).forcePathStyle(true).build()
             : builder.build();
 
         if (s3Client.listBuckets().buckets().stream().noneMatch(b -> b.name().equals(bucketName))) {
