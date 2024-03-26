@@ -75,16 +75,16 @@
   <properties>
     <maven-dependency-plugin.version>3.6.1</maven-dependency-plugin.version>
     <spring-boot-maven-plugin.version>3.2.2</spring-boot-maven-plugin.version>
+    <amazon.pom.version>2.25.16</amazon.pom.version>
     <elide.version>7.0.2</elide.version>
-    <amazon.sqs.version>2.1.1</amazon.sqs.version>
+    <amazon.sqs.version>2.1.2</amazon.sqs.version>
     <logback.version>1.4.14</logback.version>
     <slf4j.version>2.0.7</slf4j.version>
     <liquibase.version>4.26.0</liquibase.version>
     <rest-assured.version>5.4.0</rest-assured.version>
 
-    <!-- TODO major upgrade -->
-    <ocfl.java.core.version>1.5.0</ocfl.java.core.version>
-    <ocfl.java.aws.version>1.5.0</ocfl.java.aws.version>
+    <ocfl.java.core.version>2.0.1</ocfl.java.core.version>
+    <ocfl.java.aws.version>2.0.1</ocfl.java.aws.version>
 
     <javax.json.version>1.1.4</javax.json.version>
     <h2.version>2.2.224</h2.version>
@@ -133,6 +133,14 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
         <version>${spring-boot-maven-plugin.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>software.amazon.awssdk</groupId>
+        <artifactId>bom</artifactId>
+        <version>${amazon.pom.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -258,7 +266,7 @@
                 <ignoredUsedUndeclaredDependency>com.fasterxml.jackson.core:jackson-databind:</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>com.yahoo.elide::</ignoredUsedUndeclaredDependency>
                 <!-- These come from ocfl -->
-                <ignoredUsedUndeclaredDependency>edu.wisc.library.ocfl:ocfl-java-api:</ignoredUsedUndeclaredDependency>
+                <ignoredUsedUndeclaredDependency>io.ocfl:ocfl-java-api:</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>com.google.code.findbugs:jsr305:</ignoredUsedUndeclaredDependency>
                 <!-- These come from spring boot activemq artemis starter -->
                 <ignoredUsedUndeclaredDependency>org.apache.activemq:artemis-jakarta-server:</ignoredUsedUndeclaredDependency>
@@ -275,6 +283,8 @@
                 <!-- These come from aws sqs jar -->
                 <ignoredUsedUndeclaredDependency>com.amazonaws:aws-java-sdk-core:</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>com.amazonaws:aws-java-sdk-sqs:</ignoredUsedUndeclaredDependency>
+                <!-- These come from testcontainers junit-jupiter -->
+                <ignoredUsedUndeclaredDependency>org.testcontainers::</ignoredUsedUndeclaredDependency>
               </ignoredUsedUndeclaredDependencies>
               <ignoredUnusedDeclaredDependencies>
                 <!-- This is the elide starter jar -->
@@ -300,7 +310,7 @@
                 <ignoredNonTestScopedDependency>org.eclipse.pass:pass-core-file-service:jar:</ignoredNonTestScopedDependency>
                 <!-- This needs to stay compile scope to be included in pass-core exec jar -->
                 <ignoredNonTestScopedDependency>com.squareup.okhttp3:okhttp:</ignoredNonTestScopedDependency>
-                <ignoredNonTestScopedDependency>edu.wisc.library.ocfl:ocfl-java-api:</ignoredNonTestScopedDependency>
+                <ignoredNonTestScopedDependency>io.ocfl:ocfl-java-api:</ignoredNonTestScopedDependency>
                 <ignoredNonTestScopedDependency>commons-io:commons-io:</ignoredNonTestScopedDependency>
                 <ignoredNonTestScopedDependency>com.fasterxml.jackson.core:jackson-*:</ignoredNonTestScopedDependency>
               </ignoredNonTestScopedDependencies>
