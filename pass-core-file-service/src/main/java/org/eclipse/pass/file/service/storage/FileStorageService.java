@@ -18,7 +18,6 @@ package org.eclipse.pass.file.service.storage;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,34 +27,25 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
 
-import edu.wisc.library.ocfl.api.OcflRepository;
-import edu.wisc.library.ocfl.api.exception.NotFoundException;
-import edu.wisc.library.ocfl.api.model.FileDetails;
-import edu.wisc.library.ocfl.api.model.ObjectVersionId;
-import edu.wisc.library.ocfl.api.model.User;
-import edu.wisc.library.ocfl.api.model.VersionDetails;
-import edu.wisc.library.ocfl.api.model.VersionInfo;
-import edu.wisc.library.ocfl.aws.OcflS3Client;
-import edu.wisc.library.ocfl.core.OcflRepositoryBuilder;
-import edu.wisc.library.ocfl.core.extension.storage.layout.config.HashedNTupleLayoutConfig;
-import edu.wisc.library.ocfl.core.path.constraint.ContentPathConstraints;
+import io.ocfl.api.OcflRepository;
+import io.ocfl.api.exception.NotFoundException;
+import io.ocfl.api.model.FileDetails;
+import io.ocfl.api.model.ObjectVersionId;
+import io.ocfl.api.model.User;
+import io.ocfl.api.model.VersionDetails;
+import io.ocfl.api.model.VersionInfo;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.multipart.MultipartFile;
-import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 
 /**
  * The FileStorageService is responsible for the implementation of the persistence of files to their respective
@@ -86,153 +76,19 @@ import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 public class FileStorageService {
     private static final Logger LOG = LoggerFactory.getLogger(FileStorageService.class);
 
+    private final OcflRepository ocflRepository;
     private final Path tempLoc;
     private final StorageServiceType storageType;
-    private final OcflRepository ocflRepository;
-    private Path ocflLoc;
-    private S3Client cloudS3Client;
-    private String bucketName;
-    private String repoPrefix;
 
     /**
      *  FileStorageService Class constructor.
-     * @param storageConfiguration A set of configuration properties of the File Service.
-     * @param awsRegion The AWS region where the S3 bucket is located.
-     * @throws IOException If the storage root directory cannot be created.
      */
-    public FileStorageService(StorageConfiguration storageConfiguration,
-            @Value("${aws.region}") String awsRegion) throws IOException {
-        StorageProperties storageProperties = storageConfiguration.getStorageProperties();
-        storageType = storageProperties.getStorageType();
-        LOG.info("File Service: " + storageType + " Storage Type");
-
-        Path rootLoc;
-        if (StringUtils.isBlank(storageProperties.getStorageRootDir())) {
-            //when a storage root is not specified, then it should be: system_temp/create_temp_dir
-            rootLoc = Files.createTempDirectory(Paths.get(System.getProperty("java.io.tmpdir")),null);
-            //set the rootLoc in the storageProperties
-            storageProperties.setRootDir(rootLoc.toString().
-                    substring(rootLoc.toString().lastIndexOf(File.separator) + 1));
-        } else {
-            rootLoc = Paths.get(storageProperties.getStorageRootDir());
-        }
-        LOG.info("File Service: " + rootLoc + " Storage Root Directory");
-
-        // The ocflLoc only needs to be set if the storage type is file system.
-        // If the storageType is S3 then workLoc and tempLoc are used because they are used with FILE_SYSTEM AND S3
-        if (storageType.equals(StorageServiceType.FILE_SYSTEM)) {
-            ocflLoc = Paths.get(rootLoc.toString(), storageProperties.getStorageOcflDir());
-        }
-        Path workLoc = Paths.get(rootLoc.toString(), storageProperties.getStorageWorkDir());
+    public FileStorageService(OcflRepository ocflRepository,
+                              StorageProperties storageProperties,
+                              Path rootLoc) {
+        this.ocflRepository = ocflRepository;
         this.tempLoc = Paths.get(rootLoc.toString(), storageProperties.getStorageTempDir());
-
-        try {
-            if (!Files.exists(rootLoc)) {
-                Files.createDirectory(rootLoc);
-            }
-            if (!Files.exists(workLoc)) {
-                Files.createDirectory(workLoc);
-            }
-            if (!Files.isReadable(workLoc) || !Files.isWritable(workLoc)) {
-                throw new IOException("File Service: No permission to read/write work directory.");
-            }
-            if (!Files.isReadable(rootLoc) || !Files.isWritable(rootLoc)) {
-                throw new IOException("File Service: No permission to read/write File Service root directory.");
-            }
-        } catch (IOException e) {
-            throw new IOException("File Service: Unable to setup File Storage directories: " + e);
-        }
-
-        if (storageType.equals(StorageServiceType.FILE_SYSTEM)) {
-            try {
-                if (!Files.exists(ocflLoc)) {
-                    Files.createDirectory(ocflLoc);
-                }
-                if (!Files.isReadable(ocflLoc) || !Files.isWritable(ocflLoc)) {
-                    throw new IOException("File Service: No permission to read/write OCFL directory.");
-                }
-                ocflRepository = new OcflRepositoryBuilder()
-                        .defaultLayoutConfig(new HashedNTupleLayoutConfig())
-                        .storage(storage -> storage.fileSystem(this.ocflLoc))
-                        .workDir(workLoc)
-                        .build();
-            } catch (IOException e) {
-                throw new IOException("File Service: Unable to setup File Storage directories: " + e);
-            }
-        } else if (storageType.equals(StorageServiceType.S3)) {
-            if (storageProperties.getBucketName().isPresent()) {
-                bucketName = storageProperties.getBucketName().get();
-            } else {
-                throw new IOException("File Service: S3 bucket name is not set");
-            }
-
-            //repoPrefix is not required
-            if (storageProperties.getS3RepoPrefix().isPresent()) {
-                repoPrefix = storageProperties.getS3RepoPrefix().get();
-            }
-
-            if (awsRegion == null) {
-                throw new IOException("AWS region not set");
-            }
-
-            Region region = Region.of(awsRegion);
-
-            //endpoint is not required, but if one is supplied then S3 client is built with endpoint override
-            if (storageProperties.getS3Endpoint().isPresent()
-                    && StringUtils.isNotBlank(storageProperties.getS3Endpoint().get())) {
-                String endpoint = storageProperties.getS3Endpoint().get();
-                cloudS3Client = S3Client.builder()
-                        .credentialsProvider(DefaultCredentialsProvider.create())
-                        .region(region)
-                        .endpointOverride(URI.create(endpoint))
-                        .build();
-                LOG.info("File Service: S3 client built with endpoint override");
-            } else {
-                cloudS3Client = S3Client.builder()
-                        .credentialsProvider(DefaultCredentialsProvider.create())
-                        .region(region)
-                        .build();
-                LOG.info("File Service: S3 client built");
-            }
-
-            if (cloudS3Client.listBuckets().buckets().stream().noneMatch(b -> b.name().equals(bucketName))) {
-                cloudS3Client.createBucket(CreateBucketRequest.builder().bucket(bucketName).build());
-            }
-
-            if (cloudS3Client == null) {
-                throw new IOException("File Service: S3 client is not configured");
-            }
-
-            //repoPrefix is optional and can be built with or without it
-            if (storageProperties.getS3RepoPrefix().isPresent()) {
-                ocflRepository = new OcflRepositoryBuilder()
-                        .defaultLayoutConfig(new HashedNTupleLayoutConfig())
-                        .contentPathConstraints(ContentPathConstraints.cloud())
-                        .storage(storage -> storage
-                                .cloud(OcflS3Client.builder()
-                                        .s3Client(cloudS3Client)
-                                        .bucket(bucketName)
-                                        .repoPrefix(repoPrefix)
-                                        .build()))
-                        .workDir(workLoc)
-                        .build();
-            } else {
-                ocflRepository = new OcflRepositoryBuilder()
-                        .defaultLayoutConfig(new HashedNTupleLayoutConfig())
-                        .contentPathConstraints(ContentPathConstraints.cloud())
-                        .storage(storage -> storage
-                                .cloud(OcflS3Client.builder()
-                                        .s3Client(cloudS3Client)
-                                        .bucket(bucketName)
-                                        .build()))
-                        .workDir(workLoc)
-                        .build();
-            }
-            LOG.info("File Service: S3 client is configured and OCFL repository is built");
-        } else {
-            throw new IOException("File Service: File Service Type is missing or incorrect in the " +
-                    "environment variables.");
-        }
+        this.storageType = storageProperties.getStorageType();
     }
 
     /**
@@ -271,22 +127,12 @@ public class FileStorageService {
             }
             Path tempPathAndFileName = Paths.get(tempLoc.toString(), ocflRepoFileName);
             mFile.transferTo(tempPathAndFileName);
-            if (storageType.equals(StorageServiceType.FILE_SYSTEM)) {
-                ocflRepository.putObject(ObjectVersionId.head(fileId), tempPathAndFileName,
-                        new VersionInfo().setMessage("Pass-Core File Service: Initial commit").setUser(fileUser));
-                String fileRepoRelPath = ocflRepository.describeVersion(ObjectVersionId.head(fileId))
-                        .getFileMap().entrySet().iterator().next().getValue().getStorageRelativePath();
-                LOG.info("File Service: File with ID " + fileId + " was stored in the file system repo at the " +
-                        "location:" + Paths.get(this.ocflLoc.toString(),fileRepoRelPath));
-
-            } else if (storageType.equals(StorageServiceType.S3)) {
-                ocflRepository.putObject(ObjectVersionId.head(fileId), tempPathAndFileName,
-                        new VersionInfo().setMessage("Pass-Core File Service: Initial commit").setUser(fileUser));
-                String fileRepoRelPath = ocflRepository.describeVersion(ObjectVersionId.head(fileId))
-                        .getFileMap().entrySet().iterator().next().getValue().getStorageRelativePath();
-                LOG.info("File Service: File with ID " + fileId + " was stored in the S3 repo at location: " +
-                        Paths.get(this.repoPrefix,this.bucketName,fileRepoRelPath));
-            }
+            ocflRepository.putObject(ObjectVersionId.head(fileId), tempPathAndFileName,
+                new VersionInfo().setMessage("Pass-Core File Service: Initial commit").setUser(fileUser));
+            String fileRepoRelPath = ocflRepository.describeVersion(ObjectVersionId.head(fileId))
+                .getFileMap().entrySet().iterator().next().getValue().getStorageRelativePath();
+            LOG.info("File Service: File with ID " + fileId + " was stored in the system repo at location: " +
+                "location:" + fileRepoRelPath);
 
             storageFile = new StorageFile(
                     fileId,
