@@ -16,9 +16,9 @@
 package org.eclipse.pass.main.security;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 import com.yahoo.elide.RefreshableElide;
 import jakarta.servlet.FilterChain;
@@ -34,100 +34,129 @@ import org.eclipse.pass.object.model.User;
 import org.eclipse.pass.object.model.UserRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
+import org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal;
 import org.springframework.security.web.context.RequestAttributeSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * Filter responsible for mapping a Shib user to a PASS user. The PASS user is
+ * Filter responsible for mapping a SAML user to a PASS user. The PASS user is
  * created if it does not exist and otherwise updated to reflect the information
- * provided by Shib. The PASS user name becomes the name of the Principal.
+ * provided by the IDP. The PASS user name becomes the name of the Principal.
  * <p>
- * If the request does not look like it came from Shib, the mapping step is skipped.
+ * If the request has not been authenticated through SAML, the mapping step is skipped.
  * In any case, the request is passed down the chain.
  * <p>
  * A cache of maximum size pass.auth.max-cache-size of recent authentications is
  * maintained. It is cleared every pass.auth.cache-duration minutes.
  */
 @Component
-public class ShibAuthenticationFilter extends OncePerRequestFilter {
-    private static final Logger LOG = LoggerFactory.getLogger(ShibAuthenticationFilter.class);
+public class PassAuthenticationFilter extends OncePerRequestFilter {
+    static final String EMPLOYEE_ID_TYPE = "employeeid";
+    static final String UNIQUE_ID_TYPE = "unique-id";
+    static final String INSTITUIONAL_ID_TYPE = "eppn";
+
+    private static final Logger LOG = LoggerFactory.getLogger(PassAuthenticationFilter.class);
 
     private final SecurityContextHolderStrategy securityContextHolderStrategy =
         SecurityContextHolder.getContextHolderStrategy();
     private final SecurityContextRepository securityContextRepository = new RequestAttributeSecurityContextRepository();
 
-    private final ConcurrentHashMap<String, ShibAuthentication> auth_cache;
     private final RefreshableElide elide;
 
-    @Value("${pass.auth.max-cache-size}")
-    private int max_cache_size;
+    private PassAuthenticationFilterConfiguration config;
+
+    /**
+     * Attributes about a user provided by the IDP.
+     */
+    public enum Attribute {
+        /**
+         * Display name
+         */
+        DISPLAY_NAME,
+
+        /**
+         * Email address
+         */
+        EMAIL,
+
+        /**
+         * eduPersonPrincipalName
+         */
+        EPPN,
+
+        /**
+         * Given name
+         */
+        GIVEN_NAME,
+
+        /**
+         * Surname
+         */
+        SURNAME,
+
+        /**
+         * ID assigned by employer
+         */
+        EMPLOYEE_ID,
+
+        /**
+         * Unique id
+         */
+        UNIQUE_ID,
+
+        /**
+         * Affiliation identifiers separated by a semicolon.
+         */
+        SCOPED_AFFILIATION;
+    }
 
     /**
      * @param refreshableElide RefreshableElide
+     * @param config PassAuthenticationFilterConfiguration
      */
-    public ShibAuthenticationFilter(RefreshableElide refreshableElide) {
-        this.auth_cache = new ConcurrentHashMap<>();
+    public PassAuthenticationFilter(RefreshableElide refreshableElide, PassAuthenticationFilterConfiguration config) {
+        this.config = config;
         this.elide = refreshableElide;
-    }
-
-    @Scheduled(fixedRateString = "${pass.auth.cache-duration}", timeUnit = TimeUnit.MINUTES)
-    private void clear_cache() {
-        auth_cache.clear();
     }
 
     // Do authentication and return Authentication object representing success.
     // Throw AuthenticationException if there is trouble with the user credentials
-    private Authentication authenticate(HttpServletRequest request)
+    private Authentication authenticate(Saml2AuthenticatedPrincipal principal)
             throws AuthenticationException, IOException {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Request headers:");
-            request.getHeaderNames().asIterator().forEachRemaining(s -> {
-                LOG.debug(s + ": " + request.getHeader(s));
+            LOG.debug("Principal: " + principal.getName());
+
+            principal.getAttributes().forEach((key, values) -> {
+                LOG.debug(key + ": " + values);
             });
         }
 
-        User shib_user = parseShibHeaders(request);
-        ShibAuthentication auth = auth_cache.get(shib_user.getUsername());
+        User user = parse_user(principal.getAttributes());
+        create_or_update_pass_user(user);
 
-        if (auth != null) {
-            return auth;
-        }
-
-        create_or_update_pass_user(shib_user);
-
-        auth = new ShibAuthentication(shib_user);
-
-        if (auth_cache.size() > max_cache_size) {
-            auth_cache.clear();
-        }
-
-        auth_cache.put(shib_user.getUsername(), auth);
-
-        return auth;
+        return new PassAuthentication(user);
     }
 
     // Ensure that only one user is created
-    private synchronized void create_or_update_pass_user(User shib_user) throws IOException {
+    private synchronized void create_or_update_pass_user(User user) throws IOException {
         try (PassClient pass_client = PassClient.newInstance(elide)) {
-            User pass_user = find_pass_user(pass_client, shib_user);
+            User pass_user = find_pass_user(pass_client, user);
 
             if (pass_user == null) {
-                pass_client.createObject(shib_user);
+                pass_client.createObject(user);
 
-                LOG.info("Created user: {}", shib_user.getUsername());
+                LOG.info("Created user: {}", user.getUsername());
             } else {
-                update_pass_user(pass_client, shib_user, pass_user);
+                update_pass_user(pass_client, user, pass_user);
             }
         }
     }
@@ -199,44 +228,44 @@ public class ShibAuthenticationFilter extends OncePerRequestFilter {
     }
 
     /**
-     * @param request HttpServletRequest
+     * @param attributes
      * @return User representing the information in the request.
      */
-    protected static User parseShibHeaders(HttpServletRequest request) {
+    private User parse_user(Map<String, List<Object>> attributes) {
         User user = new User();
 
-        String display_name = get_shib_attr(request, ShibConstants.DISPLAY_NAME_HEADER, true);
-        String given_name = get_shib_attr(request, ShibConstants.GIVENNAME_HEADER, true);
-        String surname = get_shib_attr(request, ShibConstants.SN_HEADER, true);
-        String email = get_shib_attr(request, ShibConstants.EMAIL_HEADER, true);
-        String eppn = get_shib_attr(request, ShibConstants.EPPN_HEADER, true);
-        String employee_id = get_shib_attr(request, ShibConstants.EMPLOYEE_ID_HEADER, false);
-        String unique_id = get_shib_attr(request, ShibConstants.UNIQUE_ID_HEADER, true);
-        String affiliation = get_shib_attr(request, ShibConstants.SCOPED_AFFILIATION_HEADER, false);
+        String display_name = get(attributes, Attribute.DISPLAY_NAME, true);
+        String given_name = get(attributes, Attribute.GIVEN_NAME, true);
+        String surname = get(attributes, Attribute.SURNAME, true);
+        String email = get(attributes, Attribute.EMAIL, true);
+        String eppn = get(attributes, Attribute.EPPN, true);
+        String employee_id = get(attributes, Attribute.EMPLOYEE_ID, false);
+        String unique_id = get(attributes, Attribute.UNIQUE_ID, true);
+        String affiliation = get(attributes, Attribute.SCOPED_AFFILIATION, false);
 
         String[] eppn_parts = eppn.split("@");
 
         if (eppn_parts.length != 2) {
-            throw new BadCredentialsException("Shib header malformed: " + ShibConstants.EPPN_HEADER);
+            throw new BadCredentialsException("EPPN attribute malformed: " + eppn);
         }
 
         String domain = eppn_parts[1];
         String institutional_id = eppn_parts[0].toLowerCase();
 
         if (domain.isEmpty() || institutional_id.isEmpty()) {
-            throw new BadCredentialsException("Shib header malformed: " + ShibConstants.EPPN_HEADER);
+            throw new BadCredentialsException("EPPN attribute malformed: " + eppn);
         }
 
-        unique_id = String.join(":", domain, ShibConstants.UNIQUE_ID_TYPE, unique_id.split("@")[0]);
+        unique_id = String.join(":", domain, UNIQUE_ID_TYPE, unique_id.split("@")[0]);
 
         // The locator id list has durable ids first.
         user.getLocatorIds().add(unique_id);
 
-        institutional_id = String.join(":", domain, ShibConstants.JHED_ID_TYPE, institutional_id);
+        institutional_id = String.join(":", domain, INSTITUIONAL_ID_TYPE, institutional_id);
         user.getLocatorIds().add(institutional_id);
 
         if (employee_id != null && !employee_id.isEmpty()) {
-            employee_id = String.join(":", domain, ShibConstants.EMPLOYEE_ID_TYPE, employee_id);
+            employee_id = String.join(":", domain, EMPLOYEE_ID_TYPE, employee_id);
             user.getLocatorIds().add(employee_id);
         }
 
@@ -258,37 +287,31 @@ public class ShibAuthenticationFilter extends OncePerRequestFilter {
         return user;
     }
 
-    /**
-     * @param request HttpServletRequest
-     * @return whether or not this looks like a Shib request
-     */
-    protected static boolean isShibRequest(HttpServletRequest request) {
-        return has_all_headers(request, ShibConstants.EPPN_HEADER, ShibConstants.UNIQUE_ID_HEADER);
-    }
+    private String get(Map<String, List<Object>> attributes, Attribute attr, boolean required)
+            throws AuthenticationException {
+        String key = config.getAttributeMap().get(attr);
 
-    private static boolean has_all_headers(HttpServletRequest request, String... names) {
-        for (String s : names) {
-            if (request.getHeader(s) == null) {
-                return false;
-            }
+        List<Object> values = attributes.get(key);
+
+        if (values == null || values.size() == 0 && required) {
+            throw new BadCredentialsException("Missing attribute: " + attr + "[" + key + "]");
         }
 
-        return true;
-    }
+        if (values.size() > 1) {
+            throw new BadCredentialsException("Too many attributes: " + attr + "[" + key + "]");
+        }
 
-    private static String get_shib_attr(HttpServletRequest request, String name, boolean required)
-            throws AuthenticationException {
-        String value = request.getHeader(name);
+        String value = null;
 
-        if (value != null) {
-            value = value.trim();
+        if (values.get(0) != null) {
+            value = values.get(0).toString().trim();
         }
 
         if (value == null || value.isEmpty()) {
             value = null;
 
             if (required) {
-                throw new BadCredentialsException("Missing shib attribute: " + name);
+                throw new BadCredentialsException("Missing attribute: " + attr + "[" + key + "]");
             }
         }
 
@@ -298,22 +321,13 @@ public class ShibAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        // The filter seems to always get triggered twice.
-        // If we are already authenticated, continue on.
-        Authentication existing_auth = this.securityContextHolderStrategy.getContext().getAuthentication();
+        SecurityContext context = this.securityContextHolderStrategy.getContext();
+        Authentication auth = context.getAuthentication();
 
-        if (existing_auth != null && existing_auth.isAuthenticated()) {
-            chain.doFilter(request, response);
-            return;
-        }
-
-        if (isShibRequest(request)) {
+        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof Saml2AuthenticatedPrincipal) {
             try {
-                Authentication auth = authenticate(request);
-                SecurityContext context = this.securityContextHolderStrategy.createEmptyContext();
-                context.setAuthentication(auth);
-                this.securityContextHolderStrategy.setContext(context);
-                this.securityContextRepository.saveContext(context, request, response);
+                context.setAuthentication(authenticate((Saml2AuthenticatedPrincipal) auth.getPrincipal()));
+                securityContextRepository.saveContext(context, request, response);
 
                 LOG.debug("Shib user logged in {}", auth.getName());
             } catch (AuthenticationException e) {

@@ -16,23 +16,17 @@
 package org.eclipse.pass.main.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AnonymousConfigurer;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
-import org.springframework.security.config.annotation.web.configurers.ExceptionHandlingConfigurer;
-import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
-import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
-import org.springframework.security.config.annotation.web.configurers.RequestCacheConfigurer;
+import org.springframework.security.saml2.provider.service.web.authentication.Saml2WebSsoAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.security.web.context.RequestAttributeSecurityContextRepository;
-import org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+
 
 /**
  * Configure Spring Security filter chain.
@@ -41,7 +35,13 @@ import org.springframework.security.web.servletapi.SecurityContextHolderAwareReq
 @EnableWebSecurity
 public class SecurityConfiguration {
     @Autowired
-    private ShibAuthenticationFilter shibAuthFilter;
+    private PassAuthenticationFilter passAuthFilter;
+
+    @Value("${pass.logout-success-url}")
+    private String logoutSuccessUrl;
+
+    @Value("${pass.default-login-success-url}")
+    private String defaultLoginSuccessUrl;
 
     /**
      * Return a configured Spring Security filter chain
@@ -53,28 +53,24 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(CsrfConfigurer::disable);
-        http.formLogin(FormLoginConfigurer::disable);
-        http.logout(LogoutConfigurer::disable);
-        http.anonymous(AnonymousConfigurer::disable);
-        http.exceptionHandling(ExceptionHandlingConfigurer::disable);
-        http.headers(HeadersConfigurer::disable);
-        http.requestCache(RequestCacheConfigurer::disable);
-        // This is needed because SecurityContextHolderAwareRequestFilter uses
-        // HttpSessionSecurityContextRepository by default, and we don't want to use the session for saving
-        // SecurityContext.
-        http.servletApi((servletApi) ->
-            servletApi.addObjectPostProcessor(new ObjectPostProcessor<SecurityContextHolderAwareRequestFilter>() {
-                @Override
-                public <O extends SecurityContextHolderAwareRequestFilter> O postProcess(O filter) {
-                    filter.setSecurityContextRepository(new RequestAttributeSecurityContextRepository());
-                    return filter;
-                }
-            }));
+
         http.authorizeHttpRequests((authorizeHttpRequests) ->
             authorizeHttpRequests.anyRequest().authenticated());
-        // Note that default basic auth is stateless
+
+        // Prevent a continue parameter from being added after login
+        HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
+        requestCache.setMatchingRequestParameterName(null);
+        http.requestCache(rc -> rc.requestCache(requestCache));
+
         http.httpBasic(Customizer.withDefaults());
-        http.addFilterBefore(shibAuthFilter, BasicAuthenticationFilter.class);
+
+        http.saml2Login(s -> s.defaultSuccessUrl(logoutSuccessUrl));
+        http.saml2Metadata(Customizer.withDefaults());
+
+        // Logout clears the SP session, but does not hit the IDP
+        http.logout(l -> l.logoutSuccessUrl(logoutSuccessUrl));
+
+        http.addFilterAfter(passAuthFilter, Saml2WebSsoAuthenticationFilter.class);
 
         return http.build();
     }
