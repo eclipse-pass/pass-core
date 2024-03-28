@@ -14,8 +14,6 @@ public class PassAuthenticationFilterConfiguration {
     // Map attributes to asserting party key
     private Map<PassAuthenticationFilter.Attribute, String> attribute_map;
 
-    private int max_cache_size;
-
     /**
      * @return Mapping of user attributes to keys in SAML response
      */
@@ -30,20 +28,5 @@ public class PassAuthenticationFilterConfiguration {
      */
     public void setAttributeMap(Map<PassAuthenticationFilter.Attribute, String> attribute_map) {
         this.attribute_map = attribute_map;
-    }
-
-    /**
-     * @return cache size
-     */
-    public int getMaxCacheSize() {
-        return max_cache_size;
-    }
-
-    /**
-     *
-     * @param max_cache_size size to set
-     */
-    public void setMaxCacheSize(int max_cache_size) {
-        this.max_cache_size = max_cache_size;
     }
 }

@@ -19,8 +19,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 import com.yahoo.elide.RefreshableElide;
 import jakarta.servlet.FilterChain;
@@ -37,7 +35,6 @@ import org.eclipse.pass.object.model.UserRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -73,7 +70,6 @@ public class PassAuthenticationFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContextHolderStrategy();
     private final SecurityContextRepository securityContextRepository = new RequestAttributeSecurityContextRepository();
 
-    private final ConcurrentHashMap<String, PassAuthentication> auth_cache;
     private final RefreshableElide elide;
 
     private PassAuthenticationFilterConfiguration config;
@@ -129,16 +125,7 @@ public class PassAuthenticationFilter extends OncePerRequestFilter {
      */
     public PassAuthenticationFilter(RefreshableElide refreshableElide, PassAuthenticationFilterConfiguration config) {
         this.config = config;
-        this.auth_cache = new ConcurrentHashMap<>();
         this.elide = refreshableElide;
-    }
-
-    /**
-     * Clear the cached Authentications.
-     */
-    @Scheduled(fixedRateString = "${pass.auth.cache-duration}", timeUnit = TimeUnit.MINUTES)
-    protected void clearAuthenticationCache() {
-        auth_cache.clear();
     }
 
     // Do authentication and return Authentication object representing success.
@@ -153,37 +140,23 @@ public class PassAuthenticationFilter extends OncePerRequestFilter {
             });
         }
 
-        User shib_user = parseUser(principal.getAttributes());
-        PassAuthentication auth = auth_cache.get(shib_user.getUsername());
+        User user = parse_user(principal.getAttributes());
+        create_or_update_pass_user(user);
 
-        if (auth != null) {
-            return auth;
-        }
-
-        create_or_update_pass_user(shib_user);
-
-        auth = new PassAuthentication(shib_user);
-
-        if (auth_cache.size() > config.getMaxCacheSize()) {
-            auth_cache.clear();
-        }
-
-        auth_cache.put(shib_user.getUsername(), auth);
-
-        return auth;
+        return new PassAuthentication(user);
     }
 
     // Ensure that only one user is created
-    private synchronized void create_or_update_pass_user(User shib_user) throws IOException {
+    private synchronized void create_or_update_pass_user(User user) throws IOException {
         try (PassClient pass_client = PassClient.newInstance(elide)) {
-            User pass_user = find_pass_user(pass_client, shib_user);
+            User pass_user = find_pass_user(pass_client, user);
 
             if (pass_user == null) {
-                pass_client.createObject(shib_user);
+                pass_client.createObject(user);
 
-                LOG.info("Created user: {}", shib_user.getUsername());
+                LOG.info("Created user: {}", user.getUsername());
             } else {
-                update_pass_user(pass_client, shib_user, pass_user);
+                update_pass_user(pass_client, user, pass_user);
             }
         }
     }
@@ -258,7 +231,7 @@ public class PassAuthenticationFilter extends OncePerRequestFilter {
      * @param attributes
      * @return User representing the information in the request.
      */
-    private User parseUser(Map<String, List<Object>> attributes) {
+    private User parse_user(Map<String, List<Object>> attributes) {
         User user = new User();
 
         String display_name = get(attributes, Attribute.DISPLAY_NAME, true);

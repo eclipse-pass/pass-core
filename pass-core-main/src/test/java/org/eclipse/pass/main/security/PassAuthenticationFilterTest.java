@@ -13,12 +13,8 @@ import org.eclipse.pass.object.PassClient;
 import org.eclipse.pass.object.model.User;
 import org.eclipse.pass.object.model.UserRole;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class PassAuthenticationFilterTest extends SamlIntegrationTest {
-    @Autowired
-    private PassAuthenticationFilter passAuthFilter;
-
     @Test
     public void testLoggedInUser() throws IOException {
         User submitter = doSamlLogin();
@@ -62,7 +58,6 @@ public class PassAuthenticationFilterTest extends SamlIntegrationTest {
 
         // Login again. Must get new client and clear cache to force login.
         setupClient();
-        passAuthFilter.clearAuthenticationCache();
         User result = doSamlLogin();
 
         // User should have been reset.
