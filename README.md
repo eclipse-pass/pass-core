@@ -64,6 +64,8 @@ Environment variables:
 * PASS_CORE_SUBMISSION_QUEUE=pass-submission
 * PASS_CORE_DEPOSIT_QUEUE=pass-deposit
 * PASS_CORE_IDP_METADATA=classpath:saml2/idp-metadata.xml
+* PASS_CORE_DEAULT_LOGIN_SUCCESS=/app/
+* PASS_CORE_LOGOUT_SUCCESS=/app/
 * PASS_CORE_SP_ID=https://sp.pass/shibboleth
 * PASS_CORE_SP_ACS=http://localhost:8080/login/saml2/sso/pass
 * PASS_CORE_SP_KEY=classpath:saml2/sp-key.pem

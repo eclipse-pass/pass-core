@@ -16,6 +16,7 @@
 package org.eclipse.pass.main.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -36,6 +37,12 @@ public class SecurityConfiguration {
     @Autowired
     private PassAuthenticationFilter passAuthFilter;
 
+    @Value("${pass.logout-success-url}")
+    private String logoutSuccessUrl;
+
+    @Value("${pass.default-login-success-url}")
+    private String defaultLoginSuccessUrl;
+
     /**
      * Return a configured Spring Security filter chain
      *
@@ -50,16 +57,18 @@ public class SecurityConfiguration {
         http.authorizeHttpRequests((authorizeHttpRequests) ->
             authorizeHttpRequests.anyRequest().authenticated());
 
-        // Disable the continue parameter
+        // Prevent a continue parameter from being added after login
         HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
         requestCache.setMatchingRequestParameterName(null);
         http.requestCache(rc -> rc.requestCache(requestCache));
 
         http.httpBasic(Customizer.withDefaults());
 
-        http.saml2Login(Customizer.withDefaults());
-        http.saml2Logout(Customizer.withDefaults());
+        http.saml2Login(s -> s.defaultSuccessUrl(logoutSuccessUrl));
         http.saml2Metadata(Customizer.withDefaults());
+
+        // Logout clears the SP session, but does not hit the IDP
+        http.logout(l -> l.logoutSuccessUrl(logoutSuccessUrl));
 
         http.addFilterAfter(passAuthFilter, Saml2WebSsoAuthenticationFilter.class);
 
