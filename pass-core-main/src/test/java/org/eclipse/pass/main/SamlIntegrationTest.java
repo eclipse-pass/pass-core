@@ -116,7 +116,8 @@ public class SamlIntegrationTest {
 
         // Ensure that SAML login is initiated by setting Accept to html
 
-        Request request = new Request.Builder().url(url).header("Accept", "text/html").get().build();
+        Request request = new Request.Builder().url(url).header("Accept", "text/html, " +
+                                                    JSON_API_CONTENT_TYPE).get().build();
         Response response = client.newCall(request).execute();
 
         assertEquals(200, response.code());
@@ -146,8 +147,7 @@ public class SamlIntegrationTest {
 
         response = client.newCall(new Request.Builder().url(SP_LOGIN_URL).post(form).build()).execute();
 
-        // Will get a 406 because /data/grant does not do html
-        assertEquals(406, response.code());
+        assertEquals(200, response.code());
 
         return get_saml_user();
     }
