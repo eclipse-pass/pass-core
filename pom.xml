@@ -130,6 +130,12 @@
       </dependency>
 
       <dependency>
+        <groupId>com.squareup.okhttp3</groupId>
+        <artifactId>okhttp-urlconnection</artifactId>
+        <version>${okhttp.version}</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
         <version>${spring-boot-maven-plugin.version}</version>
@@ -232,6 +238,10 @@
                     <!-- Transitive deps from spring-boot-starter-->
                     <exclude>jakarta.jms:jakarta.jms-api:</exclude>
                     <exclude>org.springframework.security:spring-security-crypto:</exclude>
+                    <!-- Transitive deps from org.opensaml:opensaml-security-api -->
+                    <exclude>org.bouncycastle:bcprov-jdk18on:</exclude>
+                    <!-- Transitive deps from software.amazon.awssdk:apache-client and org.opensaml:opensaml-saml-impl -->
+                    <exclude>org.apache.httpcomponents:httpclient:</exclude>               
                   </excludes>
                 </dependencyConvergence>
               </rules>
@@ -285,6 +295,7 @@
                 <ignoredUsedUndeclaredDependency>com.amazonaws:aws-java-sdk-sqs:</ignoredUsedUndeclaredDependency>
                 <!-- These come from testcontainers junit-jupiter -->
                 <ignoredUsedUndeclaredDependency>org.testcontainers::</ignoredUsedUndeclaredDependency>
+                <ignoredUsedUndeclaredDependency>com.github.docker-java::</ignoredUsedUndeclaredDependency>
               </ignoredUsedUndeclaredDependencies>
               <ignoredUnusedDeclaredDependencies>
                 <!-- This is the elide starter jar -->
