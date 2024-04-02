@@ -16,42 +16,28 @@
 package org.eclipse.pass.main.security;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
 
 import okhttp3.Credentials;
-import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import org.eclipse.pass.main.ShibIntegrationTest;
+import org.eclipse.pass.main.SamlIntegrationTest;
 import org.eclipse.pass.object.PassClient;
 import org.eclipse.pass.object.model.Grant;
-import org.eclipse.pass.object.model.PassEntity;
 import org.eclipse.pass.object.model.Source;
 import org.eclipse.pass.object.model.Submission;
 import org.eclipse.pass.object.model.User;
-import org.eclipse.pass.object.model.UserRole;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.security.authentication.BadCredentialsException;
 
 /**
  * Ensure that HTTP requests are authenticated and authorized appropriately.
  */
-public class AccessControlTest extends ShibIntegrationTest {
-    private final static String JSON_API_CONTENT_TYPE = "application/vnd.api+json";
-    private final static MediaType JSON_API_MEDIA_TYPE = MediaType.parse("application/vnd.api+json; charset=utf-8");
+public class AccessControlTest extends SamlIntegrationTest {
 
     // Check the HTTP response code and try to return the JSON result
     private JSONObject check(Response response, int code) throws IOException {
@@ -165,51 +151,12 @@ public class AccessControlTest extends ShibIntegrationTest {
     }
 
     @Test
-    public void testParseShibHeaders() {
-        MockHttpServletRequest req = new MockHttpServletRequest();
-
-        req.addHeader(ShibConstants.SCOPED_AFFILIATION_HEADER, SUBMITTER_SCOPED_AFFILIATION);
-        req.addHeader(ShibConstants.SN_HEADER, SUBMITTER_SUR_NAME);
-        req.addHeader(ShibConstants.GIVENNAME_HEADER, SUBMITTER_GIVEN_NAME);
-        req.addHeader(ShibConstants.UNIQUE_ID_HEADER, getSubmitterUniqueId());
-        req.addHeader(ShibConstants.EMAIL_HEADER, SUBMITTER_EMAIL);
-        req.addHeader(ShibConstants.EMPLOYEE_ID_HEADER, getSubmitterEmployeeId());
-        req.addHeader(ShibConstants.DISPLAY_NAME_HEADER, SUBMITTER_NAME);
-        req.addHeader(ShibConstants.EPPN_HEADER, getSubmitterEppn());
-
-        assertTrue(ShibAuthenticationFilter.isShibRequest(req));
-
-        User test = ShibAuthenticationFilter.parseShibHeaders(req);
-
-        assertNotNull(test);
-        test.setId(submitter.getId());
-        assertEquals(submitter, test);
-    }
-
-    @Test
-    public void testParseInvalidShibHeaders() {
-        MockHttpServletRequest req = new MockHttpServletRequest();
-
-        // No headers
-
-        assertFalse(ShibAuthenticationFilter.isShibRequest(req));
-        assertThrows(BadCredentialsException.class, () -> ShibAuthenticationFilter.parseShibHeaders(req));
-
-        // Enough headers to look like a request
-
-        req.addHeader(ShibConstants.UNIQUE_ID_HEADER, getSubmitterUniqueId());
-        req.addHeader(ShibConstants.EPPN_HEADER, getSubmitterEppn());
-
-        assertTrue(ShibAuthenticationFilter.isShibRequest(req));
-        assertThrows(BadCredentialsException.class, () -> ShibAuthenticationFilter.parseShibHeaders(req));
-    }
-
-    @Test
     public void testReadGrantsAsShibUser() throws IOException {
         String url = getBaseUrl() + "data/grant";
 
+        doSamlLogin();
+
         Request.Builder builder = new Request.Builder();
-        setShibHeaders(builder);
         Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
                 .addHeader("Content-Type", JSON_API_CONTENT_TYPE).get().build();
 
@@ -219,63 +166,16 @@ public class AccessControlTest extends ShibIntegrationTest {
     }
 
     @Test
-    public void testReadGrantsAsShibUser_HeaderRequiredEveryRequest() throws IOException {
-        String url = getBaseUrl() + "data/grant";
-
-        Request.Builder builder = new Request.Builder();
-        setShibHeaders(builder);
-        Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
-            .addHeader("Content-Type", JSON_API_CONTENT_TYPE).get().build();
-
-        Response response = client.newCall(request).execute();
-
-        check(response, 200);
-
-        // no shib headers
-        builder = new Request.Builder();
-        Request request2 = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
-            .addHeader("Content-Type", JSON_API_CONTENT_TYPE).get().build();
-
-        Response response2 = client.newCall(request2).execute();
-
-        check(response2, 401);
-    }
-
-    @Test
-    public void testReadGrantsAsShibUser_HeadersAuthEveryRequest() throws IOException {
-        String url = getBaseUrl() + "data/grant";
-
-        Request.Builder builder = new Request.Builder();
-        setShibHeaders(builder);
-        Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
-            .addHeader("Content-Type", JSON_API_CONTENT_TYPE).get().build();
-
-        Response response = client.newCall(request).execute();
-
-        check(response, 200);
-
-        // invalid eppn header shib headers
-        Request.Builder builder2 = new Request.Builder();
-        setShibHeaders(builder2);
-        builder2.header(ShibConstants.EPPN_HEADER, "badeppnheadervalue");
-        Request request2 = builder2.url(url).header("Accept", JSON_API_CONTENT_TYPE)
-            .addHeader("Content-Type", JSON_API_CONTENT_TYPE).get().build();
-
-        Response response2 = client.newCall(request2).execute();
-
-        check(response2, 400);
-    }
-
-    @Test
     public void testCreateGrantAsShibUser() throws IOException, JSONException {
-
         String url = getBaseUrl() + "data/grant";
         JSONObject grant = pass_object("grant");
         set_attribute(grant, "projectName", "This is a test");
 
+        doSamlLogin();
+
         RequestBody body = RequestBody.create(grant.toString(), JSON_API_MEDIA_TYPE);
         Request.Builder builder = new Request.Builder();
-        setShibHeaders(builder);
+
         Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
                 .addHeader("Content-Type", JSON_API_CONTENT_TYPE).post(body).build();
 
@@ -286,6 +186,8 @@ public class AccessControlTest extends ShibIntegrationTest {
 
     @Test
     public void testCreateUpdateDeleteSubmissionAsShibUser() throws IOException, JSONException {
+        User submitter = doSamlLogin();
+
         JSONObject sub = pass_object("submission");
         set_attribute(sub, "submitterName", "Person Personson");
         set_relationship(sub, "submitter", "user", submitter.getId().toString());
@@ -295,7 +197,7 @@ public class AccessControlTest extends ShibIntegrationTest {
 
             RequestBody body = RequestBody.create(sub.toString(), JSON_API_MEDIA_TYPE);
             Request.Builder builder = new Request.Builder();
-            setShibHeaders(builder);
+
             Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
                     .addHeader("Content-Type", JSON_API_CONTENT_TYPE).post(body).build();
 
@@ -310,7 +212,7 @@ public class AccessControlTest extends ShibIntegrationTest {
             String url = getBaseUrl() + "data/submission/" + get_id(sub);
             RequestBody body = RequestBody.create(sub.toString(), JSON_API_MEDIA_TYPE);
             Request.Builder builder = new Request.Builder();
-            setShibHeaders(builder);
+
             Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
                     .addHeader("Content-Type", JSON_API_CONTENT_TYPE).patch(body).build();
 
@@ -322,7 +224,7 @@ public class AccessControlTest extends ShibIntegrationTest {
         {
             String url = getBaseUrl() + "data/submission/" + get_id(sub);
             Request.Builder builder = new Request.Builder();
-            setShibHeaders(builder);
+
             Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE).delete().build();
 
             Response response = client.newCall(request).execute();
@@ -333,6 +235,8 @@ public class AccessControlTest extends ShibIntegrationTest {
 
     @Test
     public void testCreateUpdateDeletePublicationAsShibUser() throws IOException, JSONException {
+        doSamlLogin();
+
         JSONObject pub = pass_object("publication");
         set_attribute(pub, "title", "This is a title");
 
@@ -341,7 +245,7 @@ public class AccessControlTest extends ShibIntegrationTest {
 
             RequestBody body = RequestBody.create(pub.toString(), JSON_API_MEDIA_TYPE);
             Request.Builder builder = new Request.Builder();
-            setShibHeaders(builder);
+
             Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
                     .addHeader("Content-Type", JSON_API_CONTENT_TYPE).post(body).build();
 
@@ -356,7 +260,7 @@ public class AccessControlTest extends ShibIntegrationTest {
             String url = getBaseUrl() + "data/publication/" + get_id(pub);
             RequestBody body = RequestBody.create(pub.toString(), JSON_API_MEDIA_TYPE);
             Request.Builder builder = new Request.Builder();
-            setShibHeaders(builder);
+
             Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
                     .addHeader("Content-Type", JSON_API_CONTENT_TYPE).patch(body).build();
 
@@ -368,7 +272,7 @@ public class AccessControlTest extends ShibIntegrationTest {
         {
             String url = getBaseUrl() + "data/publication/" + get_id(pub);
             Request.Builder builder = new Request.Builder();
-            setShibHeaders(builder);
+
             Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE).delete().build();
 
             Response response = client.newCall(request).execute();
@@ -381,6 +285,8 @@ public class AccessControlTest extends ShibIntegrationTest {
     public void testCreateUpdateDeleteFileAsShibUserOwningSubmission() throws IOException, JSONException {
         // File is associated with a submission associated with submitter
         // Shib user can create file, update the file, but not delete it.
+
+        User submitter = doSamlLogin();
 
         JSONObject file = pass_object("file");
 
@@ -402,7 +308,7 @@ public class AccessControlTest extends ShibIntegrationTest {
 
             RequestBody body = RequestBody.create(file.toString(), JSON_API_MEDIA_TYPE);
             Request.Builder builder = new Request.Builder();
-            setShibHeaders(builder);
+
             Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
                     .addHeader("Content-Type", JSON_API_CONTENT_TYPE).post(body).build();
 
@@ -417,7 +323,7 @@ public class AccessControlTest extends ShibIntegrationTest {
             String url = getBaseUrl() + "data/file/" + get_id(file);
             RequestBody body = RequestBody.create(file.toString(), JSON_API_MEDIA_TYPE);
             Request.Builder builder = new Request.Builder();
-            setShibHeaders(builder);
+
             Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
                     .addHeader("Content-Type", JSON_API_CONTENT_TYPE).patch(body).build();
 
@@ -429,7 +335,7 @@ public class AccessControlTest extends ShibIntegrationTest {
         {
             String url = getBaseUrl() + "data/file/" + get_id(file);
             Request.Builder builder = new Request.Builder();
-            setShibHeaders(builder);
+
             Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE).delete().build();
 
             Response response = client.newCall(request).execute();
@@ -442,6 +348,8 @@ public class AccessControlTest extends ShibIntegrationTest {
     public void testCreateUpdateDeleteEventAsShibUserOwningSubmission() throws IOException, JSONException {
         // File is associated with a submission associated with submitter
         // Shib user can create file, update the file, but not delete it.
+
+        User submitter = doSamlLogin();
 
         JSONObject event = pass_object("submissionEvent");
 
@@ -463,7 +371,6 @@ public class AccessControlTest extends ShibIntegrationTest {
 
             RequestBody body = RequestBody.create(event.toString(), JSON_API_MEDIA_TYPE);
             Request.Builder builder = new Request.Builder();
-            setShibHeaders(builder);
             Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
                     .addHeader("Content-Type", JSON_API_CONTENT_TYPE).post(body).build();
 
@@ -478,7 +385,6 @@ public class AccessControlTest extends ShibIntegrationTest {
             String url = getBaseUrl() + "data/submissionEvent/" + get_id(event);
             RequestBody body = RequestBody.create(event.toString(), JSON_API_MEDIA_TYPE);
             Request.Builder builder = new Request.Builder();
-            setShibHeaders(builder);
             Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
                     .addHeader("Content-Type", JSON_API_CONTENT_TYPE).patch(body).build();
 
@@ -490,7 +396,6 @@ public class AccessControlTest extends ShibIntegrationTest {
         {
             String url = getBaseUrl() + "data/submissionEvent/" + get_id(event);
             Request.Builder builder = new Request.Builder();
-            setShibHeaders(builder);
             Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE).delete().build();
 
             Response response = client.newCall(request).execute();
@@ -503,13 +408,14 @@ public class AccessControlTest extends ShibIntegrationTest {
     public void testCreateFileAsShibUserNotOwningSubmission() throws IOException, JSONException {
         String url = getBaseUrl() + "data/file";
 
+        doSamlLogin();
+
         JSONObject file = pass_object("file");
         // File does not point to submission user owns
         set_attribute(file, "name", "moo.xml");
 
         RequestBody body = RequestBody.create(file.toString(), JSON_API_MEDIA_TYPE);
         Request.Builder builder = new Request.Builder();
-        setShibHeaders(builder);
         Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
                 .addHeader("Content-Type", JSON_API_CONTENT_TYPE).post(body).build();
 
@@ -522,13 +428,15 @@ public class AccessControlTest extends ShibIntegrationTest {
     public void testCreateEventAsShibUserNotOwningSubmission() throws IOException, JSONException {
         String url = getBaseUrl() + "data/submissionEvent";
 
+        doSamlLogin();
+
         JSONObject event = pass_object("submissionEvent");
         // File does not point to submission user owns
         set_attribute(event, "comment", "This should not work");
 
         RequestBody body = RequestBody.create(event.toString(), JSON_API_MEDIA_TYPE);
         Request.Builder builder = new Request.Builder();
-        setShibHeaders(builder);
+
         Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
                 .addHeader("Content-Type", JSON_API_CONTENT_TYPE).post(body).build();
 
@@ -540,6 +448,8 @@ public class AccessControlTest extends ShibIntegrationTest {
     @Test
     public void testUpdateGrantAsShibUser() throws IOException, JSONException {
         Long id = null;
+
+        doSamlLogin();
 
         try (PassClient client = PassClient.newInstance(refreshableElide)) {
             Grant grant = new Grant();
@@ -555,7 +465,7 @@ public class AccessControlTest extends ShibIntegrationTest {
         String url = getBaseUrl() + "data/grant/" + id;
         RequestBody body = RequestBody.create(grant.toString(), JSON_API_MEDIA_TYPE);
         Request.Builder builder = new Request.Builder();
-        setShibHeaders(builder);
+
         Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
                 .addHeader("Content-Type", JSON_API_CONTENT_TYPE).patch(body).build();
 
@@ -568,6 +478,8 @@ public class AccessControlTest extends ShibIntegrationTest {
     public void testDeleteGrantAsShibUser() throws IOException {
         Long id = null;
 
+        doSamlLogin();
+
         try (PassClient client = PassClient.newInstance(refreshableElide)) {
             Grant grant = new Grant();
             grant.setAwardNumber("zipededoda");
@@ -578,7 +490,7 @@ public class AccessControlTest extends ShibIntegrationTest {
 
         String url = getBaseUrl() + "data/grant/" + id;
         Request.Builder builder = new Request.Builder();
-        setShibHeaders(builder);
+
         Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE).delete().build();
 
         Response response = client.newCall(request).execute();
@@ -631,65 +543,6 @@ public class AccessControlTest extends ShibIntegrationTest {
             Response response = client.newCall(request).execute();
 
             check(response, 204);
-        }
-    }
-
-    @Test
-    public void testUpdateExistingShibUserWithNullValues() throws IOException {
-        // Create a user with null values except for the required locators
-        User user = new User();
-
-        try (PassClient pass_client = PassClient.newInstance(refreshableElide)) {
-            String[] locators = {
-                "johnshopkins.edu:unique-id:cow123",
-                "johnshopkins.edu:eppn:bessiecow123"
-            };
-            user.setLocatorIds(Arrays.asList(locators));
-
-            pass_client.createObject(user);
-        }
-
-        // User should be matched by request and updated
-
-        String url = getBaseUrl() + "data/grant";
-
-        Request.Builder builder = new Request.Builder();
-
-        builder.addHeader(ShibConstants.SCOPED_AFFILIATION_HEADER, SUBMITTER_SCOPED_AFFILIATION);
-        builder.addHeader(ShibConstants.SN_HEADER, "Cow");
-        builder.addHeader(ShibConstants.GIVENNAME_HEADER, "Bessie");
-        builder.addHeader(ShibConstants.UNIQUE_ID_HEADER, "cow123@johnshopkins.edu");
-        builder.addHeader(ShibConstants.EMAIL_HEADER, "cow123@jhu.edu");
-        builder.addHeader(ShibConstants.EMPLOYEE_ID_HEADER, "123");
-        builder.addHeader(ShibConstants.DISPLAY_NAME_HEADER, "Bessie the Cow");
-        builder.addHeader(ShibConstants.EPPN_HEADER, "bessiecow123@johnshopkins.edu");
-
-        Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
-                .addHeader("Content-Type", JSON_API_CONTENT_TYPE).get().build();
-
-        Response response = client.newCall(request).execute();
-
-        check(response, 200);
-
-        // Check that user is updated
-
-        try (PassClient pass_client = PassClient.newInstance(refreshableElide)) {
-            user = pass_client.getObject(User.class, user.getId());
-
-            String[] locators = {
-                "johnshopkins.edu:unique-id:cow123",
-                "johnshopkins.edu:eppn:bessiecow123",
-                "johnshopkins.edu:employeeid:123"
-            };
-            String[] affil = {"FACULTY@johnshopkins.edu", "johnshopkins.edu"};
-
-            assertEquals(user.getDisplayName(), "Bessie the Cow");
-            assertEquals(user.getUsername(), "bessiecow123@johnshopkins.edu");
-            assertEquals(user.getLastName(), "Cow");
-            assertEquals(user.getEmail(), "cow123@jhu.edu");
-            assertTrue(PassEntity.listEquals(user.getLocatorIds(), List.of(locators)));
-            assertEquals(user.getRoles(), List.of(UserRole.SUBMITTER));
-            assertEquals(user.getAffiliation(), Set.of(affil));
         }
     }
 }
