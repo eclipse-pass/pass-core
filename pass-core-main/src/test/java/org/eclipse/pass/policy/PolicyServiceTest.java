@@ -27,7 +27,7 @@ import okhttp3.Call;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.eclipse.pass.main.ShibIntegrationTest;
+import org.eclipse.pass.main.SamlIntegrationTest;
 import org.eclipse.pass.object.PassClient;
 import org.eclipse.pass.object.model.AggregatedDepositStatus;
 import org.eclipse.pass.object.model.Funder;
@@ -50,7 +50,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author jrm
  */
-public class PolicyServiceTest extends ShibIntegrationTest {
+public class PolicyServiceTest extends SamlIntegrationTest {
 
     @Autowired
     protected RefreshableElide refreshableElide;
@@ -135,7 +135,8 @@ public class PolicyServiceTest extends ShibIntegrationTest {
     public void SubmissionPoliciesTest() throws IOException, JSONException {
         HttpUrl url = formServiceUrl("policies", submission.getId().toString());
         Request.Builder builder = new Request.Builder();
-        setShibHeaders(builder);
+
+        doSamlLogin();
 
         Request okHttpRequest = builder
             .url(url)
@@ -173,7 +174,8 @@ public class PolicyServiceTest extends ShibIntegrationTest {
     public void SubmissionRepositoriesTest() throws IOException, JSONException {
         HttpUrl url = formServiceUrl("repositories", submission.getId().toString());
         Request.Builder builder = new Request.Builder();
-        setShibHeaders(builder);
+
+        doSamlLogin();
 
         Request okHttpRequest = builder
             .url(url)
@@ -212,7 +214,8 @@ public class PolicyServiceTest extends ShibIntegrationTest {
     public void InvalidSubmissionTest() throws IOException {
         HttpUrl url = formServiceUrl("repositories", "MOO");
         Request.Builder builder = new Request.Builder();
-        setShibHeaders(builder);
+
+        doSamlLogin();
 
         Request okHttpRequest = builder
             .url(url)
@@ -243,7 +246,8 @@ public class PolicyServiceTest extends ShibIntegrationTest {
 
         HttpUrl url = formServiceUrl("policies", noGrantsSubmission.getId().toString());
         Request.Builder builder = new Request.Builder();
-        setShibHeaders(builder);
+
+        doSamlLogin();
 
         Request okHttpRequest = builder
             .url(url)
@@ -260,7 +264,6 @@ public class PolicyServiceTest extends ShibIntegrationTest {
 
         HttpUrl url1 = formServiceUrl("repositories", noGrantsSubmission.getId().toString());
         Request.Builder builder1 = new Request.Builder();
-        setShibHeaders(builder1);
 
         Request okHttpRequest1 = builder1
             .url(url1)

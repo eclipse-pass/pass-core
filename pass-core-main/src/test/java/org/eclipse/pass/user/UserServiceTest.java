@@ -10,9 +10,10 @@ import java.net.URI;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.eclipse.pass.main.ShibIntegrationTest;
+import org.eclipse.pass.main.SamlIntegrationTest;
 import org.eclipse.pass.object.PassClient;
 import org.eclipse.pass.object.model.Submission;
+import org.eclipse.pass.object.model.User;
 import org.eclipse.pass.usertoken.Token;
 import org.eclipse.pass.usertoken.TokenFactory;
 import org.json.JSONException;
@@ -20,7 +21,7 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class UserServiceTest extends ShibIntegrationTest {
+public class UserServiceTest extends SamlIntegrationTest {
     @Autowired
     private TokenFactory userTokenFactory;
 
@@ -28,8 +29,10 @@ public class UserServiceTest extends ShibIntegrationTest {
     public void testHandleRequest() throws IOException, JSONException {
         String url = getBaseUrl() + "user/whoami";
 
+        User submitter = doSamlLogin();
+
         Request.Builder builder = new Request.Builder().url(url);
-        setShibHeaders(builder);
+
         Request request = builder.get().build();
 
         Response response = client.newCall(request).execute();
@@ -48,8 +51,8 @@ public class UserServiceTest extends ShibIntegrationTest {
         HttpUrl url = HttpUrl.parse(getBaseUrl() + "user/whoami").newBuilder()
                 .addQueryParameter(Token.USER_TOKEN_PARAM, "MOO").build();
 
+        doSamlLogin();
         Request.Builder builder = new Request.Builder().url(url);
-        setShibHeaders(builder);
 
         Request request = builder.get().build();
 
@@ -67,8 +70,9 @@ public class UserServiceTest extends ShibIntegrationTest {
         HttpUrl url = HttpUrl.parse(getBaseUrl() + "user/whoami").newBuilder()
                 .addQueryParameter(Token.USER_TOKEN_PARAM, token.toString()).build();
 
+        doSamlLogin();
+
         Request.Builder builder = new Request.Builder().url(url);
-        setShibHeaders(builder);
 
         Request request = builder.get().build();
 
@@ -97,7 +101,7 @@ public class UserServiceTest extends ShibIntegrationTest {
                 .addQueryParameter(Token.USER_TOKEN_PARAM, token.toString()).build();
 
         Request.Builder builder = new Request.Builder().url(url);
-        setShibHeaders(builder);
+        User submitter = doSamlLogin();
 
         Request request = builder.get().build();
 
