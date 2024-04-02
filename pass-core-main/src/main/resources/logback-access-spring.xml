@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <springProperty scope="context" name="logDir" source="logging.path"/>
+    <springProperty scope="context" name="logDir" source="logging.file.path"/>
 
     <appender name="ACCESSFILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${logDir}/access.log</file>
