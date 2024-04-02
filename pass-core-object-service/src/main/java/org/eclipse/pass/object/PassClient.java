@@ -69,6 +69,11 @@ public interface PassClient extends Closeable {
         return getBaseUrl(elide) + type + "/" + entity.getId();
     }
 
+    /**
+     * @param params Map of key to list of values
+     * @param key Key
+     * @param value Value to add to list associated with key
+     */
     static void addParam(Map<String, List<String>> params, String key, String value) {
         params.computeIfAbsent(key, k -> new ArrayList<>()).add(value);
     }
