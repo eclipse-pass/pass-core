@@ -132,6 +132,7 @@ public class JmsConfiguration {
      * Provide a JMS connection to Amazon SQS if configured to do so.
      *
      * @param awsRegion AWS region
+     * @throws URISyntaxException when failing to configure
      * @return JmsListenerContainerFactory
      */
     @Bean
