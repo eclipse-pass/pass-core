@@ -51,6 +51,8 @@ Environment variables:
 * AWS_REGION=us-east-1
 * AWS_ACCESS_KEY_ID=xxx
 * AWS_SECRET_ACCESS_KEY=xxx
+* PASS_CORE_APP_LOCATION=classpath:app
+* PASS_CORE_APP_CSP=default-src 'self';
 * PASS_CORE_DATABASE_URL=jdbc:postgresql://postgres:5432/pass
 * PASS_CORE_DATABASE_USERNAME=pass
 * PASS_CORE_DATABASE_PASSWORD=moo
@@ -62,6 +64,13 @@ Environment variables:
 * PASS_CORE_EMBED_JMS_BROKER=true
 * PASS_CORE_SUBMISSION_QUEUE=pass-submission
 * PASS_CORE_DEPOSIT_QUEUE=pass-deposit
+* PASS_CORE_IDP_METADATA=classpath:saml2/idp-metadata.xml
+* PASS_CORE_DEAULT_LOGIN_SUCCESS=/app/
+* PASS_CORE_LOGOUT_SUCCESS=/app/
+* PASS_CORE_SP_ID=https://sp.pass/shibboleth
+* PASS_CORE_SP_ACS=http://localhost:8080/login/saml2/sso/pass
+* PASS_CORE_SP_KEY=classpath:saml2/sp-key.pem
+* PASS_CORE_SP_CERT=classpath:saml2/sp-cert.pem
 * PASS_CORE_SUBMISSION_EVENT_QUEUE=pass-submission-event
 * PASS_CORE_USERTOKEN_KEY=xxx
   * If not present, one is generated. See the [user service](pass-core-user-service/README.md) for how to create manually.
@@ -71,22 +80,36 @@ Environment variables:
   * Used when services send URLs to the client such as relationship links.
 
 The environment variables in `pass-core-main/.env` are intended to be used for local testing of pass-core in isolation.
-For the local PASS demo environment, for example, we would specify `PASS_CORE_BASE_URL=https://pass.local`
 
 # Access control
 
-This application is meant to be deployed behind a proxy which ensures clients are authenticated.
-Clients either have a backend or submitter role. The backend can do everything.
-The submitter is restricted to creating and modifying certain objects in the data model.
-The submitter has full access to all other services.
+SAML 2.0 and HTTP basic authentication are supported. An authenticated user is either authorized with a `BACKEND` or `SUBMITTER` role.
 
-A request which has gone through the proxy must have headers set which give information about the client.
-The client is mapped to a PASS User object. That object is created if the client is formerly unknown. If the
-client is already known, the existing client User object updated with any new information. In this case the
-client will have a submitter role.
+A user that does a SAML login is mapped to a PASS user using locator ids. The provided SAML properties of the user
+are interpreted using the spring property `pass.auth.attribute-map`. The user is assigned the `SUBMITTER` role.
 
-If a request has not gone through the proxy, it must be authenticated with HTTP basic. This is used for requests coming from the backend.
-Note the environment variables above which set the backend user credentials.
+There is a single `BACKEND` user specified which can be logged in as using HTTP basic.
+
+The `BACKEND` role can do everything. The `SUBMITTER` role is restricted to creating and modifying certain objects in the data model.
+The `SUBMITTER` has full access to all other services. 
+
+# SAML configuration
+
+The `PASS_CORE_SP_KEY` and `PASS_CORE_SP_CERT` environment variables set the location of the keys used by pass-core to encrypt SAML communication.
+Use `PASS_CORE_SP_ID` to set the identifier of the pass-core SP, `PASS_CORE_IDP_METADATA` to set the location where IDP metadata can be retrieved,
+and `PASS_CORE_SP_ACS` for the Assertion Consumer Service of the SP.
+
+The defaults are set such that the integration tests can run against a [SimpleSAMLphp based IDP](https://github.com/kenchan0130/docker-simplesamlphp/).
+
+The image can be run with:
+```
+docker run --name=idp -p 8090:8080 -e SIMPLESAMLPHP_SP_ENTITY_ID=https://sp.pass/shibboleth -e SIMPLESAMLPHP_SP_ASSERTION_CONSUMER_SERVICE=http://localhost:8080/login/saml2/sso/pass -e SIMPLESAMLPHP_IDP_BASE_URL=http://localhost:8090/   -v ./pass-core/pass-core/main/src/main/resources/saml2/authsources.php:/var/www/simplesamlphp/config/authsources.php -d kenchan0130/simplesamlphp
+```
+Note the volume mount which is set the user information appropriately for PASS.
+
+# App service
+
+The PASS application is available at `/app/`. Requests are resolved against the location given by the environment variable `PASS_CORE_APP_LOCATION`.
 
 # User service
 
@@ -110,8 +133,11 @@ The [metadata schema service](pass-core-metadataschema-service/README.md) provid
 
 # JSON API
 
-JSON API is deployed at `/data`. All of our data model is available, just divided into attributes and relationships. Note that identifiers are now integers, not URIs.
+JSON API is deployed at `/data/`. All of our data model is available, just divided into attributes and relationships. Note that identifiers are now integers, not URIs.
 See https://elide.io/pages/guide/v6/10-jsonapi.html for information on how Elide provides support for filtering and sorting.
+
+See `/swagger/` for auto-generated documentation.
+
 
 ## Creating a RepositoryCopy
 
