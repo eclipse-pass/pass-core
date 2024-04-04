@@ -321,15 +321,18 @@ public class PassAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        SecurityContext context = this.securityContextHolderStrategy.getContext();
-        Authentication auth = context.getAuthentication();
+        Authentication auth = securityContextHolderStrategy.getContext().getAuthentication();
 
         if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof Saml2AuthenticatedPrincipal) {
             try {
+                SecurityContext context = securityContextHolderStrategy.createEmptyContext();
+
                 context.setAuthentication(authenticate((Saml2AuthenticatedPrincipal) auth.getPrincipal()));
+
+                securityContextHolderStrategy.setContext(context);
                 securityContextRepository.saveContext(context, request, response);
 
-                LOG.debug("Shib user logged in {}", auth.getName());
+                LOG.debug("User logged in {}", auth.getName());
             } catch (AuthenticationException e) {
                 // This should not happen
                 LOG.error("Login failed", e);
