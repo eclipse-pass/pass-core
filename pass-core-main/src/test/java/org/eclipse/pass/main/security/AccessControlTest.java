@@ -16,11 +16,15 @@
 package org.eclipse.pass.main.security;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 
+import okhttp3.Cookie;
 import okhttp3.Credentials;
+import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
@@ -543,6 +547,102 @@ public class AccessControlTest extends SamlIntegrationTest {
             Response response = client.newCall(request).execute();
 
             check(response, 204);
+        }
+    }
+
+    // Check handling of /app/ including CSP header.
+    @Test
+    public void testReadAppAuthorized() throws IOException {
+        String url = getBaseUrl() + "app/";
+        String index_html;
+
+        doSamlLogin();
+
+        {
+            Request request = new Request.Builder().url(url + "index.html").get().build();
+            Response response = client.newCall(request).execute();
+            index_html = response.body().string();
+
+            assertEquals(200, response.code());
+            assertNotNull(response.header("Content-Security-Policy"));
+        }
+
+        // /app/ returns index.html
+
+        {
+            Request request = new Request.Builder().url(url).get().build();
+            Response response = client.newCall(request).execute();
+
+            assertEquals(200, response.code());
+            assertNotNull(response.header("Content-Security-Policy"));
+            assertEquals(index_html, response.body().string());
+        }
+
+        // Files that do not exist under /app/ also return index.html
+
+        {
+            Request request = new Request.Builder().url(url + "doesnotexist").get().build();
+            Response response = client.newCall(request).execute();
+
+            assertEquals(200, response.code());
+            assertNotNull(response.header("Content-Security-Policy"));
+            assertEquals(index_html, response.body().string());
+        }
+
+        // Files that exist under /app/ can be returned
+
+        {
+            Request request = new Request.Builder().url(url + "test.txt").get().build();
+            Response response = client.newCall(request).execute();
+
+            assertEquals(200, response.code());
+            assertNotNull(response.header("Content-Security-Policy"));
+            assertNotEquals(index_html, response.body().string());
+        }
+    }
+
+    @Test
+    public void testReadAppNotAuthorized() throws IOException {
+        String url = getBaseUrl() + "app/";
+
+        Request request = new Request.Builder().url(url).get().build();
+        Response response = client.newCall(request).execute();
+
+        assertEquals(401, response.code());
+    }
+
+    private Cookie get_cookie(String name) {
+        return client.cookieJar().loadForRequest(HttpUrl.get(getBaseUrl())).stream().
+                filter(c -> c.name().equals(name)).findFirst().orElse(null);
+    }
+
+    @Test
+    public void testLogout() throws IOException {
+        doSamlLogin();
+        Cookie ses = get_cookie("JSESSIONID");
+
+        assertNotNull(ses);
+
+        // Logout
+        {
+            String url = getBaseUrl() + "logout";
+
+            Request request = new Request.Builder().url(url).get().build();
+            Response response = client.newCall(request).execute();
+
+            assertEquals(204, response.code());
+        }
+
+        // Session cookie still exists, but cannot use it
+        assertEquals(ses, get_cookie("JSESSIONID"));
+
+        {
+            String url = getBaseUrl() + "app/";
+
+            Request request = new Request.Builder().url(url).get().build();
+            Response response = client.newCall(request).execute();
+
+            assertEquals(401, response.code());
         }
     }
 }
