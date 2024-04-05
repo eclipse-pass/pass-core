@@ -90,7 +90,7 @@ aws:
     endpoint-override: ${AWS_SQS_ENDPOINT_OVERRIDE:}
 
 pass:
-  app-location: ${PASS_CORE_APP_LOCATION:classpath:app}
+  app-location: ${PASS_CORE_APP_LOCATION:classpath:app/}
   auth:
     attribute-map:
       DISPLAY_NAME: 'urn:oid:2.16.840.1.113730.3.1.241'
