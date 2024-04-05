@@ -18,7 +18,7 @@ import org.springframework.web.servlet.resource.PathResourceResolver;
 @Configuration
 public class WebMvcConfiguration implements WebMvcConfigurer {
     @Autowired
-    ResourceLoader resourceLoader;
+    private ResourceLoader resourceLoader;
 
     @Value("${pass.app-location}")
     private String appLocation;
@@ -44,6 +44,8 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
         // Ensure that all requests under /app/ that are not found resolve to /app/index.html.
         // This lets the UI handle routes it controls.
 
+        String index_html = appLocation + "index.html";
+
         registry.addResourceHandler("/app/**")
             .addResourceLocations(appLocation)
             .resourceChain(true)
@@ -51,8 +53,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
                 @Override
                 protected Resource getResource(String path, Resource base) throws IOException {
                     Resource res = base.createRelative(path);
-                    return res.exists() && res.isReadable() ? res :
-                        resourceLoader.getResource(appLocation + "index.html");
+                    return res.isReadable() ? res : resourceLoader.getResource(index_html);
                 }
             });
     }
