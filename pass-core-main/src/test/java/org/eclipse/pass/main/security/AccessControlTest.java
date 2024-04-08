@@ -633,8 +633,8 @@ public class AccessControlTest extends SamlIntegrationTest {
             assertEquals(204, response.code());
         }
 
-        // Session cookie still exists, but cannot use it
-        assertEquals(ses, get_cookie("JSESSIONID"));
+        // Session cookie deleted
+        assertEquals(null, get_cookie("JSESSIONID"));
 
         {
             String url = getBaseUrl() + "app/";
