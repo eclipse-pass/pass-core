@@ -112,7 +112,8 @@ pass:
     sqs: ${PASS_CORE_USE_SQS:false}
     embed: ${PASS_CORE_EMBED_JMS_BROKER:true}
   default-login-success-url: ${PASS_CORE_DEFAULT_LOGIN_SUCCESS:/app/}
-  logout-success-url: ${PASS_CORE_LOGOUT_SUCCESS:/app/}
+  logout-delete-cookies: ${PASS_CORE_LOGOUT_DELETE_COOKIES:JSESSIONID /}
+  logout-success-url: ${PASS_CORE_LOGOUT_SUCCESS:/login}
   policy:
     institution: ${PASS_CORE_POLICY_INSTITUTION:johnshopkins.edu}
     institutional_policy_title: ${PASS_CORE_POLICY_INSTITUTIONAL_POLICY_TITLE:Johns Hopkins University (JHU) Open Access Policy}
@@ -150,6 +151,8 @@ spring:
 
 server:
   port: ${PASS_CORE_PORT}
+  error:
+    include-stacktrace: always
 
 pass:
   jms:
