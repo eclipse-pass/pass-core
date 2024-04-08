@@ -20,7 +20,7 @@ java -jar pass-core-main.jar
 
 By default an in memory database is used.
 
-Look at http://localhost:8080/ to see the auto-created documentation and a UI for testing out the api.
+Look at http://localhost:8080/swagger/ to see the auto-created documentation and a UI for testing out the api.
 
 You can directly make request with the UI and see what happens. Note when doing a POST to create an object, be sure to edit the type field to have the correct object type and delete the id field to have the id auto-generated.
 
@@ -67,6 +67,7 @@ Environment variables:
 * PASS_CORE_IDP_METADATA=classpath:saml2/idp-metadata.xml
 * PASS_CORE_DEAULT_LOGIN_SUCCESS=/app/
 * PASS_CORE_LOGOUT_SUCCESS=/app/
+* PASS_CORE_LOGOUT_DELETE_COOKIES="JSESSIONID /"
 * PASS_CORE_SP_ID=https://sp.pass/shibboleth
 * PASS_CORE_SP_ACS=http://localhost:8080/login/saml2/sso/pass
 * PASS_CORE_SP_KEY=classpath:saml2/sp-key.pem
