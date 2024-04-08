@@ -15,10 +15,14 @@
  */
 package org.eclipse.pass.main.security;
 
+import java.util.List;
+
+import jakarta.servlet.http.Cookie;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -27,6 +31,7 @@ import org.springframework.security.config.annotation.web.configurers.CsrfConfig
 import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
 import org.springframework.security.saml2.provider.service.web.authentication.Saml2WebSsoAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.logout.CookieClearingLogoutHandler;
 import org.springframework.security.web.header.writers.ContentSecurityPolicyHeaderWriter;
 import org.springframework.security.web.header.writers.DelegatingRequestMatcherHeaderWriter;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
@@ -51,6 +56,9 @@ public class SecurityConfiguration {
     @Value("${pass.csp}")
     private String contentSecurityPolicy;
 
+    @Value("${pass.logout-delete-cookies}")
+    private List<String> logoutDeleteCookies;
+
     /**
      * Return a configured Spring Security filter chain
      *
@@ -74,10 +82,11 @@ public class SecurityConfiguration {
 
         http.headers(h -> h.addHeaderWriter(appCspHeaderWriter));
 
-        // Ensure that favicon.ico requests are public so they do not interfere with SAML login
+        // Ensure that favicon.ico requests are public so they do not interfere with SAML login.
+        // Make /error public so problems that occur before authentication are not hidden.
         // All other requests must be authorized.
         http.authorizeHttpRequests((authorizeHttpRequests) ->
-            authorizeHttpRequests.requestMatchers("/favicon.ico", "/app/favicon.ico").permitAll().
+            authorizeHttpRequests.requestMatchers("/error", "/favicon.ico", "/app/favicon.ico").permitAll().
                 anyRequest().authenticated());
 
         // Prevent a continue parameter from being added after login
@@ -85,14 +94,30 @@ public class SecurityConfiguration {
         requestCache.setMatchingRequestParameterName(null);
         http.requestCache(rc -> rc.requestCache(requestCache));
 
-        http.httpBasic(Customizer.withDefaults());
+        // Prevent WWW-Authenticate header causing a browser popup after a session timeout
+        http.httpBasic((c -> c.authenticationEntryPoint(
+                (request, response, authException) ->  response.sendError(HttpStatus.UNAUTHORIZED.value(),
+                        HttpStatus.UNAUTHORIZED.getReasonPhrase()))));
 
         http.saml2Login(s -> s.defaultSuccessUrl(defaultLoginSuccessUrl));
         http.saml2Metadata(Customizer.withDefaults());
+        http.saml2Logout(Customizer.withDefaults());
 
-        // Logout clears the SP session, but does not hit the IDP
-        http.logout(l -> l.logoutSuccessUrl(logoutSuccessUrl));
+        // Delete specified cookies on logout.
+        // Each cookie is specified as a name and path separated by whitespace.
+        Cookie[] cookies = logoutDeleteCookies.stream().map(s -> {
+            String[] parts = s.trim().split("\\s+");
 
+            Cookie c = new Cookie(parts[0], null);
+            c.setPath(parts[1]);
+            c.setMaxAge(0);
+            return c;
+        }).toArray(Cookie[]::new);
+
+        CookieClearingLogoutHandler logoutHandler = new CookieClearingLogoutHandler(cookies);
+        http.logout(l -> l.logoutSuccessUrl(logoutSuccessUrl).addLogoutHandler(logoutHandler));
+
+        // Map SAML user to PASS user
         http.addFilterAfter(passAuthFilter, Saml2WebSsoAuthenticationFilter.class);
 
         return http.build();
