@@ -33,7 +33,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
         registry.addViewController("/favicon.ico").setViewName("forward:/app/favicon.ico");
 
         // Redirect / to the swagger UI. Must redirect so resources can be loaded.
-        registry.addViewController("/").setViewName("redirect:/app/index.html");
+        registry.addViewController("/").setViewName("redirect:/app/");
 
         // Make /swagger/ accessible as the swagger ui
         registry.addViewController("/swagger/").setViewName("forward:/swagger/index.html");
