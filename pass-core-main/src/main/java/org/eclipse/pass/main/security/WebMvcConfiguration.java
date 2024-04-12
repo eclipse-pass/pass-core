@@ -32,7 +32,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
         /// mess up the SAML login process
         registry.addViewController("/favicon.ico").setViewName("forward:/app/favicon.ico");
 
-        // Redirect / to the swagger UI. Must redirect so resources can be loaded.
+        // Redirect / to the app.
         registry.addViewController("/").setViewName("redirect:/app/");
 
         // Make /swagger/ accessible as the swagger ui
