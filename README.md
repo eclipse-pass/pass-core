@@ -100,7 +100,7 @@ The `PASS_CORE_SP_KEY` and `PASS_CORE_SP_CERT` environment variables set the loc
 Use `PASS_CORE_SP_ID` to set the identifier of the pass-core SP, `PASS_CORE_IDP_METADATA` to set the location where IDP metadata can be retrieved,
 and `PASS_CORE_SP_ACS` for the Assertion Consumer Service of the SP.
 
-The defaults are set such that the integration tests can run against a [SimpleSAMLphp based IDP](https://github.com/kenchan0130/docker-simplesamlphp/).
+The defaults are set such that the integration tests can run against a [SimpleSAMLphp based IDP](https://github.com/kenchan0130/docker-simplesamlphp/) using resources included in `saml2/`. These defaults should not be used in production.
 
 The image can be run with:
 ```
