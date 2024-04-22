@@ -110,7 +110,7 @@ Note the volume mount which is set the user information appropriately for PASS.
 
 # App service
 
-The PASS application is available at `/app/`. Requests are resolved against the location given by the environment variable `PASS_CORE_APP_LOCATION`.
+The PASS application is available at `/app/` and `/` is redirected to `/app/`. Requests are resolved against the location given by the environment variable `PASS_CORE_APP_LOCATION`. If a request cannot be resolved, then `/app/index.html` will be returned.  This allows the user interface to handle paths which may not resolve to files.
 
 # User service
 
