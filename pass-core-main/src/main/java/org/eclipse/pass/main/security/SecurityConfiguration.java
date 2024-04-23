@@ -53,6 +53,9 @@ public class SecurityConfiguration {
     @Value("${pass.default-login-success-url}")
     private String defaultLoginSuccessUrl;
 
+    @Value("${pass.login-processing-path}")
+    private String loginProcessingPath;
+
     @Value("${pass.csp}")
     private String contentSecurityPolicy;
 
@@ -99,7 +102,9 @@ public class SecurityConfiguration {
                 (request, response, authException) ->  response.sendError(HttpStatus.UNAUTHORIZED.value(),
                         HttpStatus.UNAUTHORIZED.getReasonPhrase()))));
 
-        http.saml2Login(s -> s.defaultSuccessUrl(defaultLoginSuccessUrl));
+        http.saml2Login(s -> s.defaultSuccessUrl(defaultLoginSuccessUrl).
+                        loginProcessingUrl(loginProcessingPath));
+
         http.saml2Metadata(Customizer.withDefaults());
         http.saml2Logout(Customizer.withDefaults());
 

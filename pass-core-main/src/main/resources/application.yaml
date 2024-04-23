@@ -112,6 +112,7 @@ pass:
     sqs: ${PASS_CORE_USE_SQS:false}
     embed: ${PASS_CORE_EMBED_JMS_BROKER:true}
   default-login-success-url: ${PASS_CORE_DEFAULT_LOGIN_SUCCESS:/app/}
+  login-processing-path: ${PASS_CORE_LOGIN_PROCESSING_PATH:/login/saml2/sso/{registrationId}}
   logout-delete-cookies: ${PASS_CORE_LOGOUT_DELETE_COOKIES:JSESSIONID /}
   logout-success-url: ${PASS_CORE_LOGOUT_SUCCESS:/login}
   policy:
