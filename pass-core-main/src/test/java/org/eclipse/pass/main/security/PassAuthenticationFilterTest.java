@@ -23,7 +23,8 @@ public class PassAuthenticationFilterTest extends SamlIntegrationTest {
 
         expected.setDisplayName("Sally M. Submitter");
         expected.setEmail("sally123456789@jhu.edu");
-        expected.setAffiliation(new HashSet<>(List.of("FACULTY@johnshopkins.edu", "johnshopkins.edu")));
+        expected.setAffiliation(new HashSet<>(List.of("MEMBER@johnshopkins.edu",
+                "FACULTY@johnshopkins.edu", "johnshopkins.edu")));
         expected.setFirstName("Sally");
         expected.setLastName("Submitter");
         expected.setLocatorIds(List.of("johnshopkins.edu:unique-id:sms123456789",
