@@ -16,6 +16,7 @@
 package org.eclipse.pass.main.security;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -241,7 +242,7 @@ public class PassAuthenticationFilter extends OncePerRequestFilter {
         String eppn = get(attributes, Attribute.EPPN, true);
         String employee_id = get(attributes, Attribute.EMPLOYEE_ID, false);
         String unique_id = get(attributes, Attribute.UNIQUE_ID, true);
-        String affiliation = get(attributes, Attribute.SCOPED_AFFILIATION, false);
+        List<String> affiliation = get_list(attributes, Attribute.SCOPED_AFFILIATION, false);
 
         String[] eppn_parts = eppn.split("@");
 
@@ -271,10 +272,8 @@ public class PassAuthenticationFilter extends OncePerRequestFilter {
 
         user.getAffiliation().add(domain);
 
-        if (affiliation != null) {
-            for (String s : affiliation.split(";")) {
-                user.getAffiliation().add(s);
-            }
+        for (String s : affiliation) {
+            user.getAffiliation().add(s);
         }
 
         user.setDisplayName(display_name);
@@ -287,6 +286,7 @@ public class PassAuthenticationFilter extends OncePerRequestFilter {
         return user;
     }
 
+    // Return the first attribute
     private String get(Map<String, List<Object>> attributes, Attribute attr, boolean required)
             throws AuthenticationException {
         String key = config.getAttributeMap().get(attr);
@@ -295,10 +295,6 @@ public class PassAuthenticationFilter extends OncePerRequestFilter {
 
         if (values == null || values.size() == 0 && required) {
             throw new BadCredentialsException("Missing attribute: " + attr + "[" + key + "]");
-        }
-
-        if (values.size() > 1) {
-            throw new BadCredentialsException("Too many attributes: " + attr + "[" + key + "]");
         }
 
         String value = null;
@@ -316,6 +312,33 @@ public class PassAuthenticationFilter extends OncePerRequestFilter {
         }
 
         return value;
+    }
+
+    private List<String> get_list(Map<String, List<Object>> attributes, Attribute attr, boolean required)
+            throws AuthenticationException {
+        String key = config.getAttributeMap().get(attr);
+
+        List<Object> values = attributes.get(key);
+
+        if (values == null) {
+            values = List.of();
+        }
+
+        List<String> result = new ArrayList<String>();
+
+        for (Object v: values) {
+            String s = v == null ? null : v.toString().trim();
+
+            if (s != null && !s.isEmpty()) {
+                result.add(s);
+            }
+        }
+
+        if (values.size() == 0 && required) {
+            throw new BadCredentialsException("Missing attribute: " + attr + "[" + key + "]");
+        }
+
+        return result;
     }
 
     @Override
