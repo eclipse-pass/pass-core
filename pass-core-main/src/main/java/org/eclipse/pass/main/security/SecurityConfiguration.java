@@ -29,6 +29,11 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AnonymousConfigurer;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
+import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository;
+import org.springframework.security.saml2.provider.service.web.DefaultRelyingPartyRegistrationResolver;
+import org.springframework.security.saml2.provider.service.web.RelyingPartyRegistrationResolver;
+import org.springframework.security.saml2.provider.service.web.authentication.OpenSaml4AuthenticationRequestResolver;
+import org.springframework.security.saml2.provider.service.web.authentication.Saml2AuthenticationRequestResolver;
 import org.springframework.security.saml2.provider.service.web.authentication.Saml2WebSsoAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.CookieClearingLogoutHandler;
@@ -126,5 +131,22 @@ public class SecurityConfiguration {
         http.addFilterAfter(passAuthFilter, Saml2WebSsoAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    /**
+     * Ensure that ForceAuthN is set to true.
+     *
+     * @param registrations
+     * @return auth request resolver
+     */
+    @Bean
+    Saml2AuthenticationRequestResolver authenticationRequestResolver(RelyingPartyRegistrationRepository registrations) {
+        RelyingPartyRegistrationResolver registrationResolver =
+                new DefaultRelyingPartyRegistrationResolver(registrations);
+        OpenSaml4AuthenticationRequestResolver authenticationRequestResolver =
+                new OpenSaml4AuthenticationRequestResolver(registrationResolver);
+        authenticationRequestResolver.setAuthnRequestCustomizer((context) -> context
+                .getAuthnRequest().setForceAuthn(true));
+        return authenticationRequestResolver;
     }
 }
