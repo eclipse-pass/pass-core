@@ -296,6 +296,8 @@
                 <!-- These come from testcontainers junit-jupiter -->
                 <ignoredUsedUndeclaredDependency>org.testcontainers::</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>com.github.docker-java::</ignoredUsedUndeclaredDependency>
+                <!-- These come from spring-security-saml2-service-provider -->
+                <ignoredUsedUndeclaredDependency>org.opensaml:opensaml-saml-api::</ignoredUsedUndeclaredDependency>                
               </ignoredUsedUndeclaredDependencies>
               <ignoredUnusedDeclaredDependencies>
                 <!-- This is the elide starter jar -->
