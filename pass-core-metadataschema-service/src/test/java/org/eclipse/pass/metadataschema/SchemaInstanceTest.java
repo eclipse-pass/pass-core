@@ -198,4 +198,18 @@ class SchemaInstanceTest {
         assertEquals(expectedSchema.getSchema(), testSchema.getSchema());
     }
 
+    @Test
+    void dereferenceInvenioRDMTest() throws Exception {
+        InputStream irdm_is = SchemaInstanceTest.class
+                .getResourceAsStream("/schemas/jhu/inveniordm.json");
+
+        InputStream expected_is = SchemaInstanceTest.class
+                .getResourceAsStream("/schemas/jhu/inveniordm_deref.json");
+
+        SchemaInstance testSchema = new SchemaInstance(map.readTree(irdm_is));
+        SchemaInstance expectedSchema = new SchemaInstance(map.readTree(expected_is));
+        SchemaFetcher schemaFetcher = new SchemaFetcher(Mockito.mock(RefreshableElide.class));
+        testSchema.dereference(testSchema.getSchema(), schemaFetcher);
+        assertEquals(expectedSchema.getSchema(), testSchema.getSchema());
+    }
 }
