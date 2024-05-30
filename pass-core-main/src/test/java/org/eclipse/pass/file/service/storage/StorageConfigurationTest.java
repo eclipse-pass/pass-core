@@ -17,7 +17,7 @@ package org.eclipse.pass.file.service.storage;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import org.eclipse.pass.main.IntegrationTest;
+import org.eclipse.pass.main.SimpleIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
@@ -26,7 +26,7 @@ import org.springframework.test.context.ActiveProfiles;
  * @author Russ Poetker (rpoetke1@jh.edu)
  */
 @ActiveProfiles("default-test")
-public class StorageConfigurationTest extends IntegrationTest {
+public class StorageConfigurationTest extends SimpleIntegrationTest {
 
     @Autowired private StorageProperties storageProperties;
 

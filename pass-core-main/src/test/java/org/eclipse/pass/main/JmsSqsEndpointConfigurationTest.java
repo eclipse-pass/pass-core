@@ -33,7 +33,7 @@ import software.amazon.awssdk.utils.AttributeMap;
     "pass.jms.sqs=true",
     "aws.sqs.endpoint-override=http://testhost:8080"
 })
-public class JmsSqsEndpointConfigurationTest extends IntegrationTest {
+public class JmsSqsEndpointConfigurationTest extends SimpleIntegrationTest {
 
     @Autowired private ConnectionFactory connectionFactory;
 

@@ -16,7 +16,7 @@ import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.eclipse.pass.main.IntegrationTest;
+import org.eclipse.pass.main.SimpleIntegrationTest;
 import org.eclipse.pass.object.PassClient;
 import org.eclipse.pass.object.PassClientResult;
 import org.eclipse.pass.object.PassClientSelector;
@@ -25,7 +25,7 @@ import org.eclipse.pass.object.model.Journal;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class DoiServiceTest extends IntegrationTest {
+public class DoiServiceTest extends SimpleIntegrationTest {
 
     @Autowired
     protected RefreshableElide refreshableElide;
@@ -52,9 +52,10 @@ public class DoiServiceTest extends IntegrationTest {
         Call call = httpClient.newCall(okHttpRequest);
         try (Response okHttpResponse = call.execute()) {
             assertEquals(400, okHttpResponse.code());
-            assert okHttpResponse.body() != null;
+            String body = okHttpResponse.body().string();
+            assert body != null;
             assertEquals("{\"error\":\"Supplied DOI is not in valid DOI format.\"}",
-                         okHttpResponse.body().string());
+                         body);
 
         }
     }
@@ -74,9 +75,10 @@ public class DoiServiceTest extends IntegrationTest {
         Call call = httpClient.newCall(okHttpRequest);
         try (Response okHttpResponse = call.execute()) {
             assertEquals(400, okHttpResponse.code());
-            assert okHttpResponse.body() != null;
+            String body = okHttpResponse.body().string();
+            assert body != null;
             assertEquals("{\"error\":\"Supplied DOI is not in valid DOI format.\"}",
-                         okHttpResponse.body().string());
+                         body);
 
         }
     }
@@ -97,9 +99,10 @@ public class DoiServiceTest extends IntegrationTest {
         Call call = httpClient.newCall(okHttpRequest);
         try (Response okHttpResponse = call.execute()) {
             assertEquals(404, okHttpResponse.code());
-            assert okHttpResponse.body() != null;
+            String body = okHttpResponse.body().string();
+            assert body != null;
             assertEquals("{\"error\":\"The resource for DOI 10.1212/abc.DEF could not be found on Crossref.\"}",
-                         okHttpResponse.body().string());
+                         body);
 
         }
     }
@@ -123,9 +126,10 @@ public class DoiServiceTest extends IntegrationTest {
         Call call = httpClient.newCall(okHttpRequest);
         try (Response okHttpResponse = call.execute()) {
             assertEquals(422, okHttpResponse.code());
-            assert okHttpResponse.body() != null;
+            String body = okHttpResponse.body().string();
+            assert body != null;
             assertEquals("{\"error\":\"Insufficient information to locate or specify a journal entry.\"}",
-                         okHttpResponse.body().string());
+                         body);
         }
     }
 
@@ -161,8 +165,9 @@ public class DoiServiceTest extends IntegrationTest {
             Call call = httpClient.newCall(okHttpRequest);
             try (Response okHttpResponse = call.execute()) {
                 assertEquals(200, okHttpResponse.code());
-                assert okHttpResponse.body() != null;
-                JsonReader jsonReader1 = Json.createReader(new StringReader(okHttpResponse.body().string()));
+                String body = okHttpResponse.body().string();
+                assert body != null;
+                JsonReader jsonReader1 = Json.createReader(new StringReader(body));
                 JsonObject successReport = jsonReader1.readObject();
                 jsonReader1.close();
                 assertNotNull(successReport.getString("journal-id"));
@@ -180,8 +185,9 @@ public class DoiServiceTest extends IntegrationTest {
             //verify that the returned object for the same request has the right id
             call = httpClient.newCall(okHttpRequest);
             try (Response okHttpResponse = call.execute()) {
-                assert okHttpResponse.body() != null;
-                JsonReader jsonReader2 = Json.createReader(new StringReader(okHttpResponse.body().string()));
+                String body = okHttpResponse.body().string();
+                assert body != null;
+                JsonReader jsonReader2 = Json.createReader(new StringReader(body));
                 JsonObject successReport = jsonReader2.readObject();
                 jsonReader2.close();
                 assertEquals(id, successReport.getString("journal-id"));

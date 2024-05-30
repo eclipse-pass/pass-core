@@ -22,18 +22,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
 /**
- * Run Elide with in memory database.
+ * Run with in memory database.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Main.class,
-    properties = {"PASS_CORE_BACKEND_PASSWORD=test"})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Main.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public abstract class IntegrationTest {
-    public static final String BACKEND_USER = "backend";
-    public static final String BACKEND_PASSWORD = "test";
+public abstract class SimpleIntegrationTest extends IntegrationTestBase {
 
     @LocalServerPort
     private int port;
 
+    @Override
     public String getBaseUrl() {
         return "http://localhost:" + port + "/";
     }
@@ -43,7 +41,7 @@ public abstract class IntegrationTest {
     }
 
     @BeforeAll
-    void setup() {
+    public void setup() {
         RestAssured.port = port;
     }
 }

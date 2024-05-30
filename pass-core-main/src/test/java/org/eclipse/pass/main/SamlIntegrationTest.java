@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.io.IOException;
-import java.net.CookieManager;
-import java.net.CookiePolicy;
 
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.PortBinding;
@@ -13,8 +11,6 @@ import com.github.dockerjava.api.model.Ports;
 import com.yahoo.elide.RefreshableElide;
 import io.restassured.RestAssured;
 import okhttp3.FormBody;
-import okhttp3.JavaNetCookieJar;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -35,24 +31,24 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 
+/**
+ * Run with in memory database and an IDP.
+ * A test user can login with SAML.
+ */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = Main.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Testcontainers
-public class SamlIntegrationTest {
-    protected static final String BACKEND_USER = "backend";
-    protected static final String BACKEND_PASSWORD = "moo";
-
+public class SamlIntegrationTest extends IntegrationTestBase {
     private static final String IDP_IMAGE = "kenchan0130/simplesamlphp:1.19.8";
     private static final String IDP_LOGIN_URL = "http://localhost:8090/simplesaml/module.php/core/loginuserpass.php";
+    private static final String IDP_BASE_URL = "http://localhost:8090/";
     private static final String SP_LOGIN_URL = "http://localhost:8080/login/saml2/sso/pass";
+    private static final String SP_LOGOUT_URL = "http://localhost:8080/logout";
     private static final String SP_ID = "https://sp.pass/shibboleth";
 
     private static final String SUBMITTER_USER = "user1";
     private static final String SUBMITTER_PASSWORD = "password";
     private static final String SUBMITTER_EMAIL = "sally123456789@jhu.edu";
-
-    protected final static String JSON_API_CONTENT_TYPE = "application/vnd.api+json";
-    protected final static MediaType JSON_API_MEDIA_TYPE = MediaType.parse("application/vnd.api+json; charset=utf-8");
 
     protected static OkHttpClient client;
 
@@ -68,7 +64,8 @@ public class SamlIntegrationTest {
             cmd.getHostConfig().withPortBindings(new PortBinding(Ports.Binding.bindPort(8090), new ExposedPort(8080)));
         }).withEnv("SIMPLESAMLPHP_SP_ENTITY_ID", SP_ID).
            withEnv("SIMPLESAMLPHP_SP_ASSERTION_CONSUMER_SERVICE", SP_LOGIN_URL).
-           withEnv("SIMPLESAMLPHP_IDP_BASE_URL", "http://localhost:8090/").
+           withEnv("SIMPLESAMLPHP_IDP_BASE_URL", IDP_BASE_URL).
+           withEnv("SIMPLESAMLPHP_SP_SINGLE_LOGOUT_SERVICE", SP_LOGOUT_URL).
            withCopyFileToContainer(MountableFile.forClasspathResource("/saml2/authsources.php"),
                 "/var/www/simplesamlphp/config/authsources.php").waitingFor(Wait.forLogMessage(".*apache2.*", 1));
 
@@ -85,13 +82,11 @@ public class SamlIntegrationTest {
 
     @BeforeEach
     protected void setupClient() throws IOException {
-        // Persist cookies and follow redirects to enable SAML login
+        client = newOkhttpClient();
+    }
 
-        CookieManager cookieManager = new CookieManager();
-        cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
-        JavaNetCookieJar cookieJar = new JavaNetCookieJar(cookieManager);
-
-        client = new OkHttpClient.Builder().cookieJar(cookieJar).followRedirects(true).build();
+    public String getCsrfToken() throws IOException {
+        return getCsrfToken(client);
     }
 
     // Return value of a form input given a marker that should end in value="
@@ -161,6 +156,7 @@ public class SamlIntegrationTest {
         }
     }
 
+    @Override
     public String getBaseUrl() {
         return "http://localhost:" + port + "/";
     }

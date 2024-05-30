@@ -130,10 +130,9 @@ public class AccessControlTest extends SamlIntegrationTest {
     public void testReadGrantsAsBackend() throws IOException {
         String url = getBaseUrl() + "data/grant";
 
-        String credentials = Credentials.basic(BACKEND_USER, BACKEND_PASSWORD);
-
         Request request = new Request.Builder().url(url).header("Accept", JSON_API_CONTENT_TYPE)
-                .addHeader("Content-Type", JSON_API_CONTENT_TYPE).header("Authorization", credentials).get().build();
+                .addHeader("Content-Type", JSON_API_CONTENT_TYPE)
+                .header("Authorization", BACKEND_CREDENTIALS).get().build();
 
         Response response = client.newCall(request).execute();
 
@@ -203,7 +202,9 @@ public class AccessControlTest extends SamlIntegrationTest {
             Request.Builder builder = new Request.Builder();
 
             Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
-                    .addHeader("Content-Type", JSON_API_CONTENT_TYPE).post(body).build();
+                    .addHeader("Content-Type", JSON_API_CONTENT_TYPE)
+                    .addHeader("X-XSRF-TOKEN", getCsrfToken())
+                    .post(body).build();
 
             Response response = client.newCall(request).execute();
 
@@ -218,7 +219,9 @@ public class AccessControlTest extends SamlIntegrationTest {
             Request.Builder builder = new Request.Builder();
 
             Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
-                    .addHeader("Content-Type", JSON_API_CONTENT_TYPE).patch(body).build();
+                    .addHeader("Content-Type", JSON_API_CONTENT_TYPE)
+                    .addHeader("X-XSRF-TOKEN", getCsrfToken())
+                    .patch(body).build();
 
             Response response = client.newCall(request).execute();
 
@@ -229,11 +232,62 @@ public class AccessControlTest extends SamlIntegrationTest {
             String url = getBaseUrl() + "data/submission/" + get_id(sub);
             Request.Builder builder = new Request.Builder();
 
-            Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE).delete().build();
+            Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
+                    .addHeader("X-XSRF-TOKEN", getCsrfToken())
+                    .delete().build();
 
             Response response = client.newCall(request).execute();
 
             check(response, 204);
+        }
+    }
+
+    @Test
+    public void testCreateUpdateDeleteSubmissionAsShibUserWithBadCsrfToken() throws IOException, JSONException {
+        doSamlLogin();
+
+        {
+            String url = getBaseUrl() + "data/submission";
+
+            RequestBody body = RequestBody.create("{}", JSON_API_MEDIA_TYPE);
+            Request.Builder builder = new Request.Builder();
+
+            Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
+                    .addHeader("Content-Type", JSON_API_CONTENT_TYPE)
+                    .addHeader("X-XSRF-TOKEN", "badtoken")
+                    .post(body).build();
+
+            Response response = client.newCall(request).execute();
+
+            check(response, 403);
+        }
+
+        {
+            String url = getBaseUrl() + "data/submission/1";
+            RequestBody body = RequestBody.create("{}", JSON_API_MEDIA_TYPE);
+            Request.Builder builder = new Request.Builder();
+
+            Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
+                    .addHeader("Content-Type", JSON_API_CONTENT_TYPE)
+                    .addHeader("X-XSRF-TOKEN", "badtoken")
+                    .patch(body).build();
+
+            Response response = client.newCall(request).execute();
+
+            check(response, 403);
+        }
+
+        {
+            String url = getBaseUrl() + "data/submission/1";
+            Request.Builder builder = new Request.Builder();
+
+            Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
+                    .addHeader("X-XSRF-TOKEN", "")
+                    .delete().build();
+
+            Response response = client.newCall(request).execute();
+
+            check(response, 403);
         }
     }
 
@@ -251,7 +305,9 @@ public class AccessControlTest extends SamlIntegrationTest {
             Request.Builder builder = new Request.Builder();
 
             Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
-                    .addHeader("Content-Type", JSON_API_CONTENT_TYPE).post(body).build();
+                    .addHeader("Content-Type", JSON_API_CONTENT_TYPE)
+                    .addHeader("X-XSRF-TOKEN", getCsrfToken())
+                    .post(body).build();
 
             Response response = client.newCall(request).execute();
 
@@ -266,7 +322,9 @@ public class AccessControlTest extends SamlIntegrationTest {
             Request.Builder builder = new Request.Builder();
 
             Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
-                    .addHeader("Content-Type", JSON_API_CONTENT_TYPE).patch(body).build();
+                    .addHeader("Content-Type", JSON_API_CONTENT_TYPE)
+                    .addHeader("X-XSRF-TOKEN", getCsrfToken())
+                    .patch(body).build();
 
             Response response = client.newCall(request).execute();
 
@@ -277,7 +335,9 @@ public class AccessControlTest extends SamlIntegrationTest {
             String url = getBaseUrl() + "data/publication/" + get_id(pub);
             Request.Builder builder = new Request.Builder();
 
-            Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE).delete().build();
+            Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
+                    .addHeader("X-XSRF-TOKEN", getCsrfToken())
+                    .delete().build();
 
             Response response = client.newCall(request).execute();
 
@@ -314,7 +374,9 @@ public class AccessControlTest extends SamlIntegrationTest {
             Request.Builder builder = new Request.Builder();
 
             Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
-                    .addHeader("Content-Type", JSON_API_CONTENT_TYPE).post(body).build();
+                    .addHeader("Content-Type", JSON_API_CONTENT_TYPE)
+                    .addHeader("X-XSRF-TOKEN", getCsrfToken())
+                    .post(body).build();
 
             Response response = client.newCall(request).execute();
 
@@ -329,7 +391,9 @@ public class AccessControlTest extends SamlIntegrationTest {
             Request.Builder builder = new Request.Builder();
 
             Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
-                    .addHeader("Content-Type", JSON_API_CONTENT_TYPE).patch(body).build();
+                    .addHeader("Content-Type", JSON_API_CONTENT_TYPE)
+                    .addHeader("X-XSRF-TOKEN", getCsrfToken())
+                    .patch(body).build();
 
             Response response = client.newCall(request).execute();
 
@@ -340,7 +404,9 @@ public class AccessControlTest extends SamlIntegrationTest {
             String url = getBaseUrl() + "data/file/" + get_id(file);
             Request.Builder builder = new Request.Builder();
 
-            Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE).delete().build();
+            Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
+                    .addHeader("X-XSRF-TOKEN", getCsrfToken())
+                    .delete().build();
 
             Response response = client.newCall(request).execute();
 
@@ -351,7 +417,7 @@ public class AccessControlTest extends SamlIntegrationTest {
     @Test
     public void testCreateUpdateDeleteEventAsShibUserOwningSubmission() throws IOException, JSONException {
         // File is associated with a submission associated with submitter
-        // Shib user can create file, update the file, but not delete it.
+        // Shib user can create event pointing to submission they own, but not update or delete it
 
         User submitter = doSamlLogin();
 
@@ -376,7 +442,8 @@ public class AccessControlTest extends SamlIntegrationTest {
             RequestBody body = RequestBody.create(event.toString(), JSON_API_MEDIA_TYPE);
             Request.Builder builder = new Request.Builder();
             Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
-                    .addHeader("Content-Type", JSON_API_CONTENT_TYPE).post(body).build();
+                    .addHeader("Content-Type", JSON_API_CONTENT_TYPE).addHeader("X-XSRF-TOKEN", getCsrfToken())
+                    .post(body).build();
 
             Response response = client.newCall(request).execute();
 
@@ -504,8 +571,6 @@ public class AccessControlTest extends SamlIntegrationTest {
 
     @Test
     public void testCreateUpdateDeleteGrantAsBackend() throws IOException, JSONException {
-        String credentials = Credentials.basic(BACKEND_USER, BACKEND_PASSWORD);
-
         JSONObject grant = pass_object("grant");
         set_attribute(grant, "projectName", "backend test");
 
@@ -515,8 +580,9 @@ public class AccessControlTest extends SamlIntegrationTest {
 
             RequestBody body = RequestBody.create(grant.toString(), JSON_API_MEDIA_TYPE);
             Request request = new Request.Builder().url(url).header("Accept", JSON_API_CONTENT_TYPE)
-                    .addHeader("Content-Type", JSON_API_CONTENT_TYPE).header("Authorization", credentials).post(body)
-                    .build();
+                    .addHeader("Content-Type", JSON_API_CONTENT_TYPE).header("Authorization", BACKEND_CREDENTIALS)
+                    .addHeader("X-XSRF-TOKEN", getCsrfToken())
+                    .post(body).build();
 
             Response response = client.newCall(request).execute();
 
@@ -530,7 +596,9 @@ public class AccessControlTest extends SamlIntegrationTest {
             String url = getBaseUrl() + "data/grant/" + get_id(grant);
             RequestBody body = RequestBody.create(grant.toString(), JSON_API_MEDIA_TYPE);
             Request request = new Request.Builder().url(url).header("Accept", JSON_API_CONTENT_TYPE)
-                    .addHeader("Content-Type", JSON_API_CONTENT_TYPE).header("Authorization", credentials).patch(body)
+                    .addHeader("Content-Type", JSON_API_CONTENT_TYPE).header("Authorization", BACKEND_CREDENTIALS)
+                    .addHeader("X-XSRF-TOKEN", getCsrfToken())
+                    .patch(body)
                     .build();
 
             Response response = client.newCall(request).execute();
@@ -542,7 +610,9 @@ public class AccessControlTest extends SamlIntegrationTest {
         {
             String url = getBaseUrl() + "data/grant/" + get_id(grant);
             Request request = new Request.Builder().url(url).header("Accept", JSON_API_CONTENT_TYPE)
-                    .header("Authorization", credentials).delete().build();
+                    .header("Authorization", BACKEND_CREDENTIALS)
+                    .addHeader("X-XSRF-TOKEN", getCsrfToken())
+                    .delete().build();
 
             Response response = client.newCall(request).execute();
 
@@ -623,7 +693,6 @@ public class AccessControlTest extends SamlIntegrationTest {
 
         assertNotNull(ses);
 
-        // Logout
         {
             String url = getBaseUrl() + "logout";
 
