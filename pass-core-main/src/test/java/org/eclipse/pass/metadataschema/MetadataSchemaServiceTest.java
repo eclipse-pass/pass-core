@@ -18,7 +18,7 @@ import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.eclipse.pass.main.IntegrationTest;
+import org.eclipse.pass.main.SimpleIntegrationTest;
 import org.eclipse.pass.object.PassClient;
 import org.eclipse.pass.object.model.IntegrationType;
 import org.eclipse.pass.object.model.Repository;
@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
-public class MetadataSchemaServiceTest extends IntegrationTest {
+public class MetadataSchemaServiceTest extends SimpleIntegrationTest {
     private final String credentials = Credentials.basic(BACKEND_USER, BACKEND_PASSWORD);
     private final OkHttpClient httpClient = new OkHttpClient();
     private Long repo1Id;

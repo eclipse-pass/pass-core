@@ -32,7 +32,7 @@ import software.amazon.awssdk.utils.AttributeMap;
     "spring.artemis.embedded.enabled=false",
     "pass.jms.sqs=true"
 })
-public class JmsSqsConfigurationTest extends IntegrationTest {
+public class JmsSqsConfigurationTest extends SimpleIntegrationTest {
 
     @Autowired private ConnectionFactory connectionFactory;
 

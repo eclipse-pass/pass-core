@@ -27,7 +27,6 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AnonymousConfigurer;
-import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository;
 import org.springframework.security.saml2.provider.service.web.DefaultRelyingPartyRegistrationResolver;
@@ -37,6 +36,7 @@ import org.springframework.security.saml2.provider.service.web.authentication.Sa
 import org.springframework.security.saml2.provider.service.web.authentication.Saml2WebSsoAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.CookieClearingLogoutHandler;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.header.writers.ContentSecurityPolicyHeaderWriter;
 import org.springframework.security.web.header.writers.DelegatingRequestMatcherHeaderWriter;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
@@ -77,9 +77,15 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // Disable unused functionality
-        http.csrf(CsrfConfigurer::disable);
         http.formLogin(FormLoginConfigurer::disable);
         http.anonymous(AnonymousConfigurer::disable);
+
+        // Enable CSRF protection using a cookie to send the token
+        // Make sure the cookie value can be parsed when returned in a header
+        // Do not protect /logout so it can be triggered with GET
+        http.csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .ignoringRequestMatchers("/logout")
+                .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler()));
 
         // Set Content Security Policy header only for /app/
         ContentSecurityPolicyHeaderWriter cspHeaderWriter = new ContentSecurityPolicyHeaderWriter();
@@ -111,6 +117,7 @@ public class SecurityConfiguration {
                         loginProcessingUrl(loginProcessingPath));
 
         http.saml2Metadata(Customizer.withDefaults());
+
         http.saml2Logout(Customizer.withDefaults());
 
         // Delete specified cookies on logout.
@@ -124,11 +131,16 @@ public class SecurityConfiguration {
             return c;
         }).toArray(Cookie[]::new);
 
+        // Allow GET on /logout
         CookieClearingLogoutHandler logoutHandler = new CookieClearingLogoutHandler(cookies);
-        http.logout(l -> l.logoutSuccessUrl(logoutSuccessUrl).addLogoutHandler(logoutHandler));
+        http.logout(l -> l.logoutSuccessUrl(logoutSuccessUrl).
+                logoutRequestMatcher(new AntPathRequestMatcher("/logout")).addLogoutHandler(logoutHandler));
 
         // Map SAML user to PASS user
         http.addFilterAfter(passAuthFilter, Saml2WebSsoAuthenticationFilter.class);
+
+        // Ensure that CSRF cookie is set
+        http.addFilterAfter(new CsrfCookieFilter(), Saml2WebSsoAuthenticationFilter.class);
 
         return http.build();
     }

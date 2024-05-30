@@ -30,7 +30,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.yahoo.elide.RefreshableElide;
-import org.eclipse.pass.main.IntegrationTest;
+import org.eclipse.pass.main.SimpleIntegrationTest;
 import org.eclipse.pass.object.model.AggregatedDepositStatus;
 import org.eclipse.pass.object.model.Deposit;
 import org.eclipse.pass.object.model.DepositStatus;
@@ -55,7 +55,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 /**
  * Tests must be written such that they can run in any order and handle objects already existing.
  */
-public class ElidePassClientTest extends IntegrationTest {
+public class ElidePassClientTest extends SimpleIntegrationTest {
     protected PassClient client;
 
     @Autowired

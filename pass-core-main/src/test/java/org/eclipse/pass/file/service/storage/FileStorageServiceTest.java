@@ -37,7 +37,6 @@ import java.util.Map;
 import java.util.Objects;
 
 import io.ocfl.api.exception.NotFoundException;
-import okhttp3.Credentials;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
@@ -45,10 +44,11 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.eclipse.pass.file.service.PassFileServiceController;
-import org.eclipse.pass.main.IntegrationTest;
+import org.eclipse.pass.main.SimpleIntegrationTest;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -68,19 +68,29 @@ import org.springframework.test.util.ReflectionTestUtils;
  * @see FileStorageService
  */
 @ExtendWith(MockitoExtension.class)
-public class FileStorageServiceTest extends IntegrationTest {
+public class FileStorageServiceTest extends SimpleIntegrationTest {
     protected final String USER_NAME = "USER1";
     protected final String USER_NAME2 = "USER2";
-    private final String credentialsBackend = Credentials.basic(BACKEND_USER, BACKEND_PASSWORD);
-    private final OkHttpClient httpClient = new OkHttpClient();
+
     public static final MediaType MEDIA_TYPE_TEXT
             = MediaType.parse("text/plain");
     public static final MediaType MEDIA_TYPE_APPLICATION
             = MediaType.parse("application/octet-stream");
 
+    private OkHttpClient httpClient;
+
     @Autowired protected PassFileServiceController passFileServiceController;
     @Autowired protected FileStorageService storageService;
     @Autowired protected StorageProperties storageProperties;
+
+    @BeforeEach
+    protected void setupClient() throws IOException {
+        httpClient = newOkhttpClient();
+    }
+
+    public String getCsrfToken() throws IOException {
+        return getCsrfToken(httpClient);
+    }
 
     /**
      * Cleanup the FileStorageService after testing. Deletes the root directory.
@@ -253,7 +263,7 @@ public class FileStorageServiceTest extends IntegrationTest {
                 .build();
         Request request = new Request.Builder()
                 .url(url)
-                .header("Authorization", credentialsBackend)
+                .header("Authorization", BACKEND_CREDENTIALS)
                 .get()
                 .build();
 
@@ -281,7 +291,8 @@ public class FileStorageServiceTest extends IntegrationTest {
         Request request = new Request.Builder()
                 .url(url)
                 .post(requestBody)
-                .addHeader("Authorization", credentialsBackend)
+                .addHeader("Authorization", BACKEND_CREDENTIALS)
+                .addHeader("X-XSRF-TOKEN", getCsrfToken())
                 .build();
 
         try (Response response = httpClient.newCall(request).execute()) {
@@ -311,7 +322,8 @@ public class FileStorageServiceTest extends IntegrationTest {
         Request request = new Request.Builder()
                 .url(url)
                 .post(requestBody)
-                .addHeader("Authorization", credentialsBackend)
+                .addHeader("Authorization", BACKEND_CREDENTIALS)
+                .addHeader("X-XSRF-TOKEN", getCsrfToken())
                 .build();
 
         try (Response response = httpClient.newCall(request).execute()) {
@@ -321,7 +333,7 @@ public class FileStorageServiceTest extends IntegrationTest {
 
             // Download
             Request dlRequest = new Request.Builder().url(url + "/" + id).
-                    addHeader("Authorization", credentialsBackend).build();
+                    addHeader("Authorization", BACKEND_CREDENTIALS).build();
 
             try (Response dlResponse = httpClient.newCall(dlRequest).execute()) {
                 assertEquals(HttpStatus.OK.value(), dlResponse.code());
@@ -352,7 +364,8 @@ public class FileStorageServiceTest extends IntegrationTest {
         Request request = new Request.Builder()
                 .url(url)
                 .post(requestBody)
-                .addHeader("Authorization", credentialsBackend)
+                .addHeader("Authorization", BACKEND_CREDENTIALS)
+                .addHeader("X-XSRF-TOKEN", getCsrfToken())
                 .build();
 
         try (Response response = httpClient.newCall(request).execute()) {
@@ -362,7 +375,7 @@ public class FileStorageServiceTest extends IntegrationTest {
 
             // Download
             Request dlRequest = new Request.Builder().url(url + "/" + id).
-                    addHeader("Authorization", credentialsBackend).build();
+                    addHeader("Authorization", BACKEND_CREDENTIALS).build();
 
             try (Response dlResponse = httpClient.newCall(dlRequest).execute()) {
                 assertEquals(HttpStatus.OK.value(), dlResponse.code());
@@ -389,7 +402,8 @@ public class FileStorageServiceTest extends IntegrationTest {
         Request request = new Request.Builder()
                 .url(url)
                 .post(requestBody)
-                .addHeader("Authorization", credentialsBackend)
+                .addHeader("Authorization", BACKEND_CREDENTIALS)
+                .addHeader("X-XSRF-TOKEN", getCsrfToken())
                 .build();
 
         try (Response response = httpClient.newCall(request).execute()) {
@@ -414,7 +428,8 @@ public class FileStorageServiceTest extends IntegrationTest {
         Request request = new Request.Builder()
                 .url(url)
                 .post(requestBody)
-                .addHeader("Authorization", credentialsBackend)
+                .addHeader("Authorization", BACKEND_CREDENTIALS)
+                .addHeader("X-XSRF-TOKEN", getCsrfToken())
                 .build();
 
         try (Response response = httpClient.newCall(request).execute()) {
@@ -436,7 +451,8 @@ public class FileStorageServiceTest extends IntegrationTest {
         Request request = new Request.Builder()
                 .url(url)
                 .delete()
-                .addHeader("Authorization", credentialsBackend)
+                .addHeader("Authorization", BACKEND_CREDENTIALS)
+                .addHeader("X-XSRF-TOKEN", getCsrfToken())
                 .build();
 
         try (Response response = httpClient.newCall(request).execute()) {
@@ -461,7 +477,8 @@ public class FileStorageServiceTest extends IntegrationTest {
         Request request = new Request.Builder()
                 .url(url)
                 .delete()
-                .addHeader("Authorization", credentialsBackend)
+                .addHeader("Authorization", BACKEND_CREDENTIALS)
+                .addHeader("X-XSRF-TOKEN", getCsrfToken())
                 .build();
 
         try (Response response = httpClient.newCall(request).execute()) {
@@ -485,7 +502,8 @@ public class FileStorageServiceTest extends IntegrationTest {
         Request request = new Request.Builder()
                 .url(url)
                 .delete()
-                .addHeader("Authorization", credentialsBackend)
+                .addHeader("Authorization", BACKEND_CREDENTIALS)
+                .addHeader("X-XSRF-TOKEN", getCsrfToken())
                 .build();
 
         try (Response response = httpClient.newCall(request).execute()) {

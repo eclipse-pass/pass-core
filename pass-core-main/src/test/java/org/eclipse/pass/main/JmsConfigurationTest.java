@@ -36,7 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.BrowserCallback;
 import org.springframework.jms.core.JmsTemplate;
 
-public class JmsConfigurationTest extends IntegrationTest {
+public class JmsConfigurationTest extends SimpleIntegrationTest {
     @Autowired
     private JmsTemplate jms;
 

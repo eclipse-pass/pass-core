@@ -146,8 +146,10 @@ public class PolicyServiceTest extends SamlIntegrationTest {
 
         try (Response okHttpResponse = call.execute()) {
             assertEquals(200, okHttpResponse.code());
-            assert okHttpResponse.body() != null;
-            JSONArray result = new JSONArray(okHttpResponse.body().string());
+            String body = okHttpResponse.body().string();
+
+            assert body != null;
+            JSONArray result = new JSONArray(body);
             assertEquals(3, result.length());
 
             for (int i = 0; i < result.length(); i++) {
@@ -185,8 +187,9 @@ public class PolicyServiceTest extends SamlIntegrationTest {
 
         try (Response okHttpResponse = call.execute()) {
             assertEquals(200, okHttpResponse.code());
-            assert okHttpResponse.body() != null;
-            JSONObject result = new JSONObject(okHttpResponse.body().string());
+            String body = okHttpResponse.body().string();
+            assert body != null;
+            JSONObject result = new JSONObject(body);
             assertEquals(2, result.length());
 
             //the IR - we recommend this by calling it selected
@@ -257,8 +260,9 @@ public class PolicyServiceTest extends SamlIntegrationTest {
 
         try (Response okHttpResponse = call.execute()) {
             assertEquals(200, okHttpResponse.code());
-            assert okHttpResponse.body() != null;
-            JSONArray result = new JSONArray(okHttpResponse.body().string());
+            String body = okHttpResponse.body().string();
+            assert body != null;
+            JSONArray result = new JSONArray(body);
             assertEquals(1, result.length());
         }
 
@@ -274,8 +278,9 @@ public class PolicyServiceTest extends SamlIntegrationTest {
         // Since effective policies is empty, no repositories will be returned
         try (Response okHttpResponse = call1.execute()) {
             assertEquals(200, okHttpResponse.code());
-            assert okHttpResponse.body() != null;
-            JSONObject result = new JSONObject(okHttpResponse.body().string());
+            String body = okHttpResponse.body().string();
+            assert body != null;
+            JSONObject result = new JSONObject(body);
 
             JSONArray optional = (JSONArray) result.get("optional");
             assertEquals(0, optional.length());
