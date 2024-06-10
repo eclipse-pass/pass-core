@@ -110,6 +110,10 @@ docker run --name=idp -p 8090:8080 -e SIMPLESAMLPHP_SP_ENTITY_ID=https://sp.pass
 ```
 Note the volume mount which is set the user information appropriately for PASS.
 
+# CSRF protection
+
+Requests which have side effects (not a GET, HEAD, or OPTIONS and any request to /doi) are protected from CSRF through the use of a token. The client must provide a cookie XSRF-TOKEN and set a header X-XSRF-TOKEN to the same value. Clients can use any value they want. Browser clients will have the cookie value set by responses and so must first make a non-protected request.
+
 # App service
 
 The PASS application is available at `/app/` and `/` is redirected to `/app/`. Requests are resolved against the location given by the environment variable `PASS_CORE_APP_LOCATION`. If a request cannot be resolved, then `/app/index.html` will be returned.  This allows the user interface to handle paths which may not resolve to files.
