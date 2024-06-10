@@ -10,7 +10,8 @@ import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * Ensure CSRF token cookie is added.
+ * Ensure CSRF token cookie is added. See
+ * https://docs.spring.io/spring-security/reference/servlet/exploits/csrf.html#csrf-integration-javascript-spa
  */
 public class CsrfCookieFilter extends OncePerRequestFilter {
     @Override

@@ -8,9 +8,11 @@ import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.csrf.CsrfTokenRequestHandler;
 import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
+import org.springframework.util.StringUtils;
 
 /**
- * Handle case of single page application which puts CSRF token cookie value into header.
+ * Handle case of single page application which puts CSRF token cookie value into header. See
+ * https://docs.spring.io/spring-security/reference/servlet/exploits/csrf.html#csrf-integration-javascript-spa
  */
 public class SpaCsrfTokenRequestHandler extends CsrfTokenRequestAttributeHandler {
     private final CsrfTokenRequestHandler delegate = new XorCsrfTokenRequestAttributeHandler();
@@ -34,7 +36,7 @@ public class SpaCsrfTokenRequestHandler extends CsrfTokenRequestAttributeHandler
          */
         String token = request.getHeader(csrfToken.getHeaderName());
 
-        if (token != null && !token.isEmpty()) {
+        if (StringUtils.hasText(token)) {
             return super.resolveCsrfTokenValue(request, csrfToken);
         }
 
