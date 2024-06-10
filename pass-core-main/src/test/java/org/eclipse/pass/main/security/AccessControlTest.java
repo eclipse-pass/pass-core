@@ -182,7 +182,9 @@ public class AccessControlTest extends SamlIntegrationTest {
         Request.Builder builder = new Request.Builder();
 
         Request request = builder.url(url).header("Accept", JSON_API_CONTENT_TYPE)
-                .header("Content-Type", JSON_API_CONTENT_TYPE).post(body).build();
+                .header("Content-Type", JSON_API_CONTENT_TYPE)
+                .header("X-XSRF-TOKEN", getCsrfToken())
+                .post(body).build();
 
         Response response = client.newCall(request).execute();
 
@@ -623,7 +625,7 @@ public class AccessControlTest extends SamlIntegrationTest {
     }
 
     @Test
-    public void testChooseCsrfTokenAsBackend() throws IOException, JSONException {
+    public void testCsrfTokenAsBackend() throws IOException, JSONException {
         JSONObject grant = pass_object("grant");
         set_attribute(grant, "projectName", "backend test");
 
@@ -636,19 +638,7 @@ public class AccessControlTest extends SamlIntegrationTest {
                 List.of(Cookie.parse(base_url, "XSRF-TOKEN=moo")));
         assertNotNull(get_cookie("XSRF-TOKEN"));
 
-        // Create a grant with CSRF token
-        {
-            RequestBody body = RequestBody.create(grant.toString(), JSON_API_MEDIA_TYPE);
-            Request request = new Request.Builder().url(url).header("Accept", JSON_API_CONTENT_TYPE)
-                    .header("Content-Type", JSON_API_CONTENT_TYPE).header("Authorization", BACKEND_CREDENTIALS)
-                    .header("X-XSRF-TOKEN", "moo").post(body).build();
-
-            Response response = client.newCall(request).execute();
-
-            check(response, 201);
-        }
-
-        // Fails if header does not match token
+        // Fails if header does not match cookie
         {
             RequestBody body = RequestBody.create(grant.toString(), JSON_API_MEDIA_TYPE);
             Request request = new Request.Builder().url(url).header("Accept", JSON_API_CONTENT_TYPE)
@@ -659,16 +649,44 @@ public class AccessControlTest extends SamlIntegrationTest {
 
             check(response, 403);
         }
+
+        // Succeeds if header does match cookie
+        {
+            RequestBody body = RequestBody.create(grant.toString(), JSON_API_MEDIA_TYPE);
+            Request request = new Request.Builder().url(url).header("Accept", JSON_API_CONTENT_TYPE)
+                    .header("Content-Type", JSON_API_CONTENT_TYPE).header("Authorization", BACKEND_CREDENTIALS)
+                    .header("X-XSRF-TOKEN", "moo").post(body).build();
+
+            Response response = client.newCall(request).execute();
+
+            check(response, 201);
+        }
     }
 
     @Test
-    public void testChooseCsrfTokenAsShibUser() throws IOException, JSONException {
+    public void testCsrfTokenAsShibUser() throws IOException, JSONException {
         HttpUrl base_url = HttpUrl.get(getBaseUrl());
 
         doSamlLogin();
 
-        JSONObject grant = pass_object("grant");
-        set_attribute(grant, "projectName", "backend test");
+        JSONObject pub = pass_object("publication");
+        set_attribute(pub, "title", "backend test");
+
+        assertNotEquals("moo", getCsrfToken());
+
+        // Create a grant with returned CSRF token
+        {
+            String url = getBaseUrl() + "data/publication";
+
+            RequestBody body = RequestBody.create(pub.toString(), JSON_API_MEDIA_TYPE);
+            Request request = new Request.Builder().url(url).header("Accept", JSON_API_CONTENT_TYPE)
+                    .header("Content-Type", JSON_API_CONTENT_TYPE).header("X-XSRF-TOKEN", getCsrfToken())
+                    .post(body).build();
+
+            Response response = client.newCall(request).execute();
+
+            check(response, 201);
+        }
 
         // Save our own CSRF token
         client.cookieJar().saveFromResponse(base_url,
@@ -678,16 +696,29 @@ public class AccessControlTest extends SamlIntegrationTest {
 
         // Create a grant with a made up CSRF token
         {
-            String url = getBaseUrl() + "data/grant";
+            String url = getBaseUrl() + "data/publication";
 
-            RequestBody body = RequestBody.create(grant.toString(), JSON_API_MEDIA_TYPE);
+            RequestBody body = RequestBody.create(pub.toString(), JSON_API_MEDIA_TYPE);
             Request request = new Request.Builder().url(url).header("Accept", JSON_API_CONTENT_TYPE)
                     .header("Content-Type", JSON_API_CONTENT_TYPE).header("X-XSRF-TOKEN", getCsrfToken())
                     .post(body).build();
 
             Response response = client.newCall(request).execute();
 
-            // Fails because CSRF token tied to session
+            check(response, 201);
+        }
+
+        // Fails if header does not match token
+        {
+            String url = getBaseUrl() + "data/publication";
+
+            RequestBody body = RequestBody.create(pub.toString(), JSON_API_MEDIA_TYPE);
+            Request request = new Request.Builder().url(url).header("Accept", JSON_API_CONTENT_TYPE)
+                    .header("Content-Type", JSON_API_CONTENT_TYPE).header("X-XSRF-TOKEN", "badmoo")
+                    .post(body).build();
+
+            Response response = client.newCall(request).execute();
+
             check(response, 403);
         }
     }
