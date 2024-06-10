@@ -37,10 +37,12 @@ import org.springframework.security.saml2.provider.service.web.authentication.Sa
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.CookieClearingLogoutHandler;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.header.writers.ContentSecurityPolicyHeaderWriter;
 import org.springframework.security.web.header.writers.DelegatingRequestMatcherHeaderWriter;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
 
 
 /**
@@ -80,11 +82,15 @@ public class SecurityConfiguration {
         http.formLogin(FormLoginConfigurer::disable);
         http.anonymous(AnonymousConfigurer::disable);
 
-        // Enable CSRF protection using a cookie to send the token
+        // Enable CSRF protection using a cookie to send the token. See
+        // https://docs.spring.io/spring-security/reference/servlet/exploits/csrf.html#csrf-integration-javascript-spa
         // Make sure the cookie value can be parsed when returned in a header
         // Do not protect /logout so it can be triggered with GET
+        // Ensure that GET requests to the doi service are protected since they have side effects
         http.csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                 .ignoringRequestMatchers("/logout")
+                .requireCsrfProtectionMatcher(new OrRequestMatcher(CsrfFilter.DEFAULT_CSRF_MATCHER,
+                        new AntPathRequestMatcher("/doi/**")))
                 .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler()));
 
         // Set Content Security Policy header only for /app/

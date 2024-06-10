@@ -22,10 +22,12 @@ import org.eclipse.pass.object.PassClientResult;
 import org.eclipse.pass.object.PassClientSelector;
 import org.eclipse.pass.object.RSQL;
 import org.eclipse.pass.object.model.Journal;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class DoiServiceTest extends SimpleIntegrationTest {
+    private static String credentials = Credentials.basic(BACKEND_USER, BACKEND_PASSWORD);
 
     @Autowired
     protected RefreshableElide refreshableElide;
@@ -34,8 +36,12 @@ public class DoiServiceTest extends SimpleIntegrationTest {
         return PassClient.newInstance(refreshableElide);
     }
 
-    private OkHttpClient httpClient = new OkHttpClient();
-    private String credentials = Credentials.basic(BACKEND_USER, BACKEND_PASSWORD);
+    private OkHttpClient httpClient;
+
+    @BeforeEach
+    protected void setupClient() throws IOException {
+        httpClient = newOkhttpClient();
+    }
 
     /**
      * throw in a "moo" doi, expect a 400 error
@@ -48,6 +54,7 @@ public class DoiServiceTest extends SimpleIntegrationTest {
 
         Request okHttpRequest = new Request.Builder()
             .url(url).header("Authorization", credentials)
+            .header("X-XSRF-TOKEN", getCsrfToken(httpClient))
             .build();
         Call call = httpClient.newCall(okHttpRequest);
         try (Response okHttpResponse = call.execute()) {
@@ -71,6 +78,7 @@ public class DoiServiceTest extends SimpleIntegrationTest {
 
         Request okHttpRequest = new Request.Builder()
             .url(url).header("Authorization", credentials)
+            .header("X-XSRF-TOKEN", getCsrfToken(httpClient))
             .build();
         Call call = httpClient.newCall(okHttpRequest);
         try (Response okHttpResponse = call.execute()) {
@@ -95,6 +103,7 @@ public class DoiServiceTest extends SimpleIntegrationTest {
 
         Request okHttpRequest = new Request.Builder()
             .url(url).header("Authorization", credentials)
+            .header("X-XSRF-TOKEN", getCsrfToken(httpClient))
             .build();
         Call call = httpClient.newCall(okHttpRequest);
         try (Response okHttpResponse = call.execute()) {
@@ -122,6 +131,7 @@ public class DoiServiceTest extends SimpleIntegrationTest {
 
         Request okHttpRequest = new Request.Builder()
             .url(url).header("Authorization", credentials)
+            .header("X-XSRF-TOKEN", getCsrfToken(httpClient))
             .build();
         Call call = httpClient.newCall(okHttpRequest);
         try (Response okHttpResponse = call.execute()) {
@@ -160,6 +170,7 @@ public class DoiServiceTest extends SimpleIntegrationTest {
 
             Request okHttpRequest = new Request.Builder()
                 .url(url).header("Authorization", credentials)
+                .header("X-XSRF-TOKEN", getCsrfToken(httpClient))
                 .build();
 
             Call call = httpClient.newCall(okHttpRequest);
