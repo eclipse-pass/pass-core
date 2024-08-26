@@ -2,8 +2,10 @@ package org.eclipse.pass.main.security;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,6 +18,7 @@ import org.eclipse.pass.object.model.User;
 import org.eclipse.pass.object.model.UserRole;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
 
 public class PassAuthenticationFilterTest extends SamlIntegrationTest {
     @Autowired
@@ -127,5 +130,53 @@ public class PassAuthenticationFilterTest extends SamlIntegrationTest {
         User user = passAuthFilter.parseUser(attributes);
 
         assertEquals(expected, user);
+    }
+
+    @Test
+    public void testParseUserMissingRequiredAttributes() {
+        Map<String, List<Object>> attributes = new HashMap<>();
+
+        attributes.put("urn:oid:2.16.840.1.113730.3.1.241", List.of("Thomas L. Submitter"));
+        attributes.put("urn:oid:0.9.2342.19200300.100.1.3", List.of("tom987654321@jhu.edu"));
+        attributes.put("urn:oid:1.3.6.1.4.1.5923.1.1.1.6", List.of("thomassubmitter987654321@johnshopkins.edu"));
+        attributes.put("urn:oid:2.5.4.42", List.of("Tom"));
+        attributes.put("urn:oid:2.5.4.4", List.of("Submitter"));
+        attributes.put("urn:oid:1.3.6.1.4.1.5923.1.1.1.13", List.of("tls987654321@johnshopkins.edu"));
+
+        // Show that removing each of the required keys causes a failure
+        // and that various values are treated as the key not existing
+        for (String key: attributes.keySet()) {
+            HashMap<String, List<Object>> test = new HashMap<>(attributes);
+
+            test.remove(key);
+
+            assertThrows(BadCredentialsException.class, () -> {
+                passAuthFilter.parseUser(test);
+            });
+
+            test.put(key, null);
+
+            assertThrows(BadCredentialsException.class, () -> {
+                passAuthFilter.parseUser(test);
+            });
+
+            test.put(key, List.of());
+
+            assertThrows(BadCredentialsException.class, () -> {
+                passAuthFilter.parseUser(test);
+            });
+
+            test.put(key, List.of(""));
+
+            assertThrows(BadCredentialsException.class, () -> {
+                passAuthFilter.parseUser(test);
+            });
+
+            test.put(key, new ArrayList<>(1));
+
+            assertThrows(BadCredentialsException.class, () -> {
+                passAuthFilter.parseUser(test);
+            });
+        }
     }
 }
