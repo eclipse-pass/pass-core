@@ -141,7 +141,7 @@ public class PassAuthenticationFilter extends OncePerRequestFilter {
             });
         }
 
-        User user = parse_user(principal.getAttributes());
+        User user = parseUser(principal.getAttributes());
         create_or_update_pass_user(user);
 
         return new PassAuthentication(user);
@@ -229,10 +229,10 @@ public class PassAuthenticationFilter extends OncePerRequestFilter {
     }
 
     /**
-     * @param attributes
-     * @return User representing the information in the request.
+     * @param attributes of an authenticating user
+     * @return User representing the attributes
      */
-    private User parse_user(Map<String, List<Object>> attributes) {
+    User parseUser(Map<String, List<Object>> attributes) {
         User user = new User();
 
         String display_name = get(attributes, Attribute.DISPLAY_NAME, true);
@@ -293,13 +293,9 @@ public class PassAuthenticationFilter extends OncePerRequestFilter {
 
         List<Object> values = attributes.get(key);
 
-        if (values == null || values.size() == 0 && required) {
-            throw new BadCredentialsException("Missing attribute: " + attr + "[" + key + "]");
-        }
-
         String value = null;
 
-        if (values.get(0) != null) {
+        if (values != null && values.size() > 0 && values.get(0) != null) {
             value = values.get(0).toString().trim();
         }
 
