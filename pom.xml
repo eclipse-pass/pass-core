@@ -154,26 +154,6 @@
   </dependencyManagement>
 
   <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.springframework.boot</groupId>
-          <artifactId>spring-boot-maven-plugin</artifactId>
-          <version>${spring-boot-maven-plugin.version}</version>
-          <configuration>
-            <mainClass>org.eclipse.pass.main.Main</mainClass>
-            <finalName>pass-core-main</finalName>
-          </configuration>
-          <executions>
-            <execution>
-              <goals>
-                <goal>repackage</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-      </plugins>
-    </pluginManagement>
 
     <plugins>
       <plugin>
