@@ -68,8 +68,8 @@ spring:
             assertingparty:
               metadata-uri: ${PASS_CORE_IDP_METADATA:classpath:saml2/idp-metadata.xml}
     user:
-      name: ${PASS_CORE_BACKEND_USER:backend}
-      password: ${PASS_CORE_BACKEND_PASSWORD:moo}
+      name: ${PASS_CORE_USER:backend}
+      password: ${PASS_CORE_PASSWORD:moo}
       roles: BACKEND
   servlet:
     multipart:
@@ -146,8 +146,8 @@ spring:
     driver-class-name: 'org.postgresql.Driver'
   security:
     user:
-      name: ${PASS_CORE_BACKEND_USER}
-      password: ${PASS_CORE_BACKEND_PASSWORD}
+      name: ${PASS_CORE_USER}
+      password: ${PASS_CORE_PASSWORD}
       roles: BACKEND
 
 server:
