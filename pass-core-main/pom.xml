@@ -160,6 +160,11 @@
       <artifactId>spring-security-saml2-service-provider</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>io.awspring.cloud</groupId>
+      <artifactId>spring-cloud-aws-starter-parameter-store</artifactId>
+    </dependency>
+
     <!-- Test dependencies -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
