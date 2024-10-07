@@ -75,6 +75,7 @@
   <properties>
     <maven-dependency-plugin.version>3.6.1</maven-dependency-plugin.version>
     <spring-boot-maven-plugin.version>3.2.2</spring-boot-maven-plugin.version>
+    <awsspring.version>3.1.0</awsspring.version>
     <amazon.pom.version>2.25.16</amazon.pom.version>
     <elide.version>7.0.2</elide.version>
     <amazon.sqs.version>2.1.2</amazon.sqs.version>
@@ -139,6 +140,14 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
         <version>${spring-boot-maven-plugin.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>io.awspring.cloud</groupId>
+        <artifactId>spring-cloud-aws-dependencies</artifactId>
+        <version>${awsspring.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -247,6 +256,7 @@
                 <!-- These come from bundled jars -->
                 <ignoredDependency>org.springframework*::</ignoredDependency>
                 <ignoredDependency>software.amazon.awssdk::</ignoredDependency>
+                <ignoredDependency>io.awspring.cloud::</ignoredDependency>
               </ignoredDependencies>
               <ignoredUsedUndeclaredDependencies>
                 <!-- These come from elide starter -->
