@@ -16,6 +16,9 @@
  */
 package org.eclipse.pass.doi.service;
 
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -57,6 +60,20 @@ public class UnpaywallDoiService extends ExternalDoiService {
         return null;
     }
 
+    private String get_filename(String url) {
+        try {
+            URI uri = new URI(url);
+
+            if (uri.getPath() == null) {
+                return null;
+            }
+
+            return new File(uri.getPath()).getName();
+        } catch (URISyntaxException e) {
+            return null;
+        }
+    }
+
     @Override
     public JsonObject processObject(JsonObject object) {
         JsonArray locations = object.getJsonArray("oa_locations");
@@ -67,13 +84,12 @@ public class UnpaywallDoiService extends ExternalDoiService {
             JsonValue urlForPdf = manuscript.getValue("/url_for_pdf");
             JsonValue isBest = manuscript.getValue("/is_best");
 
-            JsonValue filename;
             if ( urlForPdf == JsonValue.NULL ) {
-                filename = JsonValue.NULL;
-            } else {
-                String urlForPdfString = urlForPdf.toString().replaceAll("\"","");
-                filename = Json.createValue (urlForPdfString.substring(urlForPdfString.lastIndexOf('/') + 1));
+                continue;
             }
+
+            String name = get_filename(manuscript.getString("url_for_pdf"));
+            JsonValue filename = name == null ? JsonValue.NULL : Json.createValue(name);
 
             JsonValue repoInst = manuscript.getValue("/repository_institution");
 

@@ -31,9 +31,8 @@ public class UnpaywallDoiServiceTest {
         "\"repositoryLabel\":null,\"type\":\"application/pdf\",\"source\":\"Unpaywall\"," +
         "\"name\":\"CMC.S38446\",\"isBest\":true},{\"url\":\"https://europepmc.org/articles/pmc5072460?pdf=render\"," +
         "\"repositoryLabel\":\"PubMed Central - Europe PMC\",\"type\":\"application/pdf\"," +
-        "\"source\":\"Unpaywall\",\"name\":\"pmc5072460?pdf=render\",\"isBest\":false}," +
-        "{\"url\":null,\"repositoryLabel\":null,\"type\":\"application/pdf\"," +
-        "\"source\":\"Unpaywall\",\"name\":null,\"isBest\":false}]}";
+        "\"source\":\"Unpaywall\",\"name\":\"pmc5072460\",\"isBest\":false}" +
+        "]}";
 
     @Test
     public void testProcessObject() {
