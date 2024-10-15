@@ -152,8 +152,6 @@ spring:
 
 server:
   port: ${PASS_CORE_PORT}
-  error:
-    include-stacktrace: always
 
 pass:
   jms:
