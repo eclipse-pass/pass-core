@@ -25,7 +25,7 @@ import org.springframework.test.context.ActiveProfiles;
 /**
  * @author Russ Poetker (rpoetke1@jh.edu)
  */
-@ActiveProfiles("default-test")
+@ActiveProfiles("test")
 public class StorageConfigurationTest extends SimpleIntegrationTest {
 
     @Autowired private StorageProperties storageProperties;
