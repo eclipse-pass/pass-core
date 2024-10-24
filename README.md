@@ -10,15 +10,17 @@ Java 17 and Maven 3.8 required.
 mvn clean install
 ```
 
-This will produce an executabler jar `pass-core-main/target/pass-core-main.jar` and a docker image `ghcr.io/eclipse-pass/pass-core-main`.
+This will produce an executabler jar `pass-core-main/target/pass-core-main-<release>-exec.jar` and a docker image `ghcr.io/eclipse-pass/pass-core-main`.
 
 # Running local build
 
+After you have run `mvn clean install`, execute the following command from the `pass-core-main` directory:
+
 ```
-java -jar pass-core-main.jar
+java -Dspring.config.import=file:./src/test/resources/application-test.yml -jar target/pass-core-main-<release>-exec.jar
 ```
 
-By default an in memory database is used.
+This command will use the configuration defined in the `pass-core-main/src/test/resources/application-test.yml` file. **This configuration should not be used in production, it is only meant for testing purposes.**
 
 Look at http://localhost:8080/swagger/ to see the auto-created documentation and a UI for testing out the api.
 
@@ -26,62 +28,59 @@ You can directly make request with the UI and see what happens. Note when doing 
 
 ## Running with Docker
 
-This uses Postgres.
-
-In pass-core-main run:
-```
-docker-compose up -d
-```
+Run `mvn clean install`. Then go to the [pass-docker](https://github.com/eclipse-pass/pass-docker) repository and following the instructions for starting a local environment.
 
 # Configuration
 
 The application is configured by its application.yaml which in turn references a number of environment variables.
 
-By default, pass-core-main, will run with an in memory database. In order to use Postgres, switch to the production profile and set the database environment variables as below.
-The liquibase changelog located `pass-core-main/src/main/resources/db/changelog/changelog.yaml` will create the pass-core database schema if needed.
-
-If `PASS_CORE_USE_SQS` is `true`, then pass-core will attempt to connect to Amazon SQS. The connection must be configured with `AWS_REGION`, `AWS_ACCESS_KEY_ID`, and `AWS_SECRET_ACCESS_KEY`.
-The AWS credentials are also needed if the file service S3 backend is used.
-
-Otherwise a connection to an ActiveMQ broker can be configured by setting `SPRING_ACTIVEMQ_BROKER_URL`. If 'PASS_CORE_EMBED_JMS_BROKER` is true, then an embedded ActiveMQ broker will be started
-using that url. This can be useful to set tcp transport for connecting containers in a docker environment. The default is an embedded broker using vm transport.
+By default, pass-core-main will run with a typical production configuration. In order to run the default configuration, the environment variables below must be set with appropriate values for your environment.
 
 Environment variables:
-* spring_profiles_active=production
-* AWS_REGION=us-east-1
-* AWS_ACCESS_KEY_ID=xxx
-* AWS_SECRET_ACCESS_KEY=xxx
-* PASS_CORE_APP_LOCATION=classpath:app
-* PASS_CORE_APP_CSP=default-src 'self';
-* PASS_CORE_DATABASE_URL=jdbc:postgresql://postgres:5432/pass
-* PASS_CORE_DATABASE_USERNAME=pass
-* PASS_CORE_DATABASE_PASSWORD=moo
-* PASS_CORE_PORT=8080
-* PASS_CORE_LOG_DIR=${java.io.tmpdir}/pass-core
-* PASS_CORE_USER=backend
-* PASS_CORE_PASSWORD=moo
-* PASS_CORE_USE_SQS=false
-* PASS_CORE_EMBED_JMS_BROKER=true
-* PASS_CORE_SUBMISSION_QUEUE=pass-submission
-* PASS_CORE_DEPOSIT_QUEUE=pass-deposit
-* PASS_CORE_IDP_METADATA=classpath:saml2/idp-metadata.xml
-* PASS_CORE_DEAULT_LOGIN_SUCCESS=/app/
-* PASS_CORE_LOGOUT_SUCCESS=/app/
-* PASS_CORE_LOGOUT_DELETE_COOKIES="JSESSIONID /"
-* PASS_CORE_SP_ID=https://sp.pass/shibboleth
-* PASS_CORE_SP_ACS=http://localhost:8080/login/saml2/sso/pass
-* PASS_CORE_LOGIN_PROCESSING_PATH=/login/saml2/sso/pass
-* PASS_CORE_SP_KEY=classpath:saml2/sp-key.pem
-* PASS_CORE_SP_CERT=classpath:saml2/sp-cert.pem
-* PASS_CORE_SUBMISSION_EVENT_QUEUE=pass-submission-event
-* PASS_CORE_USERTOKEN_KEY=xxx
-  * If not present, one is generated. See the [user service](pass-core-user-service/README.md) for how to create manually.
-* PASS_CORE_JAVA_OPTS=""
-  * Used by the Docker image to pass arguments to Java
-* PASS_CORE_BASE_URL=http://localhost:8080
-  * Used when services send URLs to the client such as relationship links.
+| Environment Variable                             | Default Value                | Description                                                                                                             |
+|--------------------------------------------------|------------------------------|-------------------------------------------------------------------------------------------------------------------------|
+| `PASS_CORE_APP_LOCATION`                         | classpath:app/               | IP address or host name of the server running the SWORD protocol version 2 endpoint                                     |
+| `PASS_CORE_APP_CSP`                              |                              | TCP port exposing the SWORD protocol version 2 endpoint                                                                 |
+| `PASS_CORE_DATABASE_URL`                         |                              | Connection URL to database                                                                                              |
+| `PASS_CORE_DATABASE_USERNAME`                    |                              | Username for database login                                                                                             |
+| `PASS_CORE_DATABASE_PASSWORD`                    |                              | Password for database login                                                                                             |
+| `PASS_CORE_PORT`                                 |                              | The port to expose for pass-core API                                                                                    |
+| `PASS_CORE_LOG_DIR`                              | ${java.io.tmpdir}/pass-core  | Path to log directory                                                                                                   |
+| `PASS_CORE_USER`                                 |                              | Default user name for pass-core                                                                                         |
+| `PASS_CORE_PASSWORD`                             | true                         | Default user password for pass-core                                                                                     |   
+| `PASS_CORE_USE_SQS`                              | true                         | Flag to use AWS SQS for messaging                                                                                       |
+| `PASS_CORE_EMBED_JMS_BROKER`                     | false                        | Flag to use Embedded ActiveMQ for messaging                                                                             |
+| `PASS_CORE_SUBMISSION_QUEUE`                     | pass-submission              | Name of submission queue                                                                                                |
+| `PASS_CORE_DEPOSIT_QUEUE`                        | pass-deposit                 | Name of deposit queue                                                                                                   |
+| `PASS_CORE_SUBMISSION_EVENT_QUEUE`               | pass-submission-event        | Name of submission event queue                                                                                          |
+| `PASS_CORE_SP_ID`                                |                              | SAML SP ID [SAML configuration](#saml-configuration)                                                                                    |
+| `PASS_CORE_SP_ACS`                               |                              | SAML SP ACS [SAML configuration](#saml-configuration)                                                                                   |
+| `PASS_CORE_SP_KEY`                               |                              | Location of SAML SP private key pem file [SAML configuration](#saml-configuration)                                                      |
+| `PASS_CORE_SP_CERT`                              |                              | Location of SAML SP public certificate pem file [SAML configuration](#saml-configuration)                                               |
+| `PASS_CORE_IDP_METADATA`                         |                              | Location of SAML IDM Metadata file [SAML configuration](#saml-configuration)                                                            |
+| `PASS_CORE_DEAULT_LOGIN_SUCCESS`                 |                              | Path to redirect to after login success [SAML configuration](#saml-configuration)                                                       |
+| `PASS_CORE_LOGIN_PROCESSING_PATH`                |                              | Path to handle login from SAML IDP [SAML configuration](#saml-configuration)                                                            |
+| `PASS_CORE_LOGOUT_SUCCESS`                       |                              | Path to redirect to after SAML logout [SAML configuration](#saml-configuration)                                                         |
+| `PASS_CORE_LOGOUT_DELETE_COOKIES`                |                              | Name of cookies to delete as part of SAML logout [SAML configuration](#saml-configuration)                                              |
+| `PASS_CORE_USERTOKEN_KEY`                        |                              | If not present, one is generated. See the [user service](pass-core-user-service/README.md) for how to create manually.                               |
+| `PASS_CORE_JAVA_OPTS`                            |                              | Used by the Docker image to pass arguments to Java.                                                                     |
+| `PASS_CORE_BASE_URL`                             |                              | Used when services send URLs to the client such as relationship links.                                                  |
+| `PASS_CORE_FILE_SERVICE_TYPE`                    | FILE_SYSTEM                  | The port to expose for pass-core API                                                                                    |
+| `PASS_CORE_FILE_SERVICE_ROOT_DIR`                |                              | Path to log directory                                                                                                   |
+| `PASS_CORE_S3_BUCKET_NAME`                       | pass-core-file               | Default user name for pass-core                                                                                         |
+| `PASS_CORE_S3_REPO_PREFIX`                       | pass-core-file               | Default user password for pass-core                                                                                     |
+| `PASS_CORE_POLICY_INSTITUTION`                   |                              | Name of the institution                                                                                                 |
+| `PASS_CORE_POLICY_INSTITUTIONAL_POLICY_TITLE`    |                              | Title of the institutional policy                                                                                       |
+| `PASS_CORE_POLICY_INSTITUTIONAL_REPOSITORY_NAME` |                              | Name of institutional repository                                                                                        |
 
-The environment variables in `pass-core-main/.env` are intended to be used for local testing of pass-core in isolation.
+The liquibase changelog located `pass-core-main/src/main/resources/db/changelog/changelog.yaml` will create the pass-core database schema if needed.
+
+If `PASS_CORE_USE_SQS` is `true`, then pass-core will attempt to connect to Amazon SQS. For testing purposes, you can set `AWS_REGION`, `AWS_ACCESS_KEY_ID`, and `AWS_SECRET_ACCESS_KEY` for connecting to AWS resources. In production, AWS IAM Service Roles should be used.
+
+Otherwise, a connection to an ActiveMQ broker can be configured by setting `SPRING_ACTIVEMQ_BROKER_URL`. If `PASS_CORE_EMBED_JMS_BROKER` is true, then an embedded ActiveMQ broker will be started
+using that url. This can be useful to set tcp transport for connecting containers in a docker environment. The default is an embedded broker using vm transport.
+
+**Note you can quickly start pass-core locally for testing purposes following the instructions in [Running local build](#running-local-build) section.**
 
 # Access control
 
@@ -102,11 +101,11 @@ Use `PASS_CORE_SP_ID` to set the identifier of the pass-core SP, `PASS_CORE_IDP_
 `PASS_CORE_SP_ACS` for the Assertion Consumer Service of the SP and `PASS_CORE_LOGIN_PROCESSING_PATH` to set the path for handling login from the IDP.
 Note that `PASS_CORE_SP_ACS` is a URL which must match the path specified in `PASS_CORE_LOGIN_PROCESSING_PATH`.
 
-The defaults are set such that the integration tests can run against a [SimpleSAMLphp based IDP](https://github.com/kenchan0130/docker-simplesamlphp/) using resources included in `saml2/`. These defaults should not be used in production.
+The `application-test.yml` configuration is set such that the integration tests can run against a [SimpleSAMLphp based IDP](https://github.com/kenchan0130/docker-simplesamlphp/) using resources included in `saml2/`. These defaults should not be used in production.
 
 The image can be run with:
 ```
-docker run --name=idp -p 8090:8080 -e SIMPLESAMLPHP_SP_ENTITY_ID=https://sp.pass/shibboleth -e SIMPLESAMLPHP_SP_ASSERTION_CONSUMER_SERVICE=http://localhost:8080/login/saml2/sso/pass -e SIMPLESAMLPHP_IDP_BASE_URL=http://localhost:8090/   -v ./pass-core/pass-core/main/src/main/resources/saml2/authsources.php:/var/www/simplesamlphp/config/authsources.php -d kenchan0130/simplesamlphp
+docker run --name=idp -p 8090:8080 -e SIMPLESAMLPHP_SP_ENTITY_ID=https://sp.pass/shibboleth -e SIMPLESAMLPHP_SP_ASSERTION_CONSUMER_SERVICE=http://localhost:8080/login/saml2/sso/pass -e SIMPLESAMLPHP_IDP_BASE_URL=http://localhost:8090/   -v ./pass-core/pass-core/main/src/test/resources/saml2/authsources.php:/var/www/simplesamlphp/config/authsources.php -d kenchan0130/simplesamlphp
 ```
 Note the volume mount which is set the user information appropriately for PASS.
 

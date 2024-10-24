@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -38,9 +39,13 @@ import org.testcontainers.utility.DockerImageName;
     properties = {
         "spring.cloud.aws.credentials.access-key=noop",
         "spring.cloud.aws.credentials.secret-key=noop",
-        "spring.cloud.aws.region.static=us-east-1"
+        "spring.cloud.aws.region.static=us-east-1",
+        "spring.security.user.name=${PASS_CORE_USER:test-user}",
+        "spring.security.user.password=${PASS_CORE_PASSWORD:test-user-pw}",
+        "pass.app-location=${PASS_CORE_APP_LOCATION:classpath:app/}"
     })
 @ContextConfiguration(initializers = ConfigDataApplicationContextInitializer.class)
+@ActiveProfiles("test")
 @Testcontainers
 class AwsParamStoreConfigTest {
     private static final DockerImageName LOCALSTACK_IMG =
@@ -68,19 +73,19 @@ class AwsParamStoreConfigTest {
             "--value", "aws-param-store-pw",
             "--type", "SecureString");
         localStack.execInContainer("awslocal", "ssm", "put-parameter",
-            "--name", "/config/pass-core/PASS_CORE_INSTN_CHG_LOG",
-            "--value", "test-chg-log",
+            "--name", "/config/pass-core/PASS_CORE_APP_LOCATION",
+            "--value", "aws-param-test-app-loc",
             "--type", "SecureString");
     }
 
     @Test
     public void testLoadPropFromParamStore() {
         String userNameProp = environment.getProperty("spring.security.user.name");
-        assertEquals("backend", userNameProp);
+        assertEquals("test-user", userNameProp);
         String userPwProp = environment.getProperty("spring.security.user.password");
         assertEquals("aws-param-store-pw", userPwProp);
-        String changeLogProp = environment.getProperty("spring.liquibase.parameters.institution-changelog-file");
-        assertEquals("test-chg-log", changeLogProp);
+        String changeLogProp = environment.getProperty("pass.app-location");
+        assertEquals("aws-param-test-app-loc", changeLogProp);
     }
 
 }
