@@ -46,7 +46,7 @@ Environment variables:
 | `PASS_CORE_PORT`                                 |                              | The port to expose for pass-core API                                                                                    |
 | `PASS_CORE_LOG_DIR`                              | ${java.io.tmpdir}/pass-core  | Path to log directory                                                                                                   |
 | `PASS_CORE_USER`                                 |                              | Default user name for pass-core                                                                                         |
-| `PASS_CORE_PASSWORD`                             | true                         | Default user password for pass-core                                                                                     |   
+| `PASS_CORE_PASSWORD`                             |                              | Default user password for pass-core                                                                                     |   
 | `PASS_CORE_USE_SQS`                              | true                         | Flag to use AWS SQS for messaging                                                                                       |
 | `PASS_CORE_EMBED_JMS_BROKER`                     | false                        | Flag to use Embedded ActiveMQ for messaging                                                                             |
 | `PASS_CORE_SUBMISSION_QUEUE`                     | pass-submission              | Name of submission queue                                                                                                |
