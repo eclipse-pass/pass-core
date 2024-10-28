@@ -74,6 +74,7 @@
 
   <properties>
     <maven-dependency-plugin.version>3.6.1</maven-dependency-plugin.version>
+    <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
     <spring-boot-maven-plugin.version>3.2.2</spring-boot-maven-plugin.version>
     <awsspring.version>3.1.0</awsspring.version>
     <amazon.pom.version>2.25.16</amazon.pom.version>
