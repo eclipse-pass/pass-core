@@ -3,7 +3,7 @@ elide:
   aggregation-store:
     enabled: false
 
-PASS_TEST_RESC_PATH: ${user.dir}/src/test/resources
+PASS_SAML_PATH: "classpath:"
 
 spring:
   application:
@@ -28,16 +28,16 @@ spring:
             entity-id: https://sp.pass/shibboleth
             signing:
               credentials:
-                - private-key-location: file:${PASS_TEST_RESC_PATH}/saml2/sp-key.pem
-                  certificate-location: file:${PASS_TEST_RESC_PATH}/saml2/sp-cert.pem
+                - private-key-location: ${PASS_SAML_PATH}/saml2/sp-key.pem
+                  certificate-location: ${PASS_SAML_PATH}/saml2/sp-cert.pem
             decryption:
               credentials:
-                - private-key-location: file:${PASS_TEST_RESC_PATH}/saml2/sp-key.pem
-                  certificate-location: file:${PASS_TEST_RESC_PATH}/saml2/sp-cert.pem
+                - private-key-location: ${PASS_SAML_PATH}/saml2/sp-key.pem
+                  certificate-location: ${PASS_SAML_PATH}/saml2/sp-cert.pem
             acs:
               location: "{baseUrl}/login/saml2/sso/{registrationId}"
             assertingparty:
-              metadata-uri: file:${PASS_TEST_RESC_PATH}/saml2/idp-metadata.xml
+              metadata-uri: ${PASS_SAML_PATH}/saml2/idp-metadata.xml
     user:
       name: backend
       password: moo
