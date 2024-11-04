@@ -39,9 +39,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.S3ClientBuilder;
+import software.amazon.awssdk.services.s3.S3AsyncClient;
+import software.amazon.awssdk.services.s3.S3AsyncClientBuilder;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
+import software.amazon.awssdk.transfer.s3.S3TransferManager;
 
 /**
  * The StorageConfiguration is responsible for handling the StorageProperties. The FileStorageService does not get the
@@ -60,20 +61,33 @@ public class StorageConfiguration {
 
     @Bean
     @ConditionalOnProperty(name = "pass.file-service.storage-type", havingValue = "S3")
-    public S3Client s3Client(StorageProperties storageProperties) throws IOException {
+    public S3TransferManager s3TransferManager() {
+        S3AsyncClient s3AsyncClient = S3AsyncClient.crtBuilder()
+            .credentialsProvider(DefaultCredentialsProvider.create())
+            .region(Region.of(awsRegion))
+            .build();
+
+        return S3TransferManager.builder()
+            .s3Client(s3AsyncClient)
+            .build();
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = "pass.file-service.storage-type", havingValue = "S3")
+    public S3AsyncClient s3Client(StorageProperties storageProperties) throws IOException {
         String bucketName = storageProperties.getBucketName().
             orElseThrow(() -> new IOException("File Service: S3 bucket name is not set"));
 
-        S3ClientBuilder builder = S3Client.builder()
+        S3AsyncClientBuilder builder = S3AsyncClient.builder()
             .credentialsProvider(DefaultCredentialsProvider.create())
             .region(Region.of(awsRegion));
 
         String endpoint = storageProperties.getS3Endpoint().orElse(null);
-        S3Client s3Client = StringUtils.isNotBlank(endpoint)
+        S3AsyncClient s3Client = StringUtils.isNotBlank(endpoint)
             ? builder.endpointOverride(URI.create(endpoint)).forcePathStyle(true).build()
             : builder.build();
 
-        if (s3Client.listBuckets().buckets().stream().noneMatch(b -> b.name().equals(bucketName))) {
+        if (s3Client.listBuckets().join().buckets().stream().noneMatch(b -> b.name().equals(bucketName))) {
             s3Client.createBucket(CreateBucketRequest.builder().bucket(bucketName).build());
         }
         return s3Client;
@@ -81,7 +95,8 @@ public class StorageConfiguration {
 
     @Bean
     @ConditionalOnProperty(name = "pass.file-service.storage-type", havingValue = "S3")
-    public OcflRepository ocflS3Repository(S3Client s3Client, StorageProperties storageProperties,
+    public OcflRepository ocflS3Repository(S3AsyncClient s3Client, S3TransferManager s3TransferManager,
+                                           StorageProperties storageProperties,
                                            @Qualifier("rootPath") Path rootLoc) throws IOException {
         String bucketName = storageProperties.getBucketName().
             orElseThrow(() -> new IOException("File Service: S3 bucket name is not set"));
@@ -89,6 +104,7 @@ public class StorageConfiguration {
 
         OcflS3Client.Builder builder = OcflS3Client.builder()
             .s3Client(s3Client)
+            .transferManager(s3TransferManager)
             .bucket(bucketName);
         OcflS3Client ocflS3Client = StringUtils.isNotBlank(repoPrefix)
             ? builder.repoPrefix(repoPrefix).build()

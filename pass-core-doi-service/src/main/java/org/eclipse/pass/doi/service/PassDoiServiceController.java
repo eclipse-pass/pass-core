@@ -18,10 +18,10 @@ package org.eclipse.pass.doi.service;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import javax.json.Json;
-import javax.json.JsonObject;
 
 import com.yahoo.elide.RefreshableElide;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;

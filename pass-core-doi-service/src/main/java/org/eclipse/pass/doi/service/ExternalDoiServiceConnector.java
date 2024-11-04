@@ -21,11 +21,11 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Objects;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.json.stream.JsonParsingException;
 
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
+import jakarta.json.stream.JsonParsingException;
 import okhttp3.Call;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;

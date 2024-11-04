@@ -20,8 +20,6 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Set;
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
 
 import com.amazon.sqs.javamessaging.ProviderConfiguration;
 import com.amazon.sqs.javamessaging.SQSConnectionFactory;
@@ -38,6 +36,8 @@ import com.yahoo.elide.jsonapi.JsonApiSettings;
 import com.yahoo.elide.jsonapi.JsonApiSettingsBuilderCustomizer;
 import jakarta.jms.ConnectionFactory;
 import jakarta.jms.TextMessage;
+import jakarta.json.Json;
+import jakarta.json.JsonObjectBuilder;
 import jakarta.persistence.OptimisticLockException;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.pass.main.repository.DepositRepository;
@@ -178,7 +178,7 @@ public class JmsConfiguration {
                                             DepositRepository depositRepository) {
 
         EntityDictionary dictionary = new EntityDictionary(new HashMap<>(), new HashMap<>(), injector,
-                CoerceUtil::lookup, entitiesToExclude, scanner);
+                CoerceUtil::lookup, entitiesToExclude, scanner, null);
 
         setupHooks(dictionary, jms, userTokenFactory, submissionRepository, depositRepository);
 

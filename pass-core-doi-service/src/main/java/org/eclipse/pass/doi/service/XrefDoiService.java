@@ -17,7 +17,8 @@
 package org.eclipse.pass.doi.service;
 
 import java.util.HashMap;
-import javax.json.JsonObject;
+
+import jakarta.json.JsonObject;
 
 /**
  * The XrefDoiService class is an implementation of the ExternalDoiService abstract class to interface with the Crossref
