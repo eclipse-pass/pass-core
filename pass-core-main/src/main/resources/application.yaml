@@ -25,6 +25,22 @@ elide:
 spring:
   application:
     name: pass-core
+  cloud:
+    aws:
+      dynamodb:
+        enabled: false
+      parameterstore:
+        enabled: false
+      s3:
+        enabled: false
+      secretsmanager:
+        enabled: false
+      ses:
+        enabled: false
+      sns:
+        enabled: false
+      sqs:
+        enabled: false
   jpa:
     properties:
       hibernate:

@@ -37,6 +37,7 @@ import org.testcontainers.utility.DockerImageName;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = {
+        "spring.cloud.aws.parameterstore.enabled=true",
         "spring.cloud.aws.credentials.access-key=noop",
         "spring.cloud.aws.credentials.secret-key=noop",
         "spring.cloud.aws.region.static=us-east-1",
