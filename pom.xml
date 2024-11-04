@@ -74,30 +74,21 @@
   </scm>
 
   <properties>
-    <maven-dependency-plugin.version>3.6.1</maven-dependency-plugin.version>
-    <spring-boot-maven-plugin.version>3.2.2</spring-boot-maven-plugin.version>
-    <awsspring.version>3.1.0</awsspring.version>
-    <amazon.pom.version>2.25.16</amazon.pom.version>
-    <elide.version>7.0.2</elide.version>
-    <amazon.sqs.version>2.1.2</amazon.sqs.version>
-    <logback.version>1.4.14</logback.version>
-    <slf4j.version>2.0.7</slf4j.version>
-    <liquibase.version>4.26.0</liquibase.version>
-    <rest-assured.version>5.4.0</rest-assured.version>
+    <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
+    <spring-boot-maven-plugin.version>3.3.5</spring-boot-maven-plugin.version>
+    <awsspring.version>3.2.1</awsspring.version>
+    <amazon.pom.version>2.29.3</amazon.pom.version>
+    <elide.version>7.1.2</elide.version>
+    <amazon.sqs.version>2.1.3</amazon.sqs.version>
 
-    <ocfl.java.core.version>2.0.1</ocfl.java.core.version>
-    <ocfl.java.aws.version>2.0.1</ocfl.java.aws.version>
+    <ocfl.java.core.version>2.2.1</ocfl.java.core.version>
+    <ocfl.java.aws.version>2.2.1</ocfl.java.aws.version>
 
-    <javax.json.version>1.1.4</javax.json.version>
-    <h2.version>2.2.224</h2.version>
-    <postgres.version>42.7.1</postgres.version>
-    <org.json.version>5.3.1</org.json.version>
+    <jakarta.json.version>2.0.1</jakarta.json.version>
     <okhttp.version>4.12.0</okhttp.version>
 
-    <apache.commons.io.version>2.15.1</apache.commons.io.version>
-    <s3mock.version>0.2.6</s3mock.version>
-    <jsoup.version>1.17.2</jsoup.version>
-    <jakarta.jms-api.version>3.1.0</jakarta.jms-api.version>
+    <apache.commons.io.version>2.17.0</apache.commons.io.version>
+    <jsoup.version>1.18.1</jsoup.version>
   </properties>
 
   <repositories>
@@ -113,17 +104,6 @@
 
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <version>${slf4j.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>ch.qos.logback</groupId>
-        <artifactId>logback-classic</artifactId>
-        <version>${logback.version}</version>
-      </dependency>
 
       <dependency>
         <groupId>com.squareup.okhttp3</groupId>
@@ -216,8 +196,10 @@
                     <exclude>com.google.code.findbugs:jsr305:</exclude>
                     <exclude>com.google.protobuf:protobuf-java:</exclude>
                     <exclude>com.google.guava:guava:</exclude>
+                    <exclude>com.google.errorprone:error_prone_annotations:</exclude>
                     <exclude>commons-io:commons-io:</exclude>
                     <exclude>org.ow2.asm:asm:</exclude>
+                    <exclude>org.ow2.asm:asm-commons:</exclude>
                     <exclude>org.antlr:antlr4-runtime:</exclude>
                     <!-- Transitive deps from liquibase-->
                     <exclude>org.apache.commons:commons-text:</exclude>
@@ -230,6 +212,7 @@
                     <exclude>org.springframework.security:spring-security-crypto:</exclude>
                     <!-- Transitive deps from org.opensaml:opensaml-security-api -->
                     <exclude>org.bouncycastle:bcprov-jdk18on:</exclude>
+                    <exclude>org.bouncycastle:bcpkix-jdk18on:</exclude>
                     <!-- Transitive deps from software.amazon.awssdk:apache-client and org.opensaml:opensaml-saml-impl -->
                     <exclude>org.apache.httpcomponents:httpclient:</exclude>               
                   </excludes>
@@ -278,7 +261,7 @@
                 <ignoredUsedUndeclaredDependency>com.vaadin.external.google:android-json:</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>jakarta.persistence:jakarta.persistence-api::</ignoredUsedUndeclaredDependency>
                 <!-- These come from doi service jar -->
-                <ignoredUsedUndeclaredDependency>org.glassfish:javax.json:</ignoredUsedUndeclaredDependency>
+                <ignoredUsedUndeclaredDependency>org.glassfish:jakarta.json:</ignoredUsedUndeclaredDependency>
                 <!-- These come from s3mock jar -->
                 <ignoredUsedUndeclaredDependency>com.typesafe.akka:akka-http-core_2.13:</ignoredUsedUndeclaredDependency>
                 <!-- These come from aws sqs jar -->

@@ -3,10 +3,10 @@ package org.eclipse.pass.user;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
-import javax.json.Json;
-import javax.json.JsonObject;
 
 import com.yahoo.elide.RefreshableElide;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.eclipse.pass.object.PassClient;

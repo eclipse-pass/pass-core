@@ -25,10 +25,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
 
 import com.yahoo.elide.RefreshableElide;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 import org.eclipse.pass.object.PassClient;
 import org.eclipse.pass.object.PassClientResult;
 import org.eclipse.pass.object.PassClientSelector;

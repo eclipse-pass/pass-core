@@ -24,7 +24,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.json.JsonObject;
+
+import jakarta.json.JsonObject;
 
 /**
  * ExternalDoiService classes provide configuration needed for specific implementations'

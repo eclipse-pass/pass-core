@@ -5,11 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
 import java.io.StringReader;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
 
 import com.yahoo.elide.RefreshableElide;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
 import okhttp3.Call;
 import okhttp3.Credentials;
 import okhttp3.HttpUrl;
