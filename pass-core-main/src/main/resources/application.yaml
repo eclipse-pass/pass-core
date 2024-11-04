@@ -27,6 +27,8 @@ spring:
     name: pass-core
   cloud:
     aws:
+      cloudwatch:
+        enabled: false
       dynamodb:
         enabled: false
       parameterstore:
