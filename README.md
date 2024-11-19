@@ -15,3 +15,5 @@ A full list of all the Eclipse PASS projects can be found in the PASS Main repos
 # License
 
 PASS Core is Open Source software released under the [Apache 2.0 license](LICENSE).
+
+![Pass Core](https://github.com/eclipse-pass/pass-core/actions/workflows/snapshot.yml/badge.svg)
