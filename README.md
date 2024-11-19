@@ -5,6 +5,13 @@ Elide JSON:API based interface to handle essential entities, including submissio
 Both the UI and backend services interact with the data model using JSON:API. PASS core is responsible for access 
 control and authorization, event handling and notifications.
 
-You can find further documentation and details about [PASS Core](https://docs.eclipse-pass.org/developer-documentation/pass-core)
-on the [full documentation site](https://docs.eclipse-pass.org). A full list of all the Eclipse PASS projects can also
-be found in the PASS Main repository [README](https://github.com/eclipse-pass/main/blob/main/README.md).
+A full list of all the Eclipse PASS projects can be found in the PASS Main repository [README](https://github.com/eclipse-pass/main).
+
+# Guides
+
+* [PASS Core Documentation](https://docs.eclipse-pass.org/developer-documentation/pass-core)
+* [PASS Documentation](https://docs.eclipse-pass.org/)
+
+# License
+
+PASS Core is Open Source software released under the [Apache 2.0 license](LICENSE).
