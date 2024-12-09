@@ -264,8 +264,16 @@
             },
             "publicationDate": {
                 "type": "date",
-                "label": "Publication Date  <small class=\"text-muted\">(optional)</small>",
+                "label": "Publication Date  <small class=\"text-muted\"></small>",
                 "hidden": false,
+                "helpersPosition": "above",
+                "validate": true,
+                "inputType": "date",
+                "fieldClass": "date-time-picker",
+                "picker": {
+                    "format": "L",
+                    "allowInputToggle": true
+                },
                 "order": 8
             },
             "abstract": {
@@ -308,12 +316,11 @@
                 "label": "Embargo End Date",
                 "helper": "<i>After the embargo end date, your submission manuscripts or article can be made public. <b>If this publication is not under embargo, please leave this field blank.<b></i>",
                 "helpersPosition": "above",
-                "placeholder": "dd/mm/yyyy",
                 "validate": true,
                 "inputType": "date",
                 "fieldClass": "date-time-picker",
                 "picker": {
-                    "format": "MM/DD/YY",
+                    "format": "L",
                     "allowInputToggle": true
                 },
                 "order": 12,
