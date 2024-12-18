@@ -103,11 +103,14 @@ public class PassFileServiceController {
     @ResponseBody
     public ResponseEntity<?> getFileById(@PathVariable("uuid") String uuid,
                                          @PathVariable("origFileName") String origFileName) {
-        String fileId = uuid  + "/" + origFileName;
         if (StringUtils.isEmpty(uuid) || StringUtils.isEmpty(origFileName)) {
             LOG.error("File ID not provided to get a file.");
             return ResponseEntity.badRequest().body("File ID not provided to get a file.");
         }
+        String cleansedUuid = StringUtils.normalizeSpace(uuid);
+        String cleansedOrigFileName = StringUtils.normalizeSpace(origFileName);
+        String fileId = cleansedUuid  + "/" + cleansedOrigFileName;
+
         ByteArrayResource fileResource;
         String contentType = "";
 
@@ -141,7 +144,9 @@ public class PassFileServiceController {
                                             @PathVariable("origFileName") String origFileName,
                                             Principal principal, HttpServletRequest request) {
         String principalName = principal.getName();
-        String fileId = uuid  + "/" + origFileName;
+        String cleansedUuid = StringUtils.normalizeSpace(uuid);
+        String cleansedOrigFileName = StringUtils.normalizeSpace(origFileName);
+        String fileId = cleansedUuid  + "/" + cleansedOrigFileName;
 
         //Get the file, check that it exists, and then check if current user has permissions to delete
         try {
