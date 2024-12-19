@@ -172,7 +172,7 @@ public class FileStorageService {
             }
             // the output path for getObject must not exist, hence temp dir is created on the fly
             ocflRepository.getObject(ObjectVersionId.head(fileId), tempLoadDir);
-            String loggingFieldId = StringUtils.replaceChars(fileId, "\n\r", " ");
+            String loggingFieldId = fileId.replaceAll("[\n\r]", " ");
             LOG.debug("File Service: File with ID {} was loaded from the repo", loggingFieldId);
             Path fileNamePath = Objects.requireNonNull(tempLoadDir.toFile().listFiles())[0].toPath();
             loadedResource = new ByteArrayResource(Files.readAllBytes(fileNamePath));
