@@ -13,7 +13,7 @@
                     "$ref": "global.json#/properties/authors"
                 }
             },
-            "required": ["authors"]
+            "required": ["authors", "publicationDate"]
         },
         "options": {
             "$ref": "global.json#/options"
