@@ -328,6 +328,11 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <outputDirectory>${project.reporting.outputDirectory}/jacoco-aggregate</outputDirectory>
+          <dataFile>${project.build.directory}/jacoco.exec</dataFile>
+          <append>true</append>
+        </configuration>
       </plugin>
 
     </plugins>
