@@ -38,6 +38,21 @@
             <artifactId>pass-core-object-service</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.pass</groupId>
+            <artifactId>pass-core-policy-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.pass</groupId>
+            <artifactId>pass-core-user-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.pass</groupId>
+            <artifactId>pass-core-usertoken</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
