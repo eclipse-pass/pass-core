@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>org.eclipse.pass</groupId>
         <artifactId>pass-core</artifactId>
@@ -8,6 +9,7 @@
     </parent>
 
     <artifactId>jacoco-aggregate-report</artifactId>
+    <packaging>pom</packaging>
 
     <properties>
         <maven.compiler.source>23</maven.compiler.source>
@@ -15,24 +17,35 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.eclipse.pass</groupId>
-                <artifactId>pass-core-doi-service</artifactId>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.pass</groupId>
-                <artifactId>pass-core-file-service</artifactId>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.pass</groupId>
+            <artifactId>pass-core-doi-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.pass</groupId>
+            <artifactId>pass-core-file-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.pass</groupId>
+            <artifactId>pass-core-metadataschema-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.pass</groupId>
+            <artifactId>pass-core-object-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>report-aggregate</id>
@@ -45,6 +58,4 @@
             </plugin>
         </plugins>
     </build>
-
-
 </project>
