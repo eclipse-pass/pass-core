@@ -82,6 +82,10 @@ public class FileStorageService {
 
     /**
      *  FileStorageService Class constructor.
+     *
+     * @param ocflRepository ocfl object that is a layer to handle the io of the files
+     * @param storageProperties properties indicating where and what type of storage is used for persistence.
+     * @param rootLoc path of the root location used to set up temp working directory for the File Service
      */
     public FileStorageService(OcflRepository ocflRepository,
                               StorageProperties storageProperties,
