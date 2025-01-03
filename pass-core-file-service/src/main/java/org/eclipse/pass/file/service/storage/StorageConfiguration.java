@@ -59,6 +59,11 @@ public class StorageConfiguration {
     @Value("${aws.region}")
     private String awsRegion;
 
+    /**
+     * Creates and configures an S3TransferManager for managing file transfers to Amazon S3.
+     *
+     * @return a configured S3TransferManager instance.
+     */
     @Bean
     @ConditionalOnProperty(name = "pass.file-service.storage-type", havingValue = "S3")
     public S3TransferManager s3TransferManager() {
@@ -72,6 +77,13 @@ public class StorageConfiguration {
             .build();
     }
 
+    /**
+     * Creates and configures an S3AsyncClient for interacting with Amazon S3 or an S3-compatible storage service.
+     *
+     * @param storageProperties the StorageProperties containing the configuration.
+     * @return a configured S3AsyncClient instance.
+     * @throws IOException if the S3 bucket name is not set in StorageProperties.
+     */
     @Bean
     @ConditionalOnProperty(name = "pass.file-service.storage-type", havingValue = "S3")
     public S3AsyncClient s3Client(StorageProperties storageProperties) throws IOException {
@@ -93,6 +105,17 @@ public class StorageConfiguration {
         return s3Client;
     }
 
+    /**
+     * Creates and configures an OcflRepository instance for use with Amazon S3 as the storage backend.
+     *
+     * @param s3Client           the S3AsyncClient for interacting with Amazon S3.
+     * @param s3TransferManager  the S3TransferManager to manage file transfers to S3.
+     * @param storageProperties  the StorageProperties containing the configuration.
+     * @param rootLoc            the root Path for the file service.
+     * @return a OcflRepository instance, using S3 as the storage layer.
+     * @throws IOException if the S3 bucket name is not set in the StorageProperties, or if there are
+     *                     issues creating or accessing the working directory.
+     */
     @Bean
     @ConditionalOnProperty(name = "pass.file-service.storage-type", havingValue = "S3")
     public OcflRepository ocflS3Repository(S3AsyncClient s3Client, S3TransferManager s3TransferManager,
@@ -121,6 +144,17 @@ public class StorageConfiguration {
         return ocflRepository;
     }
 
+    /**
+     * Creates and configures an {@link OcflRepository} instance when the file service storage type
+     * is set to "FILE_SYSTEM". This method ensures that the OCFL directory exists, is accessible,
+     * and is properly set up with the required permissions.
+     *
+     * @param storageProperties the StorageProperties object containing storage configurations.
+     * @param rootLoc the root Path where the OCFL directory will be created or accessed.
+     * @return a fully configured OcflRepository instance backed by a file system storage type.
+     * @throws IOException if the OCFL directory cannot be created, or if there are insufficient
+     *                     read/write permissions.
+     */
     @Bean
     @ConditionalOnProperty(name = "pass.file-service.storage-type", havingValue = "FILE_SYSTEM")
     public OcflRepository ocflFileRepository(StorageProperties storageProperties,
@@ -142,6 +176,13 @@ public class StorageConfiguration {
         return ocflRepository;
     }
 
+    /**
+     * Configures and provides the root Path for the file service storage.
+     *
+     * @param storageProperties the StorageProperties object containing storage configuration details.
+     * @return the root Path for the storage system.
+     * @throws IOException if an error occurs while creating the temporary directory.
+     */
     @Bean
     @Qualifier("rootPath")
     public Path rootPath(StorageProperties storageProperties) throws IOException {
