@@ -6,8 +6,14 @@ COPY target/pass-core-main-*-exec.jar pass-core-main.jar
 COPY entrypoint.sh .
 
 RUN apt update \
-    && apt install -y curl \
+    && apt --no-install-recommends install -y curl \
     && chmod +x entrypoint.sh \
     && rm -rf /var/lib/apt/lists/*
+
+RUN groupadd -g 1432 passcoregroup && \
+    useradd -m -u 1432 -g passcoregroup passcoreuser && \
+    chown passcoreuser /app
+
+USER passcoreuser
 
 ENTRYPOINT ["./entrypoint.sh"]
