@@ -11,7 +11,7 @@ RUN apt update \
     && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd -g 1432 passcoregroup && \
-    useradd -m -u 1432 -g passcoregroup passcoreuser && \
+    useradd -m -u 1532 -g passcoregroup passcoreuser && \
     chown passcoreuser /app
 
 USER passcoreuser
