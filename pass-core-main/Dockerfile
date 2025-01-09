@@ -12,7 +12,7 @@ RUN apt update \
 
 RUN groupadd -g 1432 passcoregroup && \
     useradd -m -u 1532 -g passcoregroup passcoreuser && \
-    chown passcoreuser /app
+    chown -R passcoreuser:passcoregroup /app
 
 USER passcoreuser
 
