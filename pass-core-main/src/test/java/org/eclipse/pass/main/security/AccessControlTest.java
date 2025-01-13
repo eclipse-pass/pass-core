@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
@@ -799,14 +800,21 @@ public class AccessControlTest extends SamlIntegrationTest {
         {
             String url = getBaseUrl() + "logout";
 
-            Request request = new Request.Builder().url(url).get().build();
+            RequestBody body = RequestBody.create("{}", JSON_API_MEDIA_TYPE);
+            Request request = new Request.Builder().url(url)
+                .header("Accept", JSON_API_CONTENT_TYPE)
+                .header("Content-Type", JSON_API_CONTENT_TYPE)
+                .header("X-XSRF-TOKEN", getCsrfToken())
+                .post(body).build();
             Response response = client.newCall(request).execute();
 
-            assertEquals(204, response.code());
+            assertEquals(200, response.code());
+            assertEquals("http://localhost:8080/login", response.request().url().toString());
+            assertTrue(response.priorResponse().isRedirect());
         }
 
         // Session cookie deleted
-        assertEquals(null, get_cookie("JSESSIONID"));
+        assertNull(get_cookie("JSESSIONID"));
 
         {
             String url = getBaseUrl() + "app/";
