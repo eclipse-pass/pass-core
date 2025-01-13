@@ -85,10 +85,8 @@ public class SecurityConfiguration {
         // Enable CSRF protection using a cookie to send the token. See
         // https://docs.spring.io/spring-security/reference/servlet/exploits/csrf.html#csrf-integration-javascript-spa
         // Make sure the cookie value can be parsed when returned in a header
-        // Do not protect /logout so it can be triggered with GET
         // Ensure that GET requests to the doi service are protected since they have side effects
         http.csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .ignoringRequestMatchers("/logout")
                 .requireCsrfProtectionMatcher(new OrRequestMatcher(CsrfFilter.DEFAULT_CSRF_MATCHER,
                         new AntPathRequestMatcher("/doi/**")))
                 .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler()));
@@ -124,8 +122,6 @@ public class SecurityConfiguration {
 
         http.saml2Metadata(Customizer.withDefaults());
 
-        http.saml2Logout(Customizer.withDefaults());
-
         // Delete specified cookies on logout.
         // Each cookie is specified as a name and path separated by whitespace.
         Cookie[] cookies = logoutDeleteCookies.stream().map(s -> {
@@ -137,10 +133,9 @@ public class SecurityConfiguration {
             return c;
         }).toArray(Cookie[]::new);
 
-        // Allow GET on /logout
         CookieClearingLogoutHandler logoutHandler = new CookieClearingLogoutHandler(cookies);
-        http.logout(l -> l.logoutSuccessUrl(logoutSuccessUrl).
-                logoutRequestMatcher(new AntPathRequestMatcher("/logout")).addLogoutHandler(logoutHandler));
+        http.logout(l -> l.logoutSuccessUrl(logoutSuccessUrl)
+                .addLogoutHandler(logoutHandler));
 
         // Map SAML user to PASS user
         http.addFilterAfter(passAuthFilter, Saml2WebSsoAuthenticationFilter.class);
