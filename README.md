@@ -1,4 +1,4 @@
-# PASS Core ![Pass Core](https://github.com/eclipse-pass/pass-core/actions/workflows/snapshot.yml/badge.svg)
+# PASS Core ![Pass Core](https://github.com/eclipse-pass/pass-core/actions/workflows/snapshot.yml/badge.svg) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=eclipse-pass_pass-core&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=eclipse-pass_pass-core)
 
 PASS Core is the central backend service within the PASS application that manages the core data model. It provides an 
 Elide JSON:API based interface to handle essential entities, including submissions, users, repositories, and policies. 
