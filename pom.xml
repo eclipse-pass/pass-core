@@ -81,15 +81,14 @@
     <amazon.pom.version>2.29.3</amazon.pom.version>
     <elide.version>7.1.2</elide.version>
     <amazon.sqs.version>2.1.3</amazon.sqs.version>
-
     <ocfl.java.core.version>2.2.1</ocfl.java.core.version>
     <ocfl.java.aws.version>2.2.1</ocfl.java.aws.version>
-
     <jakarta.json.version>2.0.1</jakarta.json.version>
     <okhttp.version>4.12.0</okhttp.version>
-
     <jsoup.version>1.18.1</jsoup.version>
     <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
+    <bouncycastle.version>1.77</bouncycastle.version>
+    <asm.version>9.7</asm.version>
   </properties>
 
   <repositories>
@@ -147,12 +146,12 @@
       <dependency>
         <groupId>org.bouncycastle</groupId>
         <artifactId>bcprov-jdk18on</artifactId>
-        <version>1.77</version>
+        <version>${bouncycastle.version}</version>
       </dependency>
       <dependency>
         <groupId>org.bouncycastle</groupId>
         <artifactId>bcpkix-jdk18on</artifactId>
-        <version>1.77</version>
+        <version>${bouncycastle.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
@@ -177,27 +176,27 @@
       <dependency>
         <groupId>org.ow2.asm</groupId>
         <artifactId>asm</artifactId>
-        <version>9.7</version>
+        <version>${asm.version}</version>
       </dependency>
       <dependency>
         <groupId>org.ow2.asm</groupId>
         <artifactId>asm-commons</artifactId>
-        <version>9.7</version>
+        <version>${asm.version}</version>
       </dependency>
       <dependency>
         <groupId>org.ow2.asm</groupId>
         <artifactId>asm-tree</artifactId>
-        <version>9.7</version>
+        <version>${asm.version}</version>
       </dependency>
       <dependency>
         <groupId>org.ow2.asm</groupId>
         <artifactId>asm-analysis</artifactId>
-        <version>9.7</version>
+        <version>${asm.version}</version>
       </dependency>
       <dependency>
         <groupId>org.ow2.asm</groupId>
         <artifactId>asm-util</artifactId>
-        <version>9.7</version>
+        <version>${asm.version}</version>
       </dependency>
       <dependency>
         <groupId>commons-io</groupId>
