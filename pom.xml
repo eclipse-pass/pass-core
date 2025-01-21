@@ -88,7 +88,6 @@
     <jakarta.json.version>2.0.1</jakarta.json.version>
     <okhttp.version>4.12.0</okhttp.version>
 
-    <apache.commons.io.version>2.17.0</apache.commons.io.version>
     <jsoup.version>1.18.1</jsoup.version>
     <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
   </properties>
@@ -142,6 +141,90 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+
+      <!-- The following are transitive deps with convergence issues. -->
+      <!-- These should all be checked whenever deps are upgraded. -->
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcprov-jdk18on</artifactId>
+        <version>1.77</version>
+      </dependency>
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcpkix-jdk18on</artifactId>
+        <version>1.77</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>4.5.14</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-compress</artifactId>
+        <version>1.26.2</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-text</artifactId>
+        <version>1.11.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.antlr</groupId>
+        <artifactId>antlr4-runtime</artifactId>
+        <version>4.13.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.ow2.asm</groupId>
+        <artifactId>asm</artifactId>
+        <version>9.7</version>
+      </dependency>
+      <dependency>
+        <groupId>org.ow2.asm</groupId>
+        <artifactId>asm-commons</artifactId>
+        <version>9.7</version>
+      </dependency>
+      <dependency>
+        <groupId>org.ow2.asm</groupId>
+        <artifactId>asm-tree</artifactId>
+        <version>9.7</version>
+      </dependency>
+      <dependency>
+        <groupId>org.ow2.asm</groupId>
+        <artifactId>asm-analysis</artifactId>
+        <version>9.7</version>
+      </dependency>
+      <dependency>
+        <groupId>org.ow2.asm</groupId>
+        <artifactId>asm-util</artifactId>
+        <version>9.7</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>2.17.0</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>33.2.1-jre</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.errorprone</groupId>
+        <artifactId>error_prone_annotations</artifactId>
+        <version>2.26.1</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.protobuf</groupId>
+        <artifactId>protobuf-java</artifactId>
+        <version>4.27.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.checkerframework</groupId>
+        <artifactId>checker-qual</artifactId>
+        <version>3.42.0</version>
+      </dependency>
+      <!-- End of transitive deps with convergence issues. -->
     </dependencies>
   </dependencyManagement>
 
@@ -191,34 +274,7 @@
             </goals>
             <configuration>
               <rules>
-                <dependencyConvergence>
-                  <excludes>
-                    <!-- Transitive deps from elide-spring-boot-starter-->
-                    <exclude>org.checkerframework:checker-qual:</exclude>
-                    <exclude>com.google.code.findbugs:jsr305:</exclude>
-                    <exclude>com.google.protobuf:protobuf-java:</exclude>
-                    <exclude>com.google.guava:guava:</exclude>
-                    <exclude>com.google.errorprone:error_prone_annotations:</exclude>
-                    <exclude>commons-io:commons-io:</exclude>
-                    <exclude>org.ow2.asm:asm:</exclude>
-                    <exclude>org.ow2.asm:asm-commons:</exclude>
-                    <exclude>org.antlr:antlr4-runtime:</exclude>
-                    <!-- Transitive deps from liquibase-->
-                    <exclude>org.apache.commons:commons-text:</exclude>
-                    <!-- Transitive deps from okhttp-->
-                    <exclude>org.jetbrains.kotlin:kotlin-stdlib*:</exclude>
-                    <!-- Transitive deps from ocfl-->
-                    <exclude>software.amazon.awssdk::</exclude>
-                    <!-- Transitive deps from spring-boot-starter-->
-                    <exclude>jakarta.jms:jakarta.jms-api:</exclude>
-                    <exclude>org.springframework.security:spring-security-crypto:</exclude>
-                    <!-- Transitive deps from org.opensaml:opensaml-security-api -->
-                    <exclude>org.bouncycastle:bcprov-jdk18on:</exclude>
-                    <exclude>org.bouncycastle:bcpkix-jdk18on:</exclude>
-                    <!-- Transitive deps from software.amazon.awssdk:apache-client and org.opensaml:opensaml-saml-impl -->
-                    <exclude>org.apache.httpcomponents:httpclient:</exclude>               
-                  </excludes>
-                </dependencyConvergence>
+                <dependencyConvergence/>
               </rules>
             </configuration>
           </execution>
