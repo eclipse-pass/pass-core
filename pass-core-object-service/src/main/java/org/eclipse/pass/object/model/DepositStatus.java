@@ -37,9 +37,13 @@ public enum DepositStatus {
      */
     REJECTED("rejected"),
     /**
-     * A failure occurred performing the deposit; it may be re-tried later.
+     * A failure occurred performing the deposit; it will not be retried.
      */
-    FAILED("failed");
+    FAILED("failed"),
+    /**
+     * A failure occurred performing the deposit that qualifies for retry.
+     */
+    RETRY("retry");
 
     private static final Map<String, DepositStatus> map = new HashMap<>(values().length, 1);
 

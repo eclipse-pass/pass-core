@@ -314,6 +314,7 @@
                 <!-- These come from spring boot starter test -->
                 <ignoredUsedUndeclaredDependency>org.mockito::</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>org.junit.jupiter:junit-jupiter-api:</ignoredUsedUndeclaredDependency>
+                <ignoredUsedUndeclaredDependency>org.junit.jupiter:junit-jupiter-params:</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>org.assertj:assertj-core:</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>com.vaadin.external.google:android-json:</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>jakarta.persistence:jakarta.persistence-api::</ignoredUsedUndeclaredDependency>
