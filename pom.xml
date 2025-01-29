@@ -64,7 +64,7 @@
     <module>pass-core-policy-service</module>
     <module>pass-core-usertoken</module>
     <module>pass-core-test-config</module>
-    <module>jacoco-aggregate-report</module>
+    <module>jacoco-aggregate-report-pass-core</module>
   </modules>
 
   <scm>
