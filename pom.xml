@@ -89,6 +89,11 @@
     <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
     <bouncycastle.version>1.78</bouncycastle.version>
     <asm.version>9.7</asm.version>
+    <sonar-maven-plugin.version>5.0.0.4389</sonar-maven-plugin.version>
+    <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+    <sonar.organization>eclipse-pass</sonar.organization>
+    <sonar.projectKey>eclipse-pass_pass-core</sonar.projectKey>
+    <sonar.coverage.jacoco.xmlReportPaths>${project.reporting.outputDirectory}/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
   </properties>
 
   <repositories>
@@ -398,6 +403,12 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.sonarsource.scanner.maven</groupId>
+        <artifactId>sonar-maven-plugin</artifactId>
+        <version>${sonar-maven-plugin.version}</version>
       </plugin>
 
     </plugins>
