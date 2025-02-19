@@ -76,13 +76,13 @@
 
   <properties>
     <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
-    <spring-boot-maven-plugin.version>3.3.5</spring-boot-maven-plugin.version>
+    <spring-boot-maven-plugin.version>3.4.2</spring-boot-maven-plugin.version>
     <awsspring.version>3.2.1</awsspring.version>
     <amazon.pom.version>2.29.3</amazon.pom.version>
-    <elide.version>7.1.2</elide.version>
+    <elide.version>7.1.4</elide.version>
     <amazon.sqs.version>2.1.3</amazon.sqs.version>
-    <ocfl.java.core.version>2.2.1</ocfl.java.core.version>
-    <ocfl.java.aws.version>2.2.1</ocfl.java.aws.version>
+    <ocfl.java.core.version>2.2.2</ocfl.java.core.version>
+    <ocfl.java.aws.version>2.2.2</ocfl.java.aws.version>
     <jakarta.json.version>2.0.1</jakarta.json.version>
     <okhttp.version>4.12.0</okhttp.version>
     <jsoup.version>1.18.1</jsoup.version>
@@ -224,6 +224,26 @@
         <version>3.42.0</version>
       </dependency>
       <!-- End of transitive deps with convergence issues. -->
+
+      <!-- The following deps were declared to resolve CVEs from transitive deps. -->
+      <!-- These should all be checked whenever deps are upgraded. Should be removed if possible once parent -->
+      <!-- dep updates with fixed version. -->
+      <dependency>
+        <groupId>net.minidev</groupId>
+        <artifactId>json-smart</artifactId>
+        <version>2.5.2</version>
+      </dependency>
+      <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-handler</artifactId>
+        <version>4.1.118.Final</version>
+      </dependency>
+      <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-common</artifactId>
+        <version>4.1.118.Final</version>
+      </dependency>
+      <!-- End of transitive deps with CVE issues. -->
     </dependencies>
   </dependencyManagement>
 
