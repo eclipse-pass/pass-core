@@ -18,5 +18,9 @@ jobs:
           fetch-depth: 0
       - name: SonarQubeScan
         uses: SonarSource/sonarqube-scan-action@v4
+        with:
+          args: >
+            -Dsonar.projectKey=eclipse-pass_pass-core
+            -Dsonar.organization=eclipse-pass
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
