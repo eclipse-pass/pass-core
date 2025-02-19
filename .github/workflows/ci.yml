@@ -11,12 +11,14 @@ jobs:
     name: SonarQube
     runs-on: ubuntu-latest
     steps:
-      - name: Print description
-        run: |
-          echo "Running SonarQube Scanner"
-      - uses: actions/checkout@v3
+      - name: Checkout the repository
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: java-build
       - name: SonarQubeScan
         uses: SonarSource/sonarqube-scan-action@v4
         with:
