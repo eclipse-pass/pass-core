@@ -140,7 +140,7 @@ public class PassDoiServiceController {
                 try (OutputStream out = response.getOutputStream()) {
                     JsonObject jsonObject = Json.createObjectBuilder()
                                                 .add("journal-id", journalId)
-                                                .add("crossref", xrefJsonObject)
+                                                .add("crossref", externalService.processObject(xrefJsonObject))
                                                 .build();
 
                     out.write(jsonObject.toString().getBytes());
