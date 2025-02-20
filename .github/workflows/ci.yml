@@ -48,6 +48,7 @@ jobs:
           args: >
             -Dsonar.projectKey=eclipse-pass_pass-core
             -Dsonar.organization=eclipse-pass
+            -Dsonar.java.binaries=target/classes
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
