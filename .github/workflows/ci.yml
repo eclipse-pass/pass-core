@@ -1,25 +1,16 @@
 name: Continuous Integration
-on: [pull_request, workflow_dispatch]
+on:
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      project-key:
+        description: 'The project key that is set in SonarQube for each repository'
+        default: 'eclipse-pass_pass-core'
+        required: true
+        type: string
 
 jobs:
   test:
     name: "Run Unit & Integration Tests"
-    uses: eclipse-pass/main/.github/workflows/ci.yml@main
-
-  sonarscanner:
-    name: SonarQube
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: SonarQubeScan
-        uses: SonarSource/sonarqube-scan-action@v4
-        with:
-          args: >
-            -Dsonar.projectKey=eclipse-pass_pass-core
-            -Dsonar.organization=eclipse-pass
-            -Dsonar.java.binaries='**/target/classes'
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    uses: eclipse-pass/main/.github/workflows/ci.yml@1089-test-ci-yml-NO-MERGE-DELETE-AFTER-TESTING
