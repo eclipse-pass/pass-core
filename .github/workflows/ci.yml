@@ -1,59 +1,10 @@
-name: main Continuous Integration
-
-on:
-  pull_request:
-  workflow_dispatch:
-    inputs:
-      run_acceptance_tests:
-        description: Should acceptance tests be run?
-        type: boolean
-        default: true
-  workflow_call:
-    inputs:
-      run_acceptance_tests:
-        description: Should acceptance tests be run?
-        type: boolean
-        default: true
-
-concurrency:
-  group: ci-${{ github.head_ref || github.ref }}
-  cancel-in-progress: true
+name: Continuous Integration
+on: [pull_request, workflow_dispatch]
 
 jobs:
   test:
-    name: Run Unit & Integration Tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Print description
-        run: |
-          echo "This is a CI build of branch ${{ github.ref }} in repository ${{ github.repository }}"
-          echo "This job was triggered by a ${{ github.event_name }} event and is running on a ${{ runner.os }} server"
-
-      - name: Checkout the repository
-        uses: actions/checkout@v3
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: 17
-          distribution: 'temurin'
-          cache: 'maven'
-
-      - name: Run Tests
-        run: mvn -U -B -V -ntp verify
-
-      - name: SonarQubeScan
-        uses: SonarSource/sonarqube-scan-action@v4
-        with:
-          args: >
-            -Dsonar.projectKey=eclipse-pass_pass-core
-            -Dsonar.organization=eclipse-pass
-            -Dsonar.java.binaries='**/target/classes'
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-      - name: Acceptance tests
-        if: ${{ inputs.run_acceptance_tests }}
-        uses: eclipse-pass/main/.github/actions/acceptance-test@main
-        with:
-          pullimages: missing
+    name: "Run Unit & Integration Tests"
+    uses: eclipse-pass/main/.github/workflows/ci.yml@1089-test-ci-yml-NO-MERGE-DELETE-AFTER-TESTING
+    with:
+      project-key: 'eclipse-pass_pass-core'
+    secrets: inherit
