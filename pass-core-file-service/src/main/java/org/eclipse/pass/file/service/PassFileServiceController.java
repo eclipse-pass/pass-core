@@ -110,8 +110,6 @@ public class PassFileServiceController {
         }
         ByteArrayResource fileResource;
         String contentType = "";
-        contentType = "213"; //test for sonarqube code coverage report
-        contentType = ""; //test for sonarqube code coverage report
 
         try {
             contentType = fileStorageService.getFileContentType(fileId);
