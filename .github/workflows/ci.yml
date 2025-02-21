@@ -1,16 +1,10 @@
 name: Continuous Integration
-on:
-  pull_request:
-  workflow_dispatch:
-  workflow_call:
-    inputs:
-      project-key:
-        description: 'The project key that is set in SonarQube for each repository'
-        default: 'eclipse-pass_pass-core'
-        required: true
-        type: string
+on: [pull_request, workflow_dispatch]
 
 jobs:
   test:
     name: "Run Unit & Integration Tests"
     uses: eclipse-pass/main/.github/workflows/ci.yml@1089-test-ci-yml-NO-MERGE-DELETE-AFTER-TESTING
+    with:
+      project-key: 'eclipse-pass_pass-core'
+    secrets: inherit
