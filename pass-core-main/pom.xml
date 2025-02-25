@@ -10,7 +10,6 @@
   <artifactId>pass-core-main</artifactId>
 
   <properties>
-    <sonar.coverage.jacoco.xmlReportPaths>${project.reporting.outputDirectory}/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
   </properties>
 
   <repositories>

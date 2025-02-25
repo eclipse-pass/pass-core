@@ -10,7 +10,6 @@
   <artifactId>pass-core-object-service</artifactId>
 
   <properties>
-    <sonar.coverage.jacoco.xmlReportPaths>${project.reporting.outputDirectory}/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
   </properties>
 
   <dependencies>
