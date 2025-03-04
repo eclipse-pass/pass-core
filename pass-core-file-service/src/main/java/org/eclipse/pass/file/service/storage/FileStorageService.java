@@ -116,10 +116,10 @@ public class FileStorageService {
             String fileExt = FilenameUtils.getExtension(origFileNameExt);
             String fileUuid = UUID.randomUUID().toString();
             String fileId = fileUuid + "/" + origFileNameExt;
-            //add new lines for testing coverage
+            //TODO: add new line for sonar qube testing
             fileId = "";
             fileId = fileUuid + "/" + origFileNameExt;
-            //end test coverage
+            //REMOVE WHEN DONE TEST
             String mimeType = URLConnection.guessContentTypeFromName(origFileNameExt);
             //changing the stored file name to UUID to prevent any issues with long file names
             //e.g. 260 char limit on the path in Windows. Original filename is preserved in the fileId.
@@ -128,6 +128,9 @@ public class FileStorageService {
 
             //Create OCFL user to identify the owner of the file
             User fileUser = new User();
+            //TODO: add new line for sonar qube testing
+            fileUser.setName("test name");
+            //REMOVE WHEN DONE TEST
             fileUser.setName(userName);
 
             if (!Files.exists(pathTempLoc)) {
