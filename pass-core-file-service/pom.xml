@@ -10,6 +10,10 @@
 
     <artifactId>pass-core-file-service</artifactId>
 
+    <properties>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.reporting.outputDirectory}/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
