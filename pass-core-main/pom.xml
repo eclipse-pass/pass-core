@@ -9,9 +9,6 @@
 
   <artifactId>pass-core-main</artifactId>
 
-  <properties>
-  </properties>
-
   <repositories>
     <repository>
       <id>shibboleth-releases</id>

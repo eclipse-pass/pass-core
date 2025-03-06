@@ -9,9 +9,6 @@
 
   <artifactId>pass-core-object-service</artifactId>
 
-  <properties>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>com.yahoo.elide</groupId>
