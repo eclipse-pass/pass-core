@@ -5,6 +5,4 @@ jobs:
   test:
     name: "Run Unit & Integration Tests"
     uses: eclipse-pass/main/.github/workflows/ci.yml@1089-test-ci-yml-NO-MERGE-DELETE-AFTER-TESTING
-    with:
-      project-key: 'eclipse-pass_pass-core'
     secrets: inherit
