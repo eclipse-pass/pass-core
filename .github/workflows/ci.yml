@@ -5,3 +5,4 @@ jobs:
   test:
     name: "Run Unit & Integration Tests"
     uses: eclipse-pass/main/.github/workflows/ci.yml@main
+    secrets: inherit
