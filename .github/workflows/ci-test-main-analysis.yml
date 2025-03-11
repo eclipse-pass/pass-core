@@ -1,9 +1,8 @@
-name: main Continuous Integration
+name: Test SQ - Run Analysis on Main branch
 
 on:
   pull_request:
   workflow_dispatch:
-  workflow_call:
 
 concurrency:
   group: ci-${{ github.head_ref || github.ref }}
