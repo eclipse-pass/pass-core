@@ -143,10 +143,30 @@ public class PassClientSelector<T extends PassEntity> {
     }
 
     public boolean isFilterEqualToOk(String filter) {
-        return filter.equals("OK");
+        String a = "a";
+        String b = a + "b";
+        String c = b + "c";
+        String d = c + "d";
+        String e = d + "e";
+        String f = e + "f";
+        String g = f + "g";
+        String h = g + "h";
+        String i = h + "i";
+        String j = i + "j";
+        return filter.equals(j + "OK");
     }
 
     public boolean isFilterEqualToAlright(String filter) {
-        return filter.equals("OK");
+        String a = "a";
+        String b = a + "b";
+        String c = b + "c";
+        String d = c + "d";
+        String e = d + "e";
+        String f = e + "f";
+        String g = f + "g";
+        String h = g + "h";
+        String i = h + "i";
+        String j = i + "j";
+        return filter.equals(j + "OK");
     }
 }

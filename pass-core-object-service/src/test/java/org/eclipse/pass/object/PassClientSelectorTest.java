@@ -10,7 +10,7 @@ class PassClientSelectorTest {
     @Test
     void testFiltersOk() {
         PassClientSelector<User> passClientSelector = new PassClientSelector<>(User.class);
-        assertTrue(passClientSelector.isFilterEqualToOk("OK"));
-        assertTrue(passClientSelector.isFilterEqualToAlright("OK"));
+        assertTrue(passClientSelector.isFilterEqualToOk("abcdefghijOK"));
+        assertTrue(passClientSelector.isFilterEqualToAlright("abcdefghijOK"));
     }
 }
