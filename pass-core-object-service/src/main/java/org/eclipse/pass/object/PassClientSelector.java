@@ -137,4 +137,12 @@ public class PassClientSelector<T extends PassEntity> {
     public void setFilter(String filter) {
         this.filter = filter;
     }
+
+    public boolean isFilterOk(String filter) {
+        return filter == "OK";
+    }
+
+    public boolean isFilterEqualToOk(String filter) {
+        return filter == "OK";
+    }
 }
