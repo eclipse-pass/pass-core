@@ -143,6 +143,10 @@ public class PassClientSelector<T extends PassEntity> {
     }
 
     public boolean isFilterEqualToOk(String filter) {
-        return filter == "OK";
+        return filter.equals("OK");
+    }
+
+    public boolean isFilterEqualToAlright(String filter) {
+        return filter.equals("OK");
     }
 }
