@@ -86,7 +86,7 @@ public class StorageConfiguration {
      */
     @Bean
     @ConditionalOnProperty(name = "pass.file-service.storage-type", havingValue = "S3")
-    public S3AsyncClient s3Client(StorageProperties storageProperties) throws IOException {
+    public S3AsyncClient s3AsyncClient(StorageProperties storageProperties) throws IOException {
         String bucketName = storageProperties.getBucketName().
             orElseThrow(() -> new IOException("File Service: S3 bucket name is not set"));
 
@@ -108,7 +108,7 @@ public class StorageConfiguration {
     /**
      * Creates and configures an OcflRepository instance for use with Amazon S3 as the storage backend.
      *
-     * @param s3Client           the S3AsyncClient for interacting with Amazon S3.
+     * @param s3AsyncClient      the S3AsyncClient for interacting with Amazon S3.
      * @param s3TransferManager  the S3TransferManager to manage file transfers to S3.
      * @param storageProperties  the StorageProperties containing the configuration.
      * @param rootLoc            the root Path for the file service.
@@ -118,7 +118,7 @@ public class StorageConfiguration {
      */
     @Bean
     @ConditionalOnProperty(name = "pass.file-service.storage-type", havingValue = "S3")
-    public OcflRepository ocflS3Repository(S3AsyncClient s3Client, S3TransferManager s3TransferManager,
+    public OcflRepository ocflS3Repository(S3AsyncClient s3AsyncClient, S3TransferManager s3TransferManager,
                                            StorageProperties storageProperties,
                                            @Qualifier("rootPath") Path rootLoc) throws IOException {
         String bucketName = storageProperties.getBucketName().
@@ -126,7 +126,7 @@ public class StorageConfiguration {
         String repoPrefix = storageProperties.getS3RepoPrefix().orElse(null);
 
         OcflS3Client.Builder builder = OcflS3Client.builder()
-            .s3Client(s3Client)
+            .s3Client(s3AsyncClient)
             .transferManager(s3TransferManager)
             .bucket(bucketName);
         OcflS3Client ocflS3Client = StringUtils.isNotBlank(repoPrefix)
