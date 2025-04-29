@@ -58,12 +58,6 @@
 
     <dependency>
       <groupId>org.eclipse.pass</groupId>
-      <artifactId>pass-core-metadataschema-service</artifactId>
-      <version>${project.parent.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.eclipse.pass</groupId>
       <artifactId>pass-core-usertoken</artifactId>
       <version>${project.parent.version}</version>
     </dependency>
