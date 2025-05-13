@@ -60,7 +60,6 @@
     <module>pass-core-file-service</module>
     <module>pass-core-user-service</module>
     <module>pass-core-main</module>
-    <module>pass-core-metadataschema-service</module>
     <module>pass-core-policy-service</module>
     <module>pass-core-usertoken</module>
     <module>pass-core-test-config</module>
