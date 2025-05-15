@@ -369,7 +369,6 @@
                 <ignoredUnusedDeclaredDependency>org.eclipse.pass:pass-core-doi-service:</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>org.eclipse.pass:pass-core-user-service:</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>org.eclipse.pass:pass-core-policy-service:</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>org.eclipse.pass:pass-core-metadataschema-service:</ignoredUnusedDeclaredDependency>
                 <!-- These come from spring boot activemq artemis starter -->
                 <ignoredUnusedDeclaredDependency>org.apache.activemq:artemis-jakarta-server:</ignoredUnusedDeclaredDependency>
                 <!-- Used by ITs via classpath -->
