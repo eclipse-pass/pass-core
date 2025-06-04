@@ -46,8 +46,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class DoiServiceTest extends SimpleIntegrationTest {
-    private static final String credentials = Credentials.basic(BACKEND_USER, BACKEND_PASSWORD);
+class DoiServiceTest extends SimpleIntegrationTest {
+    private static final String CREDENTIALS = Credentials.basic(BACKEND_USER, BACKEND_PASSWORD);
 
     @Autowired
     protected RefreshableElide refreshableElide;
@@ -89,11 +89,11 @@ public class DoiServiceTest extends SimpleIntegrationTest {
      * @throws Exception if something goes wrong
      */
     @Test
-    public void invalidDoiTest() throws Exception {
+    void invalidDoiTest() throws Exception {
         HttpUrl url = formDoiUrl("moo");
 
         Request okHttpRequest = new Request.Builder()
-            .url(url).header("Authorization", credentials)
+            .url(url).header("Authorization", CREDENTIALS)
             .header("X-XSRF-TOKEN", getCsrfToken(httpClient))
             .build();
         Call call = httpClient.newCall(okHttpRequest);
@@ -113,11 +113,11 @@ public class DoiServiceTest extends SimpleIntegrationTest {
      * @throws Exception if something goes wrong
      */
     @Test
-    public void nullDoiTest() throws Exception {
+    void nullDoiTest() throws Exception {
         HttpUrl url = formDoiUrl(null);
 
         Request okHttpRequest = new Request.Builder()
-            .url(url).header("Authorization", credentials)
+            .url(url).header("Authorization", CREDENTIALS)
             .header("X-XSRF-TOKEN", getCsrfToken(httpClient))
             .build();
         Call call = httpClient.newCall(okHttpRequest);
@@ -137,12 +137,12 @@ public class DoiServiceTest extends SimpleIntegrationTest {
      * @throws Exception if something goes wrong
      */
     @Test
-    public void noSuchDoiTest() throws Exception {
+    void noSuchDoiTest() throws Exception {
 
         HttpUrl url = formDoiUrl( "10.1212/abc.DEF");
 
         Request okHttpRequest = new Request.Builder()
-            .url(url).header("Authorization", credentials)
+            .url(url).header("Authorization", CREDENTIALS)
             .header("X-XSRF-TOKEN", getCsrfToken(httpClient))
             .build();
         Call call = httpClient.newCall(okHttpRequest);
@@ -164,13 +164,13 @@ public class DoiServiceTest extends SimpleIntegrationTest {
      * @throws Exception if something goes wrong
      */
     @Test
-    public void bookDoiFailTest() throws Exception {
+    void bookDoiFailTest() throws Exception {
         // books have isbn, not issn - this should cause a failure
 
         HttpUrl url = formDoiUrl("10.1002/0470841559.ch1");
 
         Request okHttpRequest = new Request.Builder()
-            .url(url).header("Authorization", credentials)
+            .url(url).header("Authorization", CREDENTIALS)
             .header("X-XSRF-TOKEN", getCsrfToken(httpClient))
             .build();
         Call call = httpClient.newCall(okHttpRequest);
@@ -184,14 +184,14 @@ public class DoiServiceTest extends SimpleIntegrationTest {
     }
 
     @Test
-    public void testCreateJournal() {
+    void testCreateJournal() {
         String name = "Clinical Medicine Insights: Cardiology";
         HttpUrl url = formDoiUrl("10.4137/cmc.s38446" );
         String id = "";
 
         try (PassClient passClient = getNewClient()) {
             Request okHttpRequest = new Request.Builder()
-                .url(url).header("Authorization", credentials)
+                .url(url).header("Authorization", CREDENTIALS)
                 .header("X-XSRF-TOKEN", getCsrfToken(httpClient))
                 .build();
 
@@ -239,7 +239,7 @@ public class DoiServiceTest extends SimpleIntegrationTest {
     }
 
     @Test
-    public void testUpdateJournal() throws Exception {
+    void testUpdateJournal() throws Exception {
         final String expectedJournalName = "Publications of the Astronomical Society of the Pacific";
         final HttpUrl doiUrl = formDoiUrl("10.1086/655938" );
         Journal newJournal = new Journal();
@@ -265,7 +265,7 @@ public class DoiServiceTest extends SimpleIntegrationTest {
     }
 
     @Test
-    public void testNoUpdateJournalNlmtaNotNull() throws Exception {
+    void testNoUpdateJournalNlmtaNotNull() throws Exception {
         final String expectedJournalName = "Publications of the Astronomical Society of the Pacific";
         final HttpUrl doiUrl = formDoiUrl("10.1086/655938" );
         Journal newJournal = new Journal();
@@ -295,7 +295,7 @@ public class DoiServiceTest extends SimpleIntegrationTest {
     }
 
     @Test
-    public void testNoUpdateJournalPmcPartNotNull() throws Exception {
+    void testNoUpdateJournalPmcPartNotNull() throws Exception {
         final String expectedJournalName = "Publications of the Astronomical Society of the Pacific";
         final HttpUrl doiUrl = formDoiUrl("10.1086/655938" );
         Journal newJournal = new Journal();
@@ -329,7 +329,7 @@ public class DoiServiceTest extends SimpleIntegrationTest {
             passClient.createObject(newJournal);
 
             Request okHttpRequest = new Request.Builder()
-                .url(doiUrl).header("Authorization", credentials)
+                .url(doiUrl).header("Authorization", CREDENTIALS)
                 .header("X-XSRF-TOKEN", getCsrfToken(httpClient))
                 .build();
 
