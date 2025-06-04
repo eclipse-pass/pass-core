@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -189,21 +190,37 @@ public class ElideConnector {
                 // do not have enough to create a new journal
                 LOG.warn("Not enough info for journal " + name);
             }
-        } else { //we have a journal, let's see if we can add anything new
-            // just issns atm. we add only if not present
-
-            //check to see if we can supply issns
-            if (!passJournal.getIssns().containsAll(journal.getIssns())) {
-                List<String> newIssnList = Stream.concat(passJournal.getIssns().stream(),
-                                                         journal.getIssns().stream()).distinct()
-                                                 .collect(Collectors.toList());
-                passJournal.setIssns(newIssnList);
-                passClient.updateObject(passJournal);
-
-            }
+        } else {
+            updateJournalIfNeeded(passJournal, journal, passClient);
         }
 
         return passJournal;
+    }
+
+    private void updateJournalIfNeeded(Journal passJournal, Journal journal, PassClient passClient) throws IOException {
+        if (isUpdatedByJournalLoader(passJournal)) {
+            return;
+        }
+        boolean needsUpdate = false;
+        if (!passJournal.getIssns().containsAll(journal.getIssns())) {
+            List<String> newIssnList = Stream.concat(passJournal.getIssns().stream(),
+                    journal.getIssns().stream()).distinct()
+                .collect(Collectors.toList());
+            passJournal.setIssns(newIssnList);
+            needsUpdate = true;
+
+        }
+        if (!Objects.equals(passJournal.getJournalName(), journal.getJournalName())) {
+            passJournal.setJournalName(journal.getJournalName());
+            needsUpdate = true;
+        }
+        if (needsUpdate) {
+            passClient.updateObject(passJournal);
+        }
+    }
+
+    private boolean isUpdatedByJournalLoader(Journal journal) {
+        return Objects.nonNull(journal.getNlmta()) || Objects.nonNull(journal.getPmcParticipation());
     }
 
     /**
