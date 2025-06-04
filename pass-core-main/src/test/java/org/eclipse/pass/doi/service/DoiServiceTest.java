@@ -41,6 +41,7 @@ import org.eclipse.pass.object.PassClientSelector;
 import org.eclipse.pass.object.RSQL;
 import org.eclipse.pass.object.model.Journal;
 import org.eclipse.pass.object.model.PmcParticipation;
+import org.eclipse.pass.object.model.Publication;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +62,15 @@ public class DoiServiceTest extends SimpleIntegrationTest {
     protected void setupClient() throws IOException {
         httpClient = newOkhttpClient();
         try (PassClient passClient = getNewClient()) {
+            PassClientSelector<Publication> publicationSelector = new PassClientSelector<>(Publication.class);
+            List<Publication> testPublications = passClient.streamObjects(publicationSelector).toList();
+            testPublications.forEach(testPublication -> {
+                try {
+                    passClient.deleteObject(testPublication);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
             PassClientSelector<Journal> journalSelector = new PassClientSelector<>(Journal.class);
             List<Journal> testJournals = passClient.streamObjects(journalSelector).toList();
             testJournals.forEach(testJournal -> {
