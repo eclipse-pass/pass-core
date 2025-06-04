@@ -258,6 +258,7 @@ class DoiServiceTest extends SimpleIntegrationTest {
             Journal updatedJournal = passClient.getObject(Journal.class, newJournal.getId());
             assertEquals(expectedJournalName, updatedJournal.getJournalName());
             assertNull(updatedJournal.getNlmta());
+            assertNull(updatedJournal.getPmcParticipation());
             assertEquals(2, updatedJournal.getIssns().size());
             assertTrue(updatedJournal.getIssns().contains("Online:1538-3873"));
             assertTrue(updatedJournal.getIssns().contains("Print:0004-6280"));
@@ -289,6 +290,7 @@ class DoiServiceTest extends SimpleIntegrationTest {
             Journal actualJournal = passClient.getObject(Journal.class, newJournal.getId());
             assertEquals("TestUpdate: " + expectedJournalName, actualJournal.getJournalName());
             assertEquals("TestNlmta", actualJournal.getNlmta());
+            assertNull(actualJournal.getPmcParticipation());
             assertEquals(1, actualJournal.getIssns().size());
             assertTrue(actualJournal.getIssns().contains("Online:1538-3873"));
         }
@@ -301,7 +303,7 @@ class DoiServiceTest extends SimpleIntegrationTest {
         Journal newJournal = new Journal();
         newJournal.setJournalName("TestUpdate: " + expectedJournalName);
         newJournal.setIssns(List.of("Online:1538-3873"));
-        newJournal.setPmcParticipation(PmcParticipation.A);
+        newJournal.setPmcParticipation(PmcParticipation.D);
 
         executeDoiCalls(newJournal, doiUrl);
 
@@ -319,6 +321,7 @@ class DoiServiceTest extends SimpleIntegrationTest {
             Journal actualJournal = passClient.getObject(Journal.class, newJournal.getId());
             assertEquals("TestUpdate: " + expectedJournalName, actualJournal.getJournalName());
             assertNull(actualJournal.getNlmta());
+            assertEquals(PmcParticipation.D, actualJournal.getPmcParticipation());
             assertEquals(1, actualJournal.getIssns().size());
             assertTrue(actualJournal.getIssns().contains("Online:1538-3873"));
         }
