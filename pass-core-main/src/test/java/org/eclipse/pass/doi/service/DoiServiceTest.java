@@ -261,7 +261,7 @@ public class DoiServiceTest extends SimpleIntegrationTest {
         Journal newJournal = new Journal();
         newJournal.setJournalName("TestUpdate: " + expectedJournalName);
         newJournal.setIssns(List.of("Online:1538-3873"));
-        newJournal.setNlmta("Publ Astron Soc Pac");
+        newJournal.setNlmta("TestNlmta");
 
         executeDoiCalls(newJournal, doiUrl);
 
@@ -278,7 +278,7 @@ public class DoiServiceTest extends SimpleIntegrationTest {
 
             Journal actualJournal = passClient.getObject(Journal.class, newJournal.getId());
             assertEquals("TestUpdate: " + expectedJournalName, actualJournal.getJournalName());
-            assertEquals("Publ Astron Soc Pac", actualJournal.getNlmta());
+            assertEquals("TestNlmta", actualJournal.getNlmta());
             assertEquals(1, actualJournal.getIssns().size());
             assertTrue(actualJournal.getIssns().contains("Online:1538-3873"));
         }
