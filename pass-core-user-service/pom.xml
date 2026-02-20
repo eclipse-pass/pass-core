@@ -40,7 +40,7 @@
         <dependency>
             <groupId>jakarta.json</groupId>
             <artifactId>jakarta.json-api</artifactId>
-            <version>${jakarta.json.version}</version>
+            <version>${jakarta.json-api.version}</version>
         </dependency>
     </dependencies>
 

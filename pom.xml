@@ -75,19 +75,20 @@
 
   <properties>
     <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
-    <spring-boot-maven-plugin.version>3.4.2</spring-boot-maven-plugin.version>
-    <awsspring.version>3.2.1</awsspring.version>
-    <amazon.pom.version>2.29.3</amazon.pom.version>
-    <elide.version>7.1.4</elide.version>
-    <amazon.sqs.version>2.1.3</amazon.sqs.version>
-    <ocfl.java.core.version>2.2.2</ocfl.java.core.version>
-    <ocfl.java.aws.version>2.2.2</ocfl.java.aws.version>
+    <spring-boot-maven-plugin.version>3.5.11</spring-boot-maven-plugin.version>
+    <awsspring.version>3.4.2</awsspring.version>
+    <amazon.pom.version>2.41.32</amazon.pom.version>
+    <elide.version>7.1.16</elide.version>
+    <amazon.sqs.version>2.1.4</amazon.sqs.version>
+    <ocfl.java.core.version>2.2.3</ocfl.java.core.version>
+    <ocfl.java.aws.version>2.2.3</ocfl.java.aws.version>
     <jakarta.json.version>2.0.1</jakarta.json.version>
-    <okhttp.version>4.12.0</okhttp.version>
-    <jsoup.version>1.18.1</jsoup.version>
-    <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
-    <bouncycastle.version>1.79</bouncycastle.version>
-    <asm.version>9.7</asm.version>
+    <jakarta.json-api.version>2.1.3</jakarta.json-api.version>
+    <okhttp.version>5.3.2</okhttp.version>
+    <jsoup.version>1.22.1</jsoup.version>
+    <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+    <bouncycastle.version>1.83</bouncycastle.version>
+    <asm.version>9.9.1</asm.version>
     <sonar.projectName>pass-core</sonar.projectName>
     <sonar.projectKey>eclipse-pass_pass-core</sonar.projectKey>
     <sonar.coverage.jacoco.xmlReportPaths>${maven.multiModuleProjectDirectory}/jacoco-aggregate-report-pass-core/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
@@ -112,14 +113,10 @@
 
       <dependency>
         <groupId>com.squareup.okhttp3</groupId>
-        <artifactId>okhttp</artifactId>
+        <artifactId>okhttp-bom</artifactId>
         <version>${okhttp.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.squareup.okhttp3</groupId>
-        <artifactId>okhttp-urlconnection</artifactId>
-        <version>${okhttp.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
 
       <dependency>
@@ -166,17 +163,17 @@
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-compress</artifactId>
-        <version>1.26.2</version>
+        <version>1.28.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-text</artifactId>
-        <version>1.11.0</version>
+        <version>1.15.0</version>
       </dependency>
       <dependency>
         <groupId>org.antlr</groupId>
         <artifactId>antlr4-runtime</artifactId>
-        <version>4.13.1</version>
+        <version>4.13.2</version>
       </dependency>
       <dependency>
         <groupId>org.ow2.asm</groupId>
@@ -206,17 +203,22 @@
       <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
-        <version>2.17.0</version>
+        <version>2.21.0</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-beanutils</groupId>
+        <artifactId>commons-beanutils</artifactId>
+        <version>1.11.0</version>
       </dependency>
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>33.2.1-jre</version>
+        <version>33.4.8-jre</version>
       </dependency>
       <dependency>
         <groupId>com.google.errorprone</groupId>
         <artifactId>error_prone_annotations</artifactId>
-        <version>2.26.1</version>
+        <version>2.42.0</version>
       </dependency>
       <dependency>
         <groupId>com.google.protobuf</groupId>
@@ -226,29 +228,9 @@
       <dependency>
         <groupId>org.checkerframework</groupId>
         <artifactId>checker-qual</artifactId>
-        <version>3.42.0</version>
+        <version>3.52.0</version>
       </dependency>
       <!-- End of transitive deps with convergence issues. -->
-
-      <!-- The following deps were declared to resolve CVEs from transitive deps. -->
-      <!-- These should all be checked whenever deps are upgraded. Should be removed if possible once parent -->
-      <!-- dep updates with fixed version. -->
-      <dependency>
-        <groupId>net.minidev</groupId>
-        <artifactId>json-smart</artifactId>
-        <version>2.5.2</version>
-      </dependency>
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-handler</artifactId>
-        <version>4.1.118.Final</version>
-      </dependency>
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-common</artifactId>
-        <version>4.1.118.Final</version>
-      </dependency>
-      <!-- End of transitive deps with CVE issues. -->
     </dependencies>
   </dependencyManagement>
 
@@ -380,7 +362,7 @@
                 <!-- These are module jars used via spring IOC -->
                 <ignoredNonTestScopedDependency>org.eclipse.pass:pass-core-file-service:jar:</ignoredNonTestScopedDependency>
                 <!-- This needs to stay compile scope to be included in pass-core exec jar -->
-                <ignoredNonTestScopedDependency>com.squareup.okhttp3:okhttp:</ignoredNonTestScopedDependency>
+                <ignoredNonTestScopedDependency>com.squareup.okhttp3:okhttp-jvm:</ignoredNonTestScopedDependency>
                 <ignoredNonTestScopedDependency>io.ocfl:ocfl-java-api:</ignoredNonTestScopedDependency>
                 <ignoredNonTestScopedDependency>commons-io:commons-io:</ignoredNonTestScopedDependency>
                 <ignoredNonTestScopedDependency>com.fasterxml.jackson.core:jackson-*:</ignoredNonTestScopedDependency>
