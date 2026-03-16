@@ -1,94 +1,109 @@
-/*
- *
- * Copyright 2019 Johns Hopkins University
- *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
- */
 package org.eclipse.pass.doi.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+import java.io.IOException;
+import java.util.Map;
 
 import jakarta.json.JsonObject;
-import org.junit.jupiter.api.Disabled;
+import okhttp3.OkHttpClient;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.SocketPolicy;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 
 /**
- * Unit tests for the connector. This test class is @Disableed in production, and is only used to
- * verify behavior against live services when either the connector class or the external APIs
- * are changed
- *
- * @author jrm
+ * Unit tests that check the behavior of retrieveMetadata by mocking the external service.
  */
-@Disabled
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ExternalDoiServiceConnectorTest {
 
-    private final ExternalDoiServiceConnector underTest = new ExternalDoiServiceConnector();
-    private final ExternalDoiService xrefService = new XrefDoiService();
-    private final ExternalDoiService unpaywallService = new UnpaywallDoiService();
+    private ExternalDoiService mockService(String baseUrl) {
+        return new ExternalDoiService() {
+            @Override
+            public JsonObject processObject(JsonObject object) {
+                return object;
+            }
 
-    /**
-     * test that hitting the Crossref API with a doi returns the expected JSON object
-     */
-    @Test
-    public void testXrefLookup() {
-        String realDoi = "10.4137/cmc.s38446";
-        JsonObject blob = underTest.retrieveMetadata(realDoi, xrefService);
-        //these results will differ by a timestamp - but a good check is that they return the same journal objects
-        JsonObject object = JsonTestObjectsUtil.xrefTestJsonObject();
+            @Override
+            public Map<String, String> parameterMap() {
+                return Map.of();
+            }
 
-        assertNotNull(blob.getJsonObject("message").getJsonArray("ISSN"));
-        assertEquals(blob.getJsonObject("message").getJsonArray("ISSN"),
-                     object.getJsonObject("message").getJsonArray("ISSN"));
+            @Override
+            public String name() {
+                return "test";
+            }
+
+            @Override
+            public Map<String, String> headerMap() {
+                return Map.of();
+            }
+
+            @Override
+            public String baseUrl() {
+                return baseUrl;
+            }
+        };
     }
 
-    /**
-     * test that hitting the Unpaywall API with a doi returns the expected JSON object
-     */
     @Test
-    public void testUnpaywallLookup() {
-        String realDoi = "10.4137/cmc.s38446"; //"10.1038/nature12373";
-        JsonObject blob = underTest.retrieveMetadata(realDoi, unpaywallService);
+    void testRetrieveMetadataNotFound() throws IOException {
+        try (MockWebServer server = new MockWebServer()) {
+            server.enqueue(new MockResponse().setResponseCode(404));
 
-        JsonObject object = JsonTestObjectsUtil.unpaywallTestJsonObject();
+            ExternalDoiServiceConnector underTest = new ExternalDoiServiceConnector(new OkHttpClient());
+            ExternalDoiService service = mockService(server.url("/").toString());
 
-        assertNotNull(blob.getJsonString("doi"));
-        assertEquals(blob.getJsonString("doi"), object.getJsonString("doi"));
+            JsonObject result = underTest.retrieveMetadata("10.123/abc", service);
 
+            assertNotNull(result);
+            assertEquals(404, result.getInt(ExternalDoiServiceConnector.HTTP_STATUS_CODE));
+        }
     }
 
-    /**
-     * test that a bad doi gives the required error message
-     */
     @Test
-    public void testBadXrefDoiLookup() {
-        String badDoi = "10.1212/abc.DEF";
-        JsonObject blob = underTest.retrieveMetadata(badDoi, xrefService);
-        assertEquals("Resource not found.", blob.getString("error"));
+    void testRetrieveMetadataBadIO() throws IOException {
+        try (MockWebServer server = new MockWebServer()) {
+            server.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AT_START));
+
+            ExternalDoiServiceConnector underTest = new ExternalDoiServiceConnector(new OkHttpClient());
+            ExternalDoiService service = mockService(server.url("/").toString());
+
+            JsonObject result = underTest.retrieveMetadata("10.123/abc", service);
+
+            assertNull(result);
+        }
     }
 
-    /**
-     * test that a bad doi gives the required error message
-     */
     @Test
-    public void testBadUnpaywallDoiLookup() {
-        String badDoi = "10.1212/abc.DEF";
-        JsonObject blob = underTest.retrieveMetadata(badDoi, unpaywallService);
-        assertEquals("true",blob.getValue("/error").toString());
-        assertEquals("404", blob.getValue("/HTTP_status_code").toString());
+    void testRetrieveMetadataBadJson() throws IOException {
+        try (MockWebServer server = new MockWebServer()) {
+            server.enqueue(new MockResponse().setBody("This is not JSON"));
+
+            ExternalDoiServiceConnector underTest = new ExternalDoiServiceConnector(new OkHttpClient());
+            ExternalDoiService service = mockService(server.url("/").toString());
+
+            JsonObject result = underTest.retrieveMetadata("10.123/abc", service);
+
+            assertNull(result);
+        }
     }
 
+    @Test
+    void testRetrieveMetadataSuccess() throws IOException {
+        try (MockWebServer server = new MockWebServer()) {
+            String json = "{\"foo\":\"bar\"}";
+            server.enqueue(new MockResponse().setBody(json));
+
+            ExternalDoiServiceConnector underTest = new ExternalDoiServiceConnector(new OkHttpClient());
+            ExternalDoiService service = mockService(server.url("/").toString());
+
+            JsonObject result = underTest.retrieveMetadata("10.4137/cmc.s38446", service);
+
+            assertNotNull(result);
+            assertEquals("bar", result.getString("foo"));
+        }
+    }
 }
-

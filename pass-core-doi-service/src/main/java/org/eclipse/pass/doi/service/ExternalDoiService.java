@@ -16,12 +16,7 @@
  */
 package org.eclipse.pass.doi.service;
 
-import static java.lang.Thread.sleep;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,9 +30,6 @@ import jakarta.json.JsonObject;
  * @author jrm
  */
 public abstract class ExternalDoiService {
-    private final Set<String> activeJobSet = new HashSet<>();
-    private final Set<String> syncActiveJobSet = Collections.synchronizedSet(activeJobSet);
-
     final static String MAILTO = "pass@jhu.edu";
 
     /**
@@ -56,13 +48,13 @@ public abstract class ExternalDoiService {
      * A key, value map of query parameters used by the external service; null if there aren't any.
      * @return the map
      */
-    public  abstract HashMap<String, String> parameterMap();
+    public  abstract Map<String, String> parameterMap();
 
     /**
      * A key, value map of headers used by the external service; null if there aren't any.
      * @return the map
      */
-    public  abstract HashMap<String, String> headerMap();
+    public  abstract Map<String, String> headerMap();
 
     /**
      * A method to transform the raw external service's JSON response to suit the UI requirements
@@ -88,63 +80,5 @@ public abstract class ExternalDoiService {
 
         Matcher matcher = pattern.matcher(suffix);
         return matcher.matches() ? suffix : null;
-    }
-
-    /**
-     * this simply protects the external service from a person hammering on a request thinking
-     * it wasn't processed, when it really is just slow coming back
-     *
-     * @param doi the doi to check active
-     * @return whether the doi lookup is still active
-     */
-    boolean isAlreadyActive(String doi) {
-        //check cache map for existence of doi
-        //put doi on map if absent
-
-        if (syncActiveJobSet.contains(doi)) {
-            return true;
-        } else {
-            // this DOI is not actively being processed
-            // let's temporarily prohibit new requests for this DOI
-            syncActiveJobSet.add(doi);
-            //longest time we expect it should take to create a Journal object, in
-            //milliseconds
-            int cachePeriod = 30000;
-            Thread t = new Thread(new ExternalDoiService.ExpiringLock(doi, cachePeriod));
-            t.start();
-        }
-        return false;
-    }
-
-    /**
-     * Once a doi has been processed, this method removes it from the locked list.
-     * @param doi the doi
-     */
-    void unlockDoi(String doi) {
-        syncActiveJobSet.remove(doi);
-    }
-
-    /**
-     * A class to manage locking so that an active process for a DOI will finish executing before
-     * another one begins
-     */
-    public class ExpiringLock implements Runnable {
-        private final String key;
-        private final int duration;
-
-        ExpiringLock(String key, int duration) {
-            this.key = key;
-            this.duration = duration;
-        }
-
-        @Override
-        public void run() {
-            try {
-                sleep(duration);
-                syncActiveJobSet.remove(key);
-            } catch (InterruptedException e) {
-                syncActiveJobSet.remove(key);
-            }
-        }
     }
 }
