@@ -19,7 +19,7 @@ package org.eclipse.pass.doi.service;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.io.IOException;
-import java.io.StringReader;
+import java.io.Reader;
 import java.util.Objects;
 
 import jakarta.json.Json;
@@ -42,8 +42,13 @@ import org.slf4j.LoggerFactory;
  */
 public class ExternalDoiServiceConnector {
     private static final Logger LOG = LoggerFactory.getLogger(ExternalDoiServiceConnector.class);
+    static final String HTTP_STATUS_CODE = "HTTP_STATUS_CODE";
 
     private final OkHttpClient client;
+
+    ExternalDoiServiceConnector(OkHttpClient client) {
+        this.client = client;
+    }
 
     ExternalDoiServiceConnector() {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
@@ -54,54 +59,50 @@ public class ExternalDoiServiceConnector {
     }
 
     /**
-     * consult external service to get a json object for a supplied doi
+     * Consult external service to get a json object for a supplied doi.
      *
      * @param doi - the supplied doi string, prefix trimmed if necessary
-     * @return a string representing the works object if successful; an empty string if not found; null if IO exception
+     * @return a JSON object if successful,
+     *      null if an error occurs interacting with the external service,
+     *      {error: "error message", HTTP_STATUS_CODE: http status code} if
+     *      the external service returns an error status code
      */
     JsonObject retrieveMetadata(String doi, ExternalDoiService service) {
         HttpUrl.Builder urlBuilder = Objects.requireNonNull(HttpUrl.parse(service.baseUrl() + doi)).newBuilder();
 
-        if ( service.parameterMap() != null ) {
-            for ( String key : service.parameterMap().keySet() ) {
+        if (service.parameterMap() != null) {
+            for (String key : service.parameterMap().keySet()) {
                 urlBuilder.addQueryParameter(key, service.parameterMap().get(key));
             }
         }
 
-        String url = urlBuilder.build().toString();
+        Request.Builder requestBuilder = new Request.Builder().url(urlBuilder.build());
 
-        Request.Builder requestBuilder =  new Request.Builder()
-            .url(url);
-        if ( service.headerMap() != null ) {
+        if (service.headerMap() != null) {
             requestBuilder.headers(Headers.of(service.headerMap()));
         }
-        Request okHttpRequest =  requestBuilder.build();
 
+        Request okHttpRequest =  requestBuilder.build();
         Call call = client.newCall(okHttpRequest);
-        JsonReader reader;
-        JsonObject metadataJsonObject;
-        String responseString = null;
 
         try (Response okHttpResponse = call.execute()) {
-            responseString = Objects.requireNonNull(okHttpResponse.body()).string();
-            reader = Json.createReader(new StringReader(responseString));
-            metadataJsonObject = reader.readObject();
-            reader.close();
-
-            service.unlockDoi(doi);
-
-            return metadataJsonObject;
-        } catch (JsonParsingException e) {
-            if (responseString != null) {
-                return Json.createObjectBuilder()
-                           .add("error", responseString)
-                           .build();
+            if (okHttpResponse.isSuccessful()) {
+                try (Reader reader = okHttpResponse.body().charStream();
+                        JsonReader jsonReader = Json.createReader(reader)) {
+                    return jsonReader.readObject();
+                } catch (JsonParsingException e) {
+                    LOG.error("Error parsing JSON of external service: " + okHttpRequest.url(), e);
+                    return null;
+                }
             }
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
-        }
-        return null;
-    }
 
+            // Set response as the error field and save the status code.
+            return Json.createObjectBuilder().add("error", okHttpResponse.body().string()).
+                    add(HTTP_STATUS_CODE, Json.createValue(okHttpResponse.code())).build();
+        } catch (IOException e) {
+            LOG.error("Error accessing external service: " + okHttpRequest.url(), e);
+            return null;
+        }
+    }
 }
 

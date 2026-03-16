@@ -20,6 +20,7 @@ import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.Map;
 
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
@@ -48,7 +49,7 @@ public class UnpaywallDoiService extends ExternalDoiService {
     }
 
     @Override
-    public HashMap<String, String> parameterMap() {
+    public Map<String, String> parameterMap() {
         HashMap<String, String> parameterMap = new HashMap<>();
         String agent = System.getenv("PASS_DOI_SERVICE_MAILTO") != null ? System.getenv(
             "PASS_DOI_SERVICE_MAILTO") : MAILTO;
@@ -57,7 +58,7 @@ public class UnpaywallDoiService extends ExternalDoiService {
     }
 
     @Override
-    public HashMap<String, String> headerMap() {
+    public Map<String, String> headerMap() {
         return null;
     }
 
