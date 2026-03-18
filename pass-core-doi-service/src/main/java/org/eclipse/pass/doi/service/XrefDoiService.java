@@ -33,6 +33,7 @@ import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 /**
  * The XrefDoiService class is an implementation of the ExternalDoiService abstract class to interface with the Crossref
@@ -44,6 +45,7 @@ import org.slf4j.LoggerFactory;
  * address. The default email address used by is pass@jhu.edu and can be overridden by setting the environment variable
  * PASS_DOI_SERVICE_MAILTO
  */
+@Service()
 public class XrefDoiService extends ExternalDoiService {
     private final static String XREF_BASEURI = "https://api.crossref.org/v1/works/";
     private final static Logger LOG = LoggerFactory.getLogger(XrefDoiService.class);

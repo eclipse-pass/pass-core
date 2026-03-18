@@ -19,14 +19,13 @@ package org.eclipse.pass.doi.service;
 import java.io.IOException;
 import java.io.Writer;
 
-import com.yahoo.elide.RefreshableElide;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -44,29 +43,10 @@ public class PassDoiServiceController {
     private final ExternalDoiService xrefDoiService;
     private final ExternalDoiService unpaywallDoiService;
 
-    /**
-     * @param refreshableElide the RefreshableElide
-     */
-    @Autowired
-    public PassDoiServiceController(RefreshableElide refreshableElide) {
-        this.elideConnector = new ElideConnector(refreshableElide);
-        this.externalDoiServiceConnector = new ExternalDoiServiceConnector();
-        this.xrefDoiService = new XrefDoiService();
-        this.unpaywallDoiService = new UnpaywallDoiService();
-    }
-
-    /**
-     * Constructor for testing, allows injection of mock connectors and services.
-     *
-     * @param elideConnector
-     * @param externalDoiServiceConnector
-     * @param xrefDoiService
-     * @param unpaywallDoiService
-     */
-    PassDoiServiceController(ElideConnector elideConnector,
-                             ExternalDoiServiceConnector externalDoiServiceConnector,
-                             ExternalDoiService xrefDoiService,
-                             ExternalDoiService unpaywallDoiService) {
+    public PassDoiServiceController(ElideConnector elideConnector,
+                            ExternalDoiServiceConnector externalDoiServiceConnector,
+                            @Qualifier("xrefDoiService") ExternalDoiService xrefDoiService,
+                            @Qualifier("unpaywallDoiService") ExternalDoiService unpaywallDoiService) {
         this.elideConnector = elideConnector;
         this.externalDoiServiceConnector = externalDoiServiceConnector;
         this.xrefDoiService = xrefDoiService;
