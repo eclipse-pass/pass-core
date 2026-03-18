@@ -37,6 +37,7 @@ import org.eclipse.pass.object.RSQL;
 import org.eclipse.pass.object.model.Journal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 /**
  * This class manages Journal objects related to a journal lookup on Crossref - creating or updating
@@ -44,6 +45,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author jrm
  */
+@Component
 public class ElideConnector {
     private static final Logger LOG = LoggerFactory.getLogger(ElideConnector.class);
 

@@ -34,12 +34,14 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 /**
  * A class which manages the retrieval of JSON from external DOI services (Unpaywall, Crossref)
  *
  * @author jrm
  */
+@Component
 public class ExternalDoiServiceConnector {
     private static final Logger LOG = LoggerFactory.getLogger(ExternalDoiServiceConnector.class);
     static final String HTTP_STATUS_CODE = "HTTP_STATUS_CODE";

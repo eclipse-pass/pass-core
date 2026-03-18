@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
  * Unit tests that check the behavior of retrieveMetadata by mocking the external service.
  */
 public class ExternalDoiServiceConnectorTest {
+    private final OkHttpClient okhttpClient = new OkHttpClient();
 
     private ExternalDoiService mockService(String baseUrl) {
         return new ExternalDoiService() {
@@ -53,7 +54,7 @@ public class ExternalDoiServiceConnectorTest {
         try (MockWebServer server = new MockWebServer()) {
             server.enqueue(new MockResponse().setResponseCode(404));
 
-            ExternalDoiServiceConnector underTest = new ExternalDoiServiceConnector(new OkHttpClient());
+            ExternalDoiServiceConnector underTest = new ExternalDoiServiceConnector(okhttpClient);
             ExternalDoiService service = mockService(server.url("/").toString());
 
             JsonObject result = underTest.retrieveMetadata("10.123/abc", service);
@@ -68,7 +69,7 @@ public class ExternalDoiServiceConnectorTest {
         try (MockWebServer server = new MockWebServer()) {
             server.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AT_START));
 
-            ExternalDoiServiceConnector underTest = new ExternalDoiServiceConnector(new OkHttpClient());
+            ExternalDoiServiceConnector underTest = new ExternalDoiServiceConnector(okhttpClient);
             ExternalDoiService service = mockService(server.url("/").toString());
 
             JsonObject result = underTest.retrieveMetadata("10.123/abc", service);
@@ -82,7 +83,7 @@ public class ExternalDoiServiceConnectorTest {
         try (MockWebServer server = new MockWebServer()) {
             server.enqueue(new MockResponse().setBody("This is not JSON"));
 
-            ExternalDoiServiceConnector underTest = new ExternalDoiServiceConnector(new OkHttpClient());
+            ExternalDoiServiceConnector underTest = new ExternalDoiServiceConnector(okhttpClient);
             ExternalDoiService service = mockService(server.url("/").toString());
 
             JsonObject result = underTest.retrieveMetadata("10.123/abc", service);
