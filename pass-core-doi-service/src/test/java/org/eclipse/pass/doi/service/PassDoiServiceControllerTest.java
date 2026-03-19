@@ -42,7 +42,7 @@ import org.junit.jupiter.api.Test;
  * There is an integration test in pass-core-main called DoiServiceTest that actually hits the live
  * external services.
  */
-public class PassDoiServiceControllerTest {
+class PassDoiServiceControllerTest {
     private PassDoiServiceController controller;
     private ElideConnector elideConnector;
     private ExternalDoiServiceConnector externalDoiServiceConnector;
@@ -65,7 +65,7 @@ public class PassDoiServiceControllerTest {
     }
 
     @Test
-    public void testGetXrefMetadata_Success() throws IOException {
+    void testGetXrefMetadata_Success() throws IOException {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         StringWriter stringWriter = new StringWriter();
@@ -94,7 +94,7 @@ public class PassDoiServiceControllerTest {
     }
 
     @Test
-    public void testGetXrefMetadata_InvalidDoi() throws IOException {
+    void testGetXrefMetadata_InvalidDoi() throws IOException {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         StringWriter stringWriter = new StringWriter();
@@ -113,7 +113,7 @@ public class PassDoiServiceControllerTest {
     }
 
     @Test
-    public void testGetXrefMetadata_ServiceError_NullCheck() throws IOException {
+    void testGetXrefMetadata_ServiceError_NullCheck() throws IOException {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         StringWriter stringWriter = new StringWriter();
@@ -135,7 +135,7 @@ public class PassDoiServiceControllerTest {
     }
 
     @Test
-    public void testGetXrefMetadata_ServiceError_404() throws IOException {
+    void testGetXrefMetadata_ServiceError_404() throws IOException {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         StringWriter stringWriter = new StringWriter();
@@ -162,7 +162,7 @@ public class PassDoiServiceControllerTest {
     }
 
     @Test
-    public void testGetXrefMetadata_NoJournalId() throws IOException {
+    void testGetXrefMetadata_NoJournalId() throws IOException {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         StringWriter stringWriter = new StringWriter();
@@ -186,7 +186,7 @@ public class PassDoiServiceControllerTest {
     }
 
     @Test
-    public void testGetUnpaywallMetadata_Success() throws IOException {
+    void testGetUnpaywallMetadata_Success() throws IOException {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         StringWriter stringWriter = new StringWriter();
@@ -211,7 +211,7 @@ public class PassDoiServiceControllerTest {
     }
 
     @Test
-    public void testGetUnpaywallMetadata_InvalidDoi() throws IOException {
+    void testGetUnpaywallMetadata_InvalidDoi() throws IOException {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         StringWriter stringWriter = new StringWriter();
@@ -230,7 +230,7 @@ public class PassDoiServiceControllerTest {
     }
 
     @Test
-    public void testGetUnpaywallMetadata_ServiceError_Null() throws IOException {
+    void testGetUnpaywallMetadata_ServiceError_Null() throws IOException {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         StringWriter stringWriter = new StringWriter();
@@ -252,7 +252,7 @@ public class PassDoiServiceControllerTest {
     }
 
     @Test
-    public void testGetUnpaywallMetadata_ServiceError_WithCode() throws IOException {
+    void testGetUnpaywallMetadata_ServiceError_WithCode() throws IOException {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         StringWriter stringWriter = new StringWriter();
