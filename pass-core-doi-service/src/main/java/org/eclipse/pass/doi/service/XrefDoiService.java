@@ -45,7 +45,7 @@ import org.springframework.stereotype.Service;
  * address. The default email address used by is pass@jhu.edu and can be overridden by setting the environment variable
  * PASS_DOI_SERVICE_MAILTO
  */
-@Service()
+@Service
 public class XrefDoiService extends ExternalDoiService {
     private final static String XREF_BASEURI = "https://api.crossref.org/v1/works/";
     private final static Logger LOG = LoggerFactory.getLogger(XrefDoiService.class);

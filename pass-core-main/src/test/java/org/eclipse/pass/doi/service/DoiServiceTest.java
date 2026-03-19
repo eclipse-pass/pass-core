@@ -46,6 +46,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+/**
+ * This integration test of the DOI API hits the live CrossRef and Unpaywall services.
+ *
+ * There is a unit test in pass-core-doi-service called PassDoiServiceControllerTest which checks
+ * various failure conditions around integrating with the external services which are not tested here.
+ */
 class DoiServiceTest extends SimpleIntegrationTest {
     private static final String CREDENTIALS = Credentials.basic(BACKEND_USER, BACKEND_PASSWORD);
 
