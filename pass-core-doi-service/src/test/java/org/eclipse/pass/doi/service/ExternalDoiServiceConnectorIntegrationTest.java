@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
 /**
- * Unit tests for the connector. This test class is @Disableed in production, and is only used to
+ * Integration test for the connector. This test class is @Disableed in production, and is only used to
  * verify behavior against live services when either the connector class or the external APIs
  * are changed
  *

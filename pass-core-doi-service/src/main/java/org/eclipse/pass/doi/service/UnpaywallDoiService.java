@@ -34,7 +34,7 @@ import org.springframework.stereotype.Service;
  * the Unpaywall API. The Unpaywall API is a RESTful API that returns JSON metadata for a given DOI. More information
  * about the Unpaywall API can be found here: <a href="https://unpaywall.org/products/api">Unpaywall API</a>
  */
-@Service()
+@Service
 public class UnpaywallDoiService extends ExternalDoiService {
 
     String UNPAYWALL_BASEURI = "https://api.unpaywall.org/v2/";
