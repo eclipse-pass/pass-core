@@ -48,10 +48,6 @@ public class ExternalDoiServiceConnector {
 
     private final OkHttpClient client;
 
-    ExternalDoiServiceConnector(OkHttpClient client) {
-        this.client = client;
-    }
-
     ExternalDoiServiceConnector() {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.connectTimeout(30, SECONDS);
