@@ -8,10 +8,7 @@
     <version>2.6.0-SNAPSHOT</version>
   </parent>
 
-  <groupId>org.eclipse.pass</groupId>
   <artifactId>pass-core</artifactId>
-  <version>2.6.0-SNAPSHOT</version>
-  <packaging>jar</packaging>
 
   <name>PASS backend</name>
   <description>PASS REST API implementation</description>
@@ -66,6 +63,7 @@
 
   <properties>
     <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
+    <maven-jar-plugin.version>3.4.1</maven-jar-plugin.version>
     <spring-boot-maven-plugin.version>3.5.11</spring-boot-maven-plugin.version>
     <awsspring.version>3.4.2</awsspring.version>
     <amazon.pom.version>2.41.32</amazon.pom.version>
@@ -476,6 +474,29 @@
 
   <build>
     <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>${maven-jar-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>test-config-jar</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <classifier>test-config</classifier>
+              <classesDirectory>${project.build.testOutputDirectory}</classesDirectory>
+              <includes>
+                <include>application-test.yml</include>
+                <include>saml2/**</include>
+              </includes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
