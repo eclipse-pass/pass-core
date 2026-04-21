@@ -9,11 +9,11 @@
   </parent>
 
   <artifactId>pass-core</artifactId>
-  <packaging>pom</packaging>
 
   <name>PASS backend</name>
   <description>PASS REST API implementation</description>
   <url>https://github.com/eclipse-pass/pass-core</url>
+
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
@@ -54,18 +54,6 @@
     </developer>
   </developers>
 
-  <modules>
-    <module>pass-core-doi-service</module>
-    <module>pass-core-object-service</module>
-    <module>pass-core-file-service</module>
-    <module>pass-core-user-service</module>
-    <module>pass-core-main</module>
-    <module>pass-core-policy-service</module>
-    <module>pass-core-usertoken</module>
-    <module>pass-core-test-config</module>
-    <module>jacoco-aggregate-report-pass-core</module>
-  </modules>
-
   <scm>
     <connection>scm:git:https://github.com/eclipse-pass/pass-core.git</connection>
     <developerConnection>scm:git:https://github.com/eclipse-pass/pass-core.git</developerConnection>
@@ -75,6 +63,7 @@
 
   <properties>
     <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
+    <maven-jar-plugin.version>3.4.1</maven-jar-plugin.version>
     <spring-boot-maven-plugin.version>3.5.11</spring-boot-maven-plugin.version>
     <awsspring.version>3.4.2</awsspring.version>
     <amazon.pom.version>2.41.32</amazon.pom.version>
@@ -91,7 +80,7 @@
     <asm.version>9.9.1</asm.version>
     <sonar.projectName>pass-core</sonar.projectName>
     <sonar.projectKey>eclipse-pass_pass-core</sonar.projectKey>
-    <sonar.coverage.jacoco.xmlReportPaths>${maven.multiModuleProjectDirectory}/jacoco-aggregate-report-pass-core/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+    <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
   </properties>
 
   <repositories>
@@ -106,6 +95,10 @@
         <enabled>true</enabled>
       </snapshots>
     </repository>
+    <repository>
+      <id>shibboleth-releases</id>
+      <url>https://build.shibboleth.net/nexus/content/repositories/releases/</url>
+    </repository>
   </repositories>
 
   <dependencyManagement>
@@ -119,7 +112,7 @@
         <scope>import</scope>
       </dependency>
 
-        <!-- Added to fix CVE-2026-22732 -->
+      <!-- Added to fix CVE-2026-22732 -->
       <dependency>
         <groupId>org.springframework.security</groupId>
         <artifactId>spring-security-bom</artifactId>
@@ -247,34 +240,264 @@
 
       <!-- CVE-2026-27446 -->
       <dependency>
-          <groupId>org.apache.activemq</groupId>
-          <artifactId>artemis-jakarta-server</artifactId>
-          <version>2.53.0</version>
-          <exclusions>
-              <exclusion>
-                  <groupId>commons-logging</groupId>
-                  <artifactId>commons-logging</artifactId>
-              </exclusion>
-          </exclusions>
+        <groupId>org.apache.activemq</groupId>
+        <artifactId>artemis-jakarta-server</artifactId>
+        <version>2.53.0</version>
+        <exclusions>
+          <exclusion>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
-          <groupId>org.apache.activemq</groupId>
-          <artifactId>artemis-jakarta-client</artifactId>
-          <version>2.53.0</version>
-          <exclusions>
-              <exclusion>
-                  <groupId>commons-logging</groupId>
-                  <artifactId>commons-logging</artifactId>
-              </exclusion>
-          </exclusions>
+        <groupId>org.apache.activemq</groupId>
+        <artifactId>artemis-jakarta-client</artifactId>
+        <version>2.53.0</version>
+        <exclusions>
+          <exclusion>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <!-- End of transitive deps with CVE issues. -->
+
     </dependencies>
   </dependencyManagement>
 
-  <build>
+  <dependencies>
 
+    <!-- Logging -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+    </dependency>
+
+    <!-- Elide JSON:API -->
+    <dependency>
+      <groupId>com.yahoo.elide</groupId>
+      <artifactId>elide-spring-boot-starter</artifactId>
+      <version>${elide.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-tomcat</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!-- Spring Boot -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-jetty</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-artemis</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-tomcat</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-saml2-service-provider</artifactId>
+    </dependency>
+
+    <!-- Database -->
+    <dependency>
+      <groupId>org.liquibase</groupId>
+      <artifactId>liquibase-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+    </dependency>
+
+    <!-- Commons -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+    </dependency>
+
+    <!-- Messaging -->
+    <dependency>
+      <groupId>org.apache.activemq</groupId>
+      <artifactId>artemis-jakarta-server</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>amazon-sqs-java-messaging-lib</artifactId>
+      <version>${amazon.sqs.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!-- HTTP -->
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>okhttp-jvm</artifactId>
+    </dependency>
+
+    <!-- OCFL file storage -->
+    <dependency>
+      <groupId>io.ocfl</groupId>
+      <artifactId>ocfl-java-api</artifactId>
+      <version>${ocfl.java.core.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.ocfl</groupId>
+      <artifactId>ocfl-java-core</artifactId>
+      <version>${ocfl.java.core.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.ocfl</groupId>
+      <artifactId>ocfl-java-aws</artifactId>
+      <version>${ocfl.java.aws.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!-- JSON -->
+    <dependency>
+      <groupId>org.glassfish</groupId>
+      <artifactId>jakarta.json</artifactId>
+      <version>${jakarta.json.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.json</groupId>
+      <artifactId>jakarta.json-api</artifactId>
+      <version>${jakarta.json-api.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+
+    <!-- HTML parsing -->
+    <dependency>
+      <groupId>org.jsoup</groupId>
+      <artifactId>jsoup</artifactId>
+      <version>${jsoup.version}</version>
+    </dependency>
+
+    <!-- AWS Spring Cloud -->
+    <dependency>
+      <groupId>io.awspring.cloud</groupId>
+      <artifactId>spring-cloud-aws-starter-parameter-store</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.awspring.cloud</groupId>
+      <artifactId>spring-cloud-aws-starter-s3</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!-- Test dependencies -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.rest-assured</groupId>
+      <artifactId>rest-assured</artifactId>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>localstack</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>okhttp-urlconnection</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>mockwebserver</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+  </dependencies>
+
+  <build>
     <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>${maven-jar-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>test-config-jar</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <classifier>test-config</classifier>
+              <classesDirectory>${project.build.testOutputDirectory}</classesDirectory>
+              <includes>
+                <include>application-test.yml</include>
+                <include>saml2/**</include>
+              </includes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
@@ -287,10 +510,10 @@
           <source>17</source>
           <detectJavaApiLink>false</detectJavaApiLink>
           <tags>
-          <tag>
-            <name>CreatePermission</name>
-            <placement>a</placement>
-          </tag>
+            <tag>
+              <name>CreatePermission</name>
+              <placement>a</placement>
+            </tag>
             <tag>
               <name>ReadPermission</name>
               <placement>a</placement>
@@ -374,7 +597,7 @@
                 <ignoredUsedUndeclaredDependency>org.testcontainers::</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>com.github.docker-java::</ignoredUsedUndeclaredDependency>
                 <!-- These come from spring-security-saml2-service-provider -->
-                <ignoredUsedUndeclaredDependency>org.opensaml:opensaml-saml-api::</ignoredUsedUndeclaredDependency>                
+                <ignoredUsedUndeclaredDependency>org.opensaml:opensaml-saml-api::</ignoredUsedUndeclaredDependency>
               </ignoredUsedUndeclaredDependencies>
               <ignoredUnusedDeclaredDependencies>
                 <!-- This is the elide starter jar -->
@@ -385,20 +608,15 @@
                 <ignoredUnusedDeclaredDependency>org.liquibase:liquibase-core:</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>com.h2database:h2:</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>org.postgresql:postgresql:</ignoredUnusedDeclaredDependency>
-                <!-- These are module jars used via spring IOC -->
-                <ignoredUnusedDeclaredDependency>org.eclipse.pass:pass-core-doi-service:</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>org.eclipse.pass:pass-core-user-service:</ignoredUnusedDeclaredDependency>
-                <ignoredUnusedDeclaredDependency>org.eclipse.pass:pass-core-policy-service:</ignoredUnusedDeclaredDependency>
                 <!-- These come from spring boot activemq artemis starter -->
                 <ignoredUnusedDeclaredDependency>org.apache.activemq:artemis-jakarta-server:</ignoredUnusedDeclaredDependency>
-                <!-- Used by ITs via classpath -->
-                <ignoredUnusedDeclaredDependency>org.eclipse.pass:pass-core-test-config::</ignoredUnusedDeclaredDependency>
+                <!-- Used transitively via user-service and other modules -->
+                <ignoredUnusedDeclaredDependency>jakarta.json:jakarta.json-api:</ignoredUnusedDeclaredDependency>
+                <ignoredUnusedDeclaredDependency>com.fasterxml.jackson.core:jackson-databind:</ignoredUnusedDeclaredDependency>
               </ignoredUnusedDeclaredDependencies>
               <ignoredNonTestScopedDependencies>
                 <!-- This is the elide starter jar -->
                 <ignoredNonTestScopedDependency>org.json:json:</ignoredNonTestScopedDependency>
-                <!-- These are module jars used via spring IOC -->
-                <ignoredNonTestScopedDependency>org.eclipse.pass:pass-core-file-service:jar:</ignoredNonTestScopedDependency>
                 <!-- This needs to stay compile scope to be included in pass-core exec jar -->
                 <ignoredNonTestScopedDependency>com.squareup.okhttp3:okhttp-jvm:</ignoredNonTestScopedDependency>
                 <ignoredNonTestScopedDependency>io.ocfl:ocfl-java-api:</ignoredNonTestScopedDependency>
@@ -421,6 +639,13 @@
               <goal>prepare-agent</goal>
             </goals>
           </execution>
+          <execution>
+            <id>report</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
         </executions>
       </plugin>
 
@@ -429,6 +654,82 @@
         <artifactId>sonar-maven-plugin</artifactId>
       </plugin>
 
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <version>${spring-boot-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>repackage</id>
+            <goals>
+              <goal>repackage</goal>
+            </goals>
+            <configuration>
+              <mainClass>org.eclipse.pass.main.Main</mainClass>
+              <classifier>exec</classifier>
+              <attach>false</attach>
+              <includeTools>false</includeTools>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>**/*IT.java</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>integration-tests</id>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+            <configuration>
+              <includes>
+                <include>**/*IT.java</include>
+              </includes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <configuration>
+          <images>
+            <image>
+              <name>ghcr.io/eclipse-pass/pass-core-main:%v</name>
+            </image>
+          </images>
+        </configuration>
+        <executions>
+          <execution>
+            <id>build-before-its</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>build</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.cyclonedx</groupId>
+        <artifactId>cyclonedx-maven-plugin</artifactId>
+      </plugin>
+
     </plugins>
   </build>
+
 </project>
