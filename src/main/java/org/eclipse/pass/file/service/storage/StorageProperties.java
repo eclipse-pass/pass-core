@@ -101,7 +101,7 @@ public class StorageProperties {
      * @return The S3 bucket name of the File Service
      */
     public Optional<String> getBucketName() {
-        return Optional.of(s3BucketName);
+        return Optional.ofNullable(s3BucketName);
     }
 
     /**
