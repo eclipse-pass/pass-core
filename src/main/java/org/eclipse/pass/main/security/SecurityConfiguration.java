@@ -31,7 +31,7 @@ import org.springframework.security.config.annotation.web.configurers.FormLoginC
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository;
 import org.springframework.security.saml2.provider.service.web.DefaultRelyingPartyRegistrationResolver;
 import org.springframework.security.saml2.provider.service.web.RelyingPartyRegistrationResolver;
-import org.springframework.security.saml2.provider.service.web.authentication.OpenSaml4AuthenticationRequestResolver;
+import org.springframework.security.saml2.provider.service.web.authentication.OpenSaml5AuthenticationRequestResolver;
 import org.springframework.security.saml2.provider.service.web.authentication.Saml2AuthenticationRequestResolver;
 import org.springframework.security.saml2.provider.service.web.authentication.Saml2WebSsoAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
@@ -41,7 +41,7 @@ import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.header.writers.ContentSecurityPolicyHeaderWriter;
 import org.springframework.security.web.header.writers.DelegatingRequestMatcherHeaderWriter;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 
 
@@ -88,7 +88,7 @@ public class SecurityConfiguration {
         // Ensure that GET requests to the doi service are protected since they have side effects
         http.csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                 .requireCsrfProtectionMatcher(new OrRequestMatcher(CsrfFilter.DEFAULT_CSRF_MATCHER,
-                        new AntPathRequestMatcher("/doi/**")))
+                        PathPatternRequestMatcher.withDefaults().matcher("/doi/**")))
                 .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler()));
 
         // Set Content Security Policy header only for /app/
@@ -96,7 +96,7 @@ public class SecurityConfiguration {
         cspHeaderWriter.setPolicyDirectives(contentSecurityPolicy);
 
         DelegatingRequestMatcherHeaderWriter appCspHeaderWriter = new DelegatingRequestMatcherHeaderWriter(
-                new AntPathRequestMatcher("/app/**"), cspHeaderWriter);
+                PathPatternRequestMatcher.withDefaults().matcher("/app/**"), cspHeaderWriter);
 
         http.headers(h -> h.addHeaderWriter(appCspHeaderWriter));
 
@@ -156,8 +156,8 @@ public class SecurityConfiguration {
     Saml2AuthenticationRequestResolver authenticationRequestResolver(RelyingPartyRegistrationRepository registrations) {
         RelyingPartyRegistrationResolver registrationResolver =
                 new DefaultRelyingPartyRegistrationResolver(registrations);
-        OpenSaml4AuthenticationRequestResolver authenticationRequestResolver =
-                new OpenSaml4AuthenticationRequestResolver(registrationResolver);
+        OpenSaml5AuthenticationRequestResolver authenticationRequestResolver =
+                new OpenSaml5AuthenticationRequestResolver(registrationResolver);
         authenticationRequestResolver.setAuthnRequestCustomizer((context) -> context
                 .getAuthnRequest().setForceAuthn(true));
         return authenticationRequestResolver;
