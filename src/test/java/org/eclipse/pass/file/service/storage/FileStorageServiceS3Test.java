@@ -37,7 +37,7 @@ import org.testcontainers.utility.DockerImageName;
 @ActiveProfiles("test-S3")
 class FileStorageServiceS3Test extends FileStorageServiceTest {
     private static final DockerImageName LOCALSTACK_IMG =
-        DockerImageName.parse("localstack/localstack:3.8.1");
+        DockerImageName.parse("localstack/localstack:4.14.0");
 
     private static final LocalStackContainer localStack =
         new LocalStackContainer(LOCALSTACK_IMG)
