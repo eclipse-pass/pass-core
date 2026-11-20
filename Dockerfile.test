@@ -1,0 +1,9 @@
+# !!DO NOT USE IN PRODUCTION!!
+# Image for test use only. Adds the SAML test configuration and test application config
+# on top of the pass-core-main image.
+ARG VERSION
+FROM ghcr.io/eclipse-pass/pass-core-main:${VERSION}
+COPY --chown=passcoreuser:passcoregroup src/test/resources/saml2/ /app/test-config/saml2/
+COPY --chown=passcoreuser:passcoregroup src/test/resources/application-test.yml /app/test-config/
+ENV PASS_SAML_PATH=file:/app/test-config
+ENV PASS_CORE_JAVA_OPTS=-Dspring.config.import=file:/app/test-config/application-test.yml

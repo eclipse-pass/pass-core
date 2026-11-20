@@ -63,7 +63,6 @@
 
   <properties>
     <maven-dependency-plugin.version>3.11.0</maven-dependency-plugin.version>
-    <maven-jar-plugin.version>3.5.1</maven-jar-plugin.version>
     <spring-boot-maven-plugin.version>4.1.2</spring-boot-maven-plugin.version>
     <awsspring.version>4.2.2</awsspring.version>
     <amazon.pom.version>2.59.0</amazon.pom.version>
@@ -450,29 +449,6 @@
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>${maven-jar-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>test-config-jar</id>
-            <phase>package</phase>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-            <configuration>
-              <classifier>test-config</classifier>
-              <classesDirectory>${project.build.testOutputDirectory}</classesDirectory>
-              <includes>
-                <include>application-test.yml</include>
-                <include>saml2/**</include>
-              </includes>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
       </plugin>
 
@@ -684,6 +660,20 @@
           <images>
             <image>
               <name>ghcr.io/eclipse-pass/pass-core-main:%v</name>
+              <build>
+                <contextDir>${project.basedir}</contextDir>
+                <dockerFile>Dockerfile</dockerFile>
+              </build>
+            </image>
+            <image>
+              <name>ghcr.io/eclipse-pass/pass-core-main-for-test-only:%v</name>
+              <build>
+                <contextDir>${project.basedir}</contextDir>
+                <dockerFile>Dockerfile.test</dockerFile>
+                <args>
+                  <VERSION>${project.version}</VERSION>
+                </args>
+              </build>
             </image>
           </images>
         </configuration>
