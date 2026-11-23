@@ -18,8 +18,6 @@ package org.eclipse.pass.main;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.SSM;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +32,11 @@ import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.ssm.SsmClient;
+import software.amazon.awssdk.services.ssm.model.ParameterType;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = {
@@ -68,15 +71,20 @@ class AwsParamStoreConfigTest {
     }
 
     @BeforeAll
-    static void beforeAll() throws IOException, InterruptedException {
-        localStack.execInContainer("awslocal", "ssm", "put-parameter",
-            "--name", "/config/pass-core-client/PASS_CORE_PASSWORD",
-            "--value", "aws-param-store-pw",
-            "--type", "SecureString");
-        localStack.execInContainer("awslocal", "ssm", "put-parameter",
-            "--name", "/config/pass-core/PASS_CORE_APP_LOCATION",
-            "--value", "aws-param-test-app-loc",
-            "--type", "SecureString");
+    static void beforeAll() {
+        try (SsmClient ssm = SsmClient.builder()
+            .endpointOverride(localStack.getEndpoint())
+            .region(Region.of(localStack.getRegion()))
+            .credentialsProvider(StaticCredentialsProvider.create(
+                AwsBasicCredentials.create(localStack.getAccessKey(), localStack.getSecretKey())))
+            .build()) {
+            putParameter(ssm, "/config/pass-core-client/PASS_CORE_PASSWORD", "aws-param-store-pw");
+            putParameter(ssm, "/config/pass-core/PASS_CORE_APP_LOCATION", "aws-param-test-app-loc");
+        }
+    }
+
+    private static void putParameter(SsmClient ssm, String name, String value) {
+        ssm.putParameter(request -> request.name(name).value(value).type(ParameterType.SECURE_STRING));
     }
 
     @Test
