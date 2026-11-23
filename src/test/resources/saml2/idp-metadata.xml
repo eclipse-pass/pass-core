@@ -1,26 +1,15 @@
 <?xml version="1.0"?>
-<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" entityID="http://localhost:8090/simplesaml/saml2/idp/metadata.php">
+<!-- Metadata for the in-JVM test IDP, see org.eclipse.pass.main.TestSamlIdp. For tests only. -->
+<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" entityID="https://idp.pass.test/idp">
   <md:IDPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
     <md:KeyDescriptor use="signing">
-      <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+      <ds:KeyInfo>
         <ds:X509Data>
-          <ds:X509Certificate>MIICmjCCAYICCQDX5sKPsYV3+jANBgkqhkiG9w0BAQsFADAPMQ0wCwYDVQQDDAR0ZXN0MB4XDTE5MTIyMzA5MDI1MVoXDTIwMDEyMjA5MDI1MVowDzENMAsGA1UEAwwEdGVzdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMdtDJ278DQTp84O5Nq5F8s5YOR34GFOGI2Swb/3pU7X7918lVljiKv7WVM65S59nJSyXV+fa15qoXLfsdRnq3yw0hTSTs2YDX+jl98kK3ksk3rROfYh1LIgByj4/4NeNpExgeB6rQk5Ay7YS+ARmMzEjXa0favHxu5BOdB2y6WvRQyjPS2lirT/PKWBZc04QZepsZ56+W7bd557tdedcYdY/nKI1qmSQClG2qgslzgqFOv1KCOw43a3mcK/TiiD8IXyLMJNC6OFW3xTL/BG6SOZ3dQ9rjQOBga+6GIaQsDjC4Xp7Kx+FkSvgaw0sJV8gt1mlZy+27Sza6d+hHD2pWECAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAm2fk1+gd08FQxK7TL04O8EK1f0bzaGGUxWzlh98a3Dm8+OPhVQRi/KLsFHliLC86lsZQKunYdDB+qd0KUk2oqDG6tstG/htmRYD/S/jNmt8gyPAVi11dHUqW3IvQgJLwxZtoAv6PNs188hvT1WK3VWJ4YgFKYi5XQYnR5sv69Vsr91lYAxyrIlMKahjSW1jTD3ByRfAQghsSLk6fV0OyJHyhuF1TxOVBVf8XOdaqfmvD90JGIPGtfMLPUX4m35qaGAU48PwCL7L3cRHYs9wZWc0ifXZcBENLtHYCLi5txR8c5lyHB9d3AQHzKHMFNjLswn5HsckKg83RH7+eVqHqGw==</ds:X509Certificate>
+          <ds:X509Certificate>MIIC/DCCAeSgAwIBAgIUZ3xEjlQchg8o/nirssLh0QuECMUwDQYJKoZIhvcNAQELBQAwHTEbMBkGA1UEAwwScGFzcy1jb3JlIHRlc3QgaWRwMCAXDTI2MTEyMzE1NDMxMFoYDzIxMjYxMDMwMTU0MzEwWjAdMRswGQYDVQQDDBJwYXNzLWNvcmUgdGVzdCBpZHAwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCYIcGYWdNZRDSG48POf8bky7l2qbgNnXD2yE8TReIr9qt+fTiColX8SkiiPzTEnvcBLWfjFFVxc9sXgdU15hNdeCFJ2WH3e+ZVdc8vzZyoSeA5XdAbg/UuM+PuynCYK9eyrQ8TduIHVXCyeG6O+MSQitpDRqCuriWdkxYfHQXqiwXsuk/Mva5xD3EIdeJvRwJXmaYHqsoHftu9aXrOr/H2dgptU3iZwYjf3Jnu8JI5Mt+VL10+vGPwbrHR9be8naNltUzrWZmUY/0Ow0AxLcp3uiOdyflIQ9bBo9VfkyX1E2zA45PJCrURrqYcU6iJNSJq4HpnCeLo5B2KrdSzyXklAgMBAAGjMjAwMB0GA1UdDgQWBBRvCcPbkJGSN2FhluurtzmkmRBECTAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQBJiu0MX3m/Lqnx//k7vAo+UZo7Cqa6keNFFVg4o06Wh6qjjx6qsn159hBHaMTfefXYSLfcYsUMG96pz7Soq9NUKGUt2QYsXnT4X/z0ULtJFwUVytwGEbyimfrkADHdzMlbWgryT480rB4o+kxGb4UZbRcg6G9UQOEZg7M3/UaVuRH717EujBtxKW9roU2ErFOQbUrzfZql/bpMP7SKb1k9MyF/rWU6TNH+7UYIgaJwJQChvY2B2LnnFqd1IF1nuPmo9M7g7ZVdO8g8GZ7pcfb8ZmQA7pXwPrx653e/khBW3mR2d9neKj7xicM/SQMKs9y2s60BTUBMbMT+OaKPmMn8</ds:X509Certificate>
         </ds:X509Data>
       </ds:KeyInfo>
     </md:KeyDescriptor>
-    <md:KeyDescriptor use="encryption">
-      <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
-        <ds:X509Data>
-          <ds:X509Certificate>MIICmjCCAYICCQDX5sKPsYV3+jANBgkqhkiG9w0BAQsFADAPMQ0wCwYDVQQDDAR0ZXN0MB4XDTE5MTIyMzA5MDI1MVoXDTIwMDEyMjA5MDI1MVowDzENMAsGA1UEAwwEdGVzdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMdtDJ278DQTp84O5Nq5F8s5YOR34GFOGI2Swb/3pU7X7918lVljiKv7WVM65S59nJSyXV+fa15qoXLfsdRnq3yw0hTSTs2YDX+jl98kK3ksk3rROfYh1LIgByj4/4NeNpExgeB6rQk5Ay7YS+ARmMzEjXa0favHxu5BOdB2y6WvRQyjPS2lirT/PKWBZc04QZepsZ56+W7bd557tdedcYdY/nKI1qmSQClG2qgslzgqFOv1KCOw43a3mcK/TiiD8IXyLMJNC6OFW3xTL/BG6SOZ3dQ9rjQOBga+6GIaQsDjC4Xp7Kx+FkSvgaw0sJV8gt1mlZy+27Sza6d+hHD2pWECAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAm2fk1+gd08FQxK7TL04O8EK1f0bzaGGUxWzlh98a3Dm8+OPhVQRi/KLsFHliLC86lsZQKunYdDB+qd0KUk2oqDG6tstG/htmRYD/S/jNmt8gyPAVi11dHUqW3IvQgJLwxZtoAv6PNs188hvT1WK3VWJ4YgFKYi5XQYnR5sv69Vsr91lYAxyrIlMKahjSW1jTD3ByRfAQghsSLk6fV0OyJHyhuF1TxOVBVf8XOdaqfmvD90JGIPGtfMLPUX4m35qaGAU48PwCL7L3cRHYs9wZWc0ifXZcBENLtHYCLi5txR8c5lyHB9d3AQHzKHMFNjLswn5HsckKg83RH7+eVqHqGw==</ds:X509Certificate>
-        </ds:X509Data>
-      </ds:KeyInfo>
-    </md:KeyDescriptor>
-    <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="http://localhost:8090/simplesaml/saml2/idp/SingleLogoutService.php"/>
     <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
-    <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="http://localhost:8090/simplesaml/saml2/idp/SSOService.php"/>
+    <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://idp.pass.test/sso"/>
   </md:IDPSSODescriptor>
-  <md:ContactPerson contactType="technical">
-    <md:GivenName>Administrator</md:GivenName>
-    <md:EmailAddress>mailto:na@example.com</md:EmailAddress>
-  </md:ContactPerson>
 </md:EntityDescriptor>
