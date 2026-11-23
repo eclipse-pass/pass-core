@@ -18,4 +18,4 @@ jobs:
     with:
       releaseversion: ${{ inputs.releaseversion }}
       nextversion: ${{ inputs.nextversion}}
-      images: ghcr.io/eclipse-pass/pass-core-main ghcr.io/eclipse-pass/pass-core-main-for-test-only
+      images: ghcr.io/eclipse-pass/pass-core-main
