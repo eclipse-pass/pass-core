@@ -136,3 +136,50 @@ pass:
     institutional_repository_name: ${PASS_CORE_POLICY_INSTITUTIONAL_REPOSITORY_NAME}
   usertoken:
     key: ${PASS_CORE_USERTOKEN_KEY}
+
+---
+# Run without any external services: in memory database, embedded message broker, and SAML login disabled.
+# Only the backend user set with PASS_CORE_USER and PASS_CORE_PASSWORD can authenticate.
+# Intended for testing clients of pass-core. All data is lost on shutdown. Do not use in production.
+spring:
+  config:
+    activate:
+      on-profile: standalone
+  autoconfigure:
+    exclude: org.springframework.boot.security.saml2.autoconfigure.Saml2RelyingPartyAutoConfiguration
+  artemis:
+    embedded:
+      enabled: true
+      queues: ${pass.jms.queue.submission},${pass.jms.queue.deposit},${pass.jms.queue.submission-event}
+  jpa:
+    hibernate:
+      dialect: 'org.hibernate.dialect.H2Dialect'
+  datasource:
+    url: ${PASS_CORE_DATABASE_URL:jdbc:h2:mem:pass;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE}
+    username: ${PASS_CORE_DATABASE_USERNAME:sa}
+    password: ${PASS_CORE_DATABASE_PASSWORD:}
+    driver-class-name: 'org.h2.Driver'
+
+elide:
+  baseUrl: ${PASS_CORE_BASE_URL:http://localhost:8080}
+  aggregation-store:
+    enabled: false
+
+server:
+  port: ${PASS_CORE_PORT:8080}
+
+pass:
+  csp: ${PASS_CORE_APP_CSP:default-src 'self';}
+  jms:
+    sqs: ${PASS_CORE_USE_SQS:false}
+    embed: ${PASS_CORE_EMBED_JMS_BROKER:true}
+  default-login-success-url: ${PASS_CORE_DEFAULT_LOGIN_SUCCESS:/app/}
+  login-processing-path: ${PASS_CORE_LOGIN_PROCESSING_PATH:/login/saml2/sso/pass}
+  logout-delete-cookies: ${PASS_CORE_LOGOUT_DELETE_COOKIES:JSESSIONID /}
+  logout-success-url: ${PASS_CORE_LOGOUT_SUCCESS:/login}
+  policy:
+    institution: ${PASS_CORE_POLICY_INSTITUTION:johnshopkins.edu}
+    institutional_policy_title: ${PASS_CORE_POLICY_INSTITUTIONAL_POLICY_TITLE:Johns Hopkins University (JHU) Open Access Policy}
+    institutional_repository_name: ${PASS_CORE_POLICY_INSTITUTIONAL_REPOSITORY_NAME:JScholarship}
+  usertoken:
+    key: ${PASS_CORE_USERTOKEN_KEY:}

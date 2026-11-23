@@ -18,6 +18,9 @@ package org.eclipse.pass.main.security;
 import java.util.List;
 
 import jakarta.servlet.http.Cookie;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -51,6 +54,8 @@ import org.springframework.security.web.util.matcher.OrRequestMatcher;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
+    private static final Logger LOG = LoggerFactory.getLogger(SecurityConfiguration.class);
+
     @Autowired
     private PassAuthenticationFilter passAuthFilter;
 
@@ -77,7 +82,8 @@ public class SecurityConfiguration {
      * @throws Exception on error
      */
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http,
+            ObjectProvider<RelyingPartyRegistrationRepository> registrationsProvider) throws Exception {
         // Disable unused functionality
         http.formLogin(FormLoginConfigurer::disable);
         http.anonymous(AnonymousConfigurer::disable);
@@ -117,10 +123,19 @@ public class SecurityConfiguration {
                 (request, response, authException) ->  response.sendError(HttpStatus.UNAUTHORIZED.value(),
                         HttpStatus.UNAUTHORIZED.getReasonPhrase()))));
 
-        http.saml2Login(s -> s.defaultSuccessUrl(defaultLoginSuccessUrl).
-                        loginProcessingUrl(loginProcessingPath));
+        // SAML login is only available if a relying party registration is configured.
+        // Without one, only the backend user can authenticate.
+        RelyingPartyRegistrationRepository registrations = registrationsProvider.getIfAvailable();
 
-        http.saml2Metadata(Customizer.withDefaults());
+        if (registrations != null) {
+            http.saml2Login(s -> s.defaultSuccessUrl(defaultLoginSuccessUrl).
+                            loginProcessingUrl(loginProcessingPath).
+                            authenticationRequestResolver(authenticationRequestResolver(registrations)));
+
+            http.saml2Metadata(Customizer.withDefaults());
+        } else {
+            LOG.warn("No SAML relying party registration configured, SAML login is disabled");
+        }
 
         // Delete specified cookies on logout.
         // Each cookie is specified as a name and path separated by whitespace.
@@ -152,8 +167,8 @@ public class SecurityConfiguration {
      * @param registrations
      * @return auth request resolver
      */
-    @Bean
-    Saml2AuthenticationRequestResolver authenticationRequestResolver(RelyingPartyRegistrationRepository registrations) {
+    private Saml2AuthenticationRequestResolver authenticationRequestResolver(
+            RelyingPartyRegistrationRepository registrations) {
         RelyingPartyRegistrationResolver registrationResolver =
                 new DefaultRelyingPartyRegistrationResolver(registrations);
         OpenSaml5AuthenticationRequestResolver authenticationRequestResolver =
