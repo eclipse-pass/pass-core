@@ -809,7 +809,7 @@ public class AccessControlTest extends SamlIntegrationTest {
             Response response = client.newCall(request).execute();
 
             assertEquals(200, response.code());
-            assertEquals("http://localhost:8080/login", response.request().url().toString());
+            assertEquals(getBaseUrl() + "login", response.request().url().toString());
             assertTrue(response.priorResponse().isRedirect());
         }
 

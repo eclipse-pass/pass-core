@@ -546,7 +546,7 @@
                 <ignoredUsedUndeclaredDependency>org.testcontainers::</ignoredUsedUndeclaredDependency>
                 <ignoredUsedUndeclaredDependency>com.github.docker-java::</ignoredUsedUndeclaredDependency>
                 <!-- These come from spring-security-saml2-service-provider -->
-                <ignoredUsedUndeclaredDependency>org.opensaml:opensaml-saml-api::</ignoredUsedUndeclaredDependency>
+                <ignoredUsedUndeclaredDependency>org.opensaml::</ignoredUsedUndeclaredDependency>
               </ignoredUsedUndeclaredDependencies>
               <ignoredUnusedDeclaredDependencies>
                 <!-- This is the elide starter jar -->
@@ -567,6 +567,8 @@
               <ignoredNonTestScopedDependencies>
                 <!-- This is the elide starter jar -->
                 <ignoredNonTestScopedDependency>org.json:json:</ignoredNonTestScopedDependency>
+                <!-- These come from spring-security-saml2-service-provider and are used directly by the test IDP -->
+                <ignoredNonTestScopedDependency>org.opensaml::</ignoredNonTestScopedDependency>
                 <!-- This needs to stay compile scope to be included in pass-core exec jar -->
                 <ignoredNonTestScopedDependency>com.squareup.okhttp3:okhttp-jvm:</ignoredNonTestScopedDependency>
                 <ignoredNonTestScopedDependency>io.ocfl:ocfl-java-api:</ignoredNonTestScopedDependency>
