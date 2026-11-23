@@ -667,16 +667,6 @@
                 <dockerFile>Dockerfile</dockerFile>
               </build>
             </image>
-            <image>
-              <name>ghcr.io/eclipse-pass/pass-core-main-for-test-only:%v</name>
-              <build>
-                <contextDir>${project.basedir}</contextDir>
-                <dockerFile>Dockerfile.test</dockerFile>
-                <args>
-                  <VERSION>${project.version}</VERSION>
-                </args>
-              </build>
-            </image>
           </images>
         </configuration>
         <executions>
