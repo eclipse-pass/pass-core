@@ -63,7 +63,7 @@
 
   <properties>
     <maven-dependency-plugin.version>3.11.0</maven-dependency-plugin.version>
-    <spring-boot-maven-plugin.version>4.1.2</spring-boot-maven-plugin.version>
+    <spring-boot-maven-plugin.version>4.1.3</spring-boot-maven-plugin.version>
     <awsspring.version>4.2.2</awsspring.version>
     <amazon.pom.version>2.59.0</amazon.pom.version>
     <elide.version>7.2.0</elide.version>
@@ -74,6 +74,7 @@
     <jakarta.json-api.version>2.1.3</jakarta.json-api.version>
     <okhttp.version>5.5.1</okhttp.version>
     <rest-assured.version>6.3.0</rest-assured.version>
+    <artemis.version>2.57.0</artemis.version>
     <jsoup.version>1.24.1</jsoup.version>
     <jacoco-maven-plugin.version>0.8.16</jacoco-maven-plugin.version>
     <bouncycastle.version>1.87</bouncycastle.version>
@@ -120,6 +121,15 @@
       </dependency>
 
 
+      <!-- Override the Artemis version managed by Spring Boot to fix CVE-2026-49364 and CVE-2026-57967 (fixed in 2.57.0). -->
+      <!-- Must stay before spring-boot-dependencies. Remove once Spring Boot manages Artemis 2.57.0 or later. -->
+      <dependency>
+        <groupId>org.apache.artemis</groupId>
+        <artifactId>artemis-bom</artifactId>
+        <version>${artemis.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
@@ -216,7 +226,35 @@
         <artifactId>joou-java-6</artifactId>
         <version>0.9.5</version>
       </dependency>
+      <dependency>
+        <groupId>org.snakeyaml</groupId>
+        <artifactId>snakeyaml-engine</artifactId>
+        <version>3.1.1</version>
+      </dependency>
       <!-- End of transitive deps with convergence issues. -->
+
+      <!-- The following deps were declared to resolve CVEs from transitive deps. -->
+      <!-- These should all be checked whenever deps are upgraded. Should be removed if possible once parent -->
+      <!-- dep updates with fixed version. -->
+
+      <!-- CVE-2026-45205: from artemis-server, fixed in 2.15.0 -->
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-configuration2</artifactId>
+        <version>2.15.1</version>
+      </dependency>
+      <!-- CVE-2026-70410: from calcite-core via elide-datastore-aggregation, fixed in 1.29.0 -->
+      <dependency>
+        <groupId>org.apache.calcite.avatica</groupId>
+        <artifactId>avatica-core</artifactId>
+        <version>1.29.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.calcite.avatica</groupId>
+        <artifactId>avatica-metrics</artifactId>
+        <version>1.29.0</version>
+      </dependency>
+      <!-- End of transitive deps with CVE issues. -->
 
     </dependencies>
   </dependencyManagement>
